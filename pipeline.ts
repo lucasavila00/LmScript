@@ -1,316 +1,191 @@
-import { StateFn } from "./types.ts";
+type MaybePromise<T> = Promise<T> | T;
 
-export function pipeline<A extends string>(
-  a: Promise<StateFn<A>>
-): Promise<StateFn<A>>;
-export function pipeline<A extends string, B extends string>(
-  a: Promise<StateFn<A>>,
-  b: (a: StateFn<A>) => Promise<StateFn<B>>
-): Promise<StateFn<B>>;
-export function pipeline<A extends string, B extends string, C extends string>(
-  a: Promise<StateFn<A>>,
-  b: (a: StateFn<A>) => Promise<StateFn<B>>,
-  c: (b: StateFn<B>) => Promise<StateFn<C>>
-): Promise<StateFn<C>>;
-export function pipeline<
-  A extends string,
-  B extends string,
-  C extends string,
-  D extends string
->(
-  a: Promise<StateFn<A>>,
-  b: (a: StateFn<A>) => Promise<StateFn<B>>,
-  c: (b: StateFn<B>) => Promise<StateFn<C>>,
-  d: (c: StateFn<C>) => Promise<StateFn<D>>
-): Promise<StateFn<D>>;
-export function pipeline<
-  A extends string,
-  B extends string,
-  C extends string,
-  D extends string,
-  E extends string
->(
-  a: Promise<StateFn<A>>,
-  b: (a: StateFn<A>) => Promise<StateFn<B>>,
-  c: (b: StateFn<B>) => Promise<StateFn<C>>,
-  d: (c: StateFn<C>) => Promise<StateFn<D>>,
-  e: (d: StateFn<D>) => Promise<StateFn<E>>
-): Promise<StateFn<E>>;
-export function pipeline<
-  A extends string,
-  B extends string,
-  C extends string,
-  D extends string,
-  E extends string,
-  F extends string
->(
-  a: Promise<StateFn<A>>,
-  b: (a: StateFn<A>) => Promise<StateFn<B>>,
-  c: (b: StateFn<B>) => Promise<StateFn<C>>,
-  d: (c: StateFn<C>) => Promise<StateFn<D>>,
-  e: (d: StateFn<D>) => Promise<StateFn<E>>,
-  f: (e: StateFn<E>) => Promise<StateFn<F>>
-): Promise<StateFn<F>>;
-export function pipeline<
-  A extends string,
-  B extends string,
-  C extends string,
-  D extends string,
-  E extends string,
-  F extends string,
-  G extends string
->(
-  a: Promise<StateFn<A>>,
-  b: (a: StateFn<A>) => Promise<StateFn<B>>,
-  c: (b: StateFn<B>) => Promise<StateFn<C>>,
-  d: (c: StateFn<C>) => Promise<StateFn<D>>,
-  e: (d: StateFn<D>) => Promise<StateFn<E>>,
-  f: (e: StateFn<E>) => Promise<StateFn<F>>,
-  g: (f: StateFn<F>) => Promise<StateFn<G>>
-): Promise<StateFn<G>>;
-export function pipeline<
-  A extends string,
-  B extends string,
-  C extends string,
-  D extends string,
-  E extends string,
-  F extends string,
-  G extends string,
-  H extends string
->(
-  a: Promise<StateFn<A>>,
-  b: (a: StateFn<A>) => Promise<StateFn<B>>,
-  c: (b: StateFn<B>) => Promise<StateFn<C>>,
-  d: (c: StateFn<C>) => Promise<StateFn<D>>,
-  e: (d: StateFn<D>) => Promise<StateFn<E>>,
-  f: (e: StateFn<E>) => Promise<StateFn<F>>,
-  g: (f: StateFn<F>) => Promise<StateFn<G>>,
-  h: (g: StateFn<G>) => Promise<StateFn<H>>
-): Promise<StateFn<H>>;
-export function pipeline<
-  A extends string,
-  B extends string,
-  C extends string,
-  D extends string,
-  E extends string,
-  F extends string,
-  G extends string,
-  H extends string,
-  I extends string
->(
-  a: Promise<StateFn<A>>,
-  b: (a: StateFn<A>) => Promise<StateFn<B>>,
-  c: (b: StateFn<B>) => Promise<StateFn<C>>,
-  d: (c: StateFn<C>) => Promise<StateFn<D>>,
-  e: (d: StateFn<D>) => Promise<StateFn<E>>,
-  f: (e: StateFn<E>) => Promise<StateFn<F>>,
-  g: (f: StateFn<F>) => Promise<StateFn<G>>,
-  h: (g: StateFn<G>) => Promise<StateFn<H>>,
-  i: (h: StateFn<H>) => Promise<StateFn<I>>
-): Promise<StateFn<I>>;
-export function pipeline<
-  A extends string,
-  B extends string,
-  C extends string,
-  D extends string,
-  E extends string,
-  F extends string,
-  G extends string,
-  H extends string,
-  I extends string,
-  J extends string
->(
-  a: Promise<StateFn<A>>,
-  b: (a: StateFn<A>) => Promise<StateFn<B>>,
-  c: (b: StateFn<B>) => Promise<StateFn<C>>,
-  d: (c: StateFn<C>) => Promise<StateFn<D>>,
-  e: (d: StateFn<D>) => Promise<StateFn<E>>,
-  f: (e: StateFn<E>) => Promise<StateFn<F>>,
-  g: (f: StateFn<F>) => Promise<StateFn<G>>,
-  h: (g: StateFn<G>) => Promise<StateFn<H>>,
-  i: (h: StateFn<H>) => Promise<StateFn<I>>,
-  j: (i: StateFn<I>) => Promise<StateFn<J>>
-): Promise<StateFn<J>>;
-export function pipeline<
-  A extends string,
-  B extends string,
-  C extends string,
-  D extends string,
-  E extends string,
-  F extends string,
-  G extends string,
-  H extends string,
-  I extends string,
-  J extends string,
-  K extends string
->(
-  a: Promise<StateFn<A>>,
-  b: (a: StateFn<A>) => Promise<StateFn<B>>,
-  c: (b: StateFn<B>) => Promise<StateFn<C>>,
-  d: (c: StateFn<C>) => Promise<StateFn<D>>,
-  e: (d: StateFn<D>) => Promise<StateFn<E>>,
-  f: (e: StateFn<E>) => Promise<StateFn<F>>,
-  g: (f: StateFn<F>) => Promise<StateFn<G>>,
-  h: (g: StateFn<G>) => Promise<StateFn<H>>,
-  i: (h: StateFn<H>) => Promise<StateFn<I>>,
-  j: (i: StateFn<I>) => Promise<StateFn<J>>,
-  k: (j: StateFn<J>) => Promise<StateFn<K>>
-): Promise<StateFn<K>>;
-export function pipeline<
-  A extends string,
-  B extends string,
-  C extends string,
-  D extends string,
-  E extends string,
-  F extends string,
-  G extends string,
-  H extends string,
-  I extends string,
-  J extends string,
-  K extends string,
-  L extends string
->(
-  a: Promise<StateFn<A>>,
-  b: (a: StateFn<A>) => Promise<StateFn<B>>,
-  c: (b: StateFn<B>) => Promise<StateFn<C>>,
-  d: (c: StateFn<C>) => Promise<StateFn<D>>,
-  e: (d: StateFn<D>) => Promise<StateFn<E>>,
-  f: (e: StateFn<E>) => Promise<StateFn<F>>,
-  g: (f: StateFn<F>) => Promise<StateFn<G>>,
-  h: (g: StateFn<G>) => Promise<StateFn<H>>,
-  i: (h: StateFn<H>) => Promise<StateFn<I>>,
-  j: (i: StateFn<I>) => Promise<StateFn<J>>,
-  k: (j: StateFn<J>) => Promise<StateFn<K>>,
-  l: (k: StateFn<K>) => Promise<StateFn<L>>
-): Promise<StateFn<L>>;
-export function pipeline<
-  A extends string,
-  B extends string,
-  C extends string,
-  D extends string,
-  E extends string,
-  F extends string,
-  G extends string,
-  H extends string,
-  I extends string,
-  J extends string,
-  K extends string,
-  L extends string,
-  M extends string
->(
-  a: Promise<StateFn<A>>,
-  b: (a: StateFn<A>) => Promise<StateFn<B>>,
-  c: (b: StateFn<B>) => Promise<StateFn<C>>,
-  d: (c: StateFn<C>) => Promise<StateFn<D>>,
-  e: (d: StateFn<D>) => Promise<StateFn<E>>,
-  f: (e: StateFn<E>) => Promise<StateFn<F>>,
-  g: (f: StateFn<F>) => Promise<StateFn<G>>,
-  h: (g: StateFn<G>) => Promise<StateFn<H>>,
-  i: (h: StateFn<H>) => Promise<StateFn<I>>,
-  j: (i: StateFn<I>) => Promise<StateFn<J>>,
-  k: (j: StateFn<J>) => Promise<StateFn<K>>,
-  l: (k: StateFn<K>) => Promise<StateFn<L>>,
-  m: (l: StateFn<L>) => Promise<StateFn<M>>
-): Promise<StateFn<M>>;
-export function pipeline<
-  A extends string,
-  B extends string,
-  C extends string,
-  D extends string,
-  E extends string,
-  F extends string,
-  G extends string,
-  H extends string,
-  I extends string,
-  J extends string,
-  K extends string,
-  L extends string,
-  M extends string,
-  N extends string
->(
-  a: Promise<StateFn<A>>,
-  b: (a: StateFn<A>) => Promise<StateFn<B>>,
-  c: (b: StateFn<B>) => Promise<StateFn<C>>,
-  d: (c: StateFn<C>) => Promise<StateFn<D>>,
-  e: (d: StateFn<D>) => Promise<StateFn<E>>,
-  f: (e: StateFn<E>) => Promise<StateFn<F>>,
-  g: (f: StateFn<F>) => Promise<StateFn<G>>,
-  h: (g: StateFn<G>) => Promise<StateFn<H>>,
-  i: (h: StateFn<H>) => Promise<StateFn<I>>,
-  j: (i: StateFn<I>) => Promise<StateFn<J>>,
-  k: (j: StateFn<J>) => Promise<StateFn<K>>,
-  l: (k: StateFn<K>) => Promise<StateFn<L>>,
-  m: (l: StateFn<L>) => Promise<StateFn<M>>,
-  n: (m: StateFn<M>) => Promise<StateFn<N>>
-): Promise<StateFn<N>>;
-export function pipeline<
-  A extends string,
-  B extends string,
-  C extends string,
-  D extends string,
-  E extends string,
-  F extends string,
-  G extends string,
-  H extends string,
-  I extends string,
-  J extends string,
-  K extends string,
-  L extends string,
-  M extends string,
-  N extends string,
-  O extends string
->(
-  a: Promise<StateFn<A>>,
-  b: (a: StateFn<A>) => Promise<StateFn<B>>,
-  c: (b: StateFn<B>) => Promise<StateFn<C>>,
-  d: (c: StateFn<C>) => Promise<StateFn<D>>,
-  e: (d: StateFn<D>) => Promise<StateFn<E>>,
-  f: (e: StateFn<E>) => Promise<StateFn<F>>,
-  g: (f: StateFn<F>) => Promise<StateFn<G>>,
-  h: (g: StateFn<G>) => Promise<StateFn<H>>,
-  i: (h: StateFn<H>) => Promise<StateFn<I>>,
-  j: (i: StateFn<I>) => Promise<StateFn<J>>,
-  k: (j: StateFn<J>) => Promise<StateFn<K>>,
-  l: (k: StateFn<K>) => Promise<StateFn<L>>,
-  m: (l: StateFn<L>) => Promise<StateFn<M>>,
-  n: (m: StateFn<M>) => Promise<StateFn<N>>,
-  o: (n: StateFn<N>) => Promise<StateFn<O>>
-): Promise<StateFn<O>>;
-export function pipeline<
-  A extends string,
-  B extends string,
-  C extends string,
-  D extends string,
-  E extends string,
-  F extends string,
-  G extends string,
-  H extends string,
-  I extends string,
-  J extends string,
-  K extends string,
-  L extends string,
-  M extends string,
-  N extends string,
-  O extends string,
-  P extends string
->(
-  a: Promise<StateFn<A>>,
-  b: (a: StateFn<A>) => Promise<StateFn<B>>,
-  c: (b: StateFn<B>) => Promise<StateFn<C>>,
-  d: (c: StateFn<C>) => Promise<StateFn<D>>,
-  e: (d: StateFn<D>) => Promise<StateFn<E>>,
-  f: (e: StateFn<E>) => Promise<StateFn<F>>,
-  g: (f: StateFn<F>) => Promise<StateFn<G>>,
-  h: (g: StateFn<G>) => Promise<StateFn<H>>,
-  i: (h: StateFn<H>) => Promise<StateFn<I>>,
-  j: (i: StateFn<I>) => Promise<StateFn<J>>,
-  k: (j: StateFn<J>) => Promise<StateFn<K>>,
-  l: (k: StateFn<K>) => Promise<StateFn<L>>,
-  m: (l: StateFn<L>) => Promise<StateFn<M>>,
-  n: (m: StateFn<M>) => Promise<StateFn<N>>,
-  o: (n: StateFn<N>) => Promise<StateFn<O>>,
-  p: (o: StateFn<O>) => Promise<StateFn<P>>
-): Promise<StateFn<P>>;
+export function pipeline<A>(a: Promise<A>): Promise<A>;
+export function pipeline<A, B>(
+  a: Promise<A>,
+  ab: (a: A) => Promise<B>
+): Promise<B>;
+export function pipeline<A, B, C>(
+  a: Promise<A>,
+  ab: (a: A) => Promise<B>,
+  bc: (b: B) => Promise<C>
+): Promise<A>;
+export function pipeline<A, B, C, D>(
+  a: Promise<A>,
+  ab: (a: A) => Promise<B>,
+  bc: (b: B) => Promise<C>,
+  cd: (c: C) => Promise<D>
+): Promise<D>;
+export function pipeline<A, B, C, D, E>(
+  a: Promise<A>,
+  ab: (a: A) => Promise<B>,
+  bc: (b: B) => Promise<C>,
+  cd: (c: C) => Promise<D>,
+  de: (d: D) => Promise<E>
+): Promise<E>;
+export function pipeline<A, B, C, D, E, F>(
+  a: Promise<A>,
+  ab: (a: A) => Promise<B>,
+  bc: (b: B) => Promise<C>,
+  cd: (c: C) => Promise<D>,
+  de: (d: D) => Promise<E>,
+  ef: (e: E) => Promise<F>
+): Promise<F>;
+export function pipeline<A, B, C, D, E, F, G>(
+  a: Promise<A>,
+  ab: (a: A) => Promise<B>,
+  bc: (b: B) => Promise<C>,
+  cd: (c: C) => Promise<D>,
+  de: (d: D) => Promise<E>,
+  ef: (e: E) => Promise<F>,
+  fg: (f: F) => Promise<G>
+): Promise<G>;
+export function pipeline<A, B, C, D, E, F, G, H>(
+  a: Promise<A>,
+  ab: (a: A) => Promise<B>,
+  bc: (b: B) => Promise<C>,
+  cd: (c: C) => Promise<D>,
+  de: (d: D) => Promise<E>,
+  ef: (e: E) => Promise<F>,
+  fg: (f: F) => Promise<G>,
+  gh: (g: G) => Promise<H>
+): Promise<H>;
+export function pipeline<A, B, C, D, E, F, G, H, I>(
+  a: Promise<A>,
+  ab: (a: A) => Promise<B>,
+  bc: (b: B) => Promise<C>,
+  cd: (c: C) => Promise<D>,
+  de: (d: D) => Promise<E>,
+  ef: (e: E) => Promise<F>,
+  fg: (f: F) => Promise<G>,
+  gh: (g: G) => Promise<H>,
+  hi: (h: H) => Promise<I>
+): Promise<I>;
+export function pipeline<A, B, C, D, E, F, G, H, I, J>(
+  a: Promise<A>,
+  ab: (a: A) => Promise<B>,
+  bc: (b: B) => Promise<C>,
+  cd: (c: C) => Promise<D>,
+  de: (d: D) => Promise<E>,
+  ef: (e: E) => Promise<F>,
+  fg: (f: F) => Promise<G>,
+  gh: (g: G) => Promise<H>,
+  hi: (h: H) => Promise<I>,
+  ij: (i: I) => Promise<J>
+): Promise<J>;
+export function pipeline<A, B, C, D, E, F, G, H, I, J, K>(
+  a: Promise<A>,
+  ab: (a: A) => Promise<B>,
+  bc: (b: B) => Promise<C>,
+  cd: (c: C) => Promise<D>,
+  de: (d: D) => Promise<E>,
+  ef: (e: E) => Promise<F>,
+  fg: (f: F) => Promise<G>,
+  gh: (g: G) => Promise<H>,
+  hi: (h: H) => Promise<I>,
+  ij: (i: I) => Promise<J>,
+  jk: (j: J) => Promise<K>
+): Promise<K>;
+export function pipeline<A, B, C, D, E, F, G, H, I, J, K, L>(
+  a: Promise<A>,
+  ab: (a: A) => Promise<B>,
+  bc: (b: B) => Promise<C>,
+  cd: (c: C) => Promise<D>,
+  de: (d: D) => Promise<E>,
+  ef: (e: E) => Promise<F>,
+  fg: (f: F) => Promise<G>,
+  gh: (g: G) => Promise<H>,
+  hi: (h: H) => Promise<I>,
+  ij: (i: I) => Promise<J>,
+  jk: (j: J) => Promise<K>,
+  kl: (k: K) => Promise<L>
+): Promise<L>;
+export function pipeline<A, B, C, D, E, F, G, H, I, J, K, L, M>(
+  a: Promise<A>,
+  ab: (a: A) => Promise<B>,
+  bc: (b: B) => Promise<C>,
+  cd: (c: C) => Promise<D>,
+  de: (d: D) => Promise<E>,
+  ef: (e: E) => Promise<F>,
+  fg: (f: F) => Promise<G>,
+  gh: (g: G) => Promise<H>,
+  hi: (h: H) => Promise<I>,
+  ij: (i: I) => Promise<J>,
+  jk: (j: J) => Promise<K>,
+  kl: (k: K) => Promise<L>,
+  lm: (l: L) => Promise<M>
+): Promise<M>;
+export function pipeline<A, B, C, D, E, F, G, H, I, J, K, L, M, N>(
+  a: Promise<A>,
+  ab: (a: A) => Promise<B>,
+  bc: (b: B) => Promise<C>,
+  cd: (c: C) => Promise<D>,
+  de: (d: D) => Promise<E>,
+  ef: (e: E) => Promise<F>,
+  fg: (f: F) => Promise<G>,
+  gh: (g: G) => Promise<H>,
+  hi: (h: H) => Promise<I>,
+  ij: (i: I) => Promise<J>,
+  jk: (j: J) => Promise<K>,
+  kl: (k: K) => Promise<L>,
+  lm: (l: L) => Promise<M>,
+  mn: (m: M) => Promise<N>
+): Promise<N>;
+export function pipeline<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O>(
+  a: Promise<A>,
+  ab: (a: A) => Promise<B>,
+  bc: (b: B) => Promise<C>,
+  cd: (c: C) => Promise<D>,
+  de: (d: D) => Promise<E>,
+  ef: (e: E) => Promise<F>,
+  fg: (f: F) => Promise<G>,
+  gh: (g: G) => Promise<H>,
+  hi: (h: H) => Promise<I>,
+  ij: (i: I) => Promise<J>,
+  jk: (j: J) => Promise<K>,
+  kl: (k: K) => Promise<L>,
+  lm: (l: L) => Promise<M>,
+  mn: (m: M) => Promise<N>,
+  no: (n: N) => Promise<O>
+): Promise<O>;
+export function pipeline<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P>(
+  a: Promise<A>,
+  ab: (a: A) => Promise<B>,
+  bc: (b: B) => Promise<C>,
+  cd: (c: C) => Promise<D>,
+  de: (d: D) => Promise<E>,
+  ef: (e: E) => Promise<F>,
+  fg: (f: F) => Promise<G>,
+  gh: (g: G) => Promise<H>,
+  hi: (h: H) => Promise<I>,
+  ij: (i: I) => Promise<J>,
+  jk: (j: J) => Promise<K>,
+  kl: (k: K) => Promise<L>,
+  lm: (l: L) => Promise<M>,
+  mn: (m: M) => Promise<N>,
+  no: (n: N) => Promise<O>,
+  op: (o: O) => Promise<P>
+): Promise<P>;
+export function pipeline<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q>(
+  a: Promise<A>,
+  ab: (a: A) => Promise<B>,
+  bc: (b: B) => Promise<C>,
+  cd: (c: C) => Promise<D>,
+  de: (d: D) => Promise<E>,
+  ef: (e: E) => Promise<F>,
+  fg: (f: F) => Promise<G>,
+  gh: (g: G) => Promise<H>,
+  hi: (h: H) => Promise<I>,
+  ij: (i: I) => Promise<J>,
+  jk: (j: J) => Promise<K>,
+  kl: (k: K) => Promise<L>,
+  lm: (l: L) => Promise<M>,
+  mn: (m: M) => Promise<N>,
+  no: (n: N) => Promise<O>,
+  op: (o: O) => Promise<P>,
+  pq: (p: P) => Promise<Q>
+): Promise<Q>;
+
 export async function pipeline(...args: any): Promise<any> {
   const [first, ...rest] = args;
 

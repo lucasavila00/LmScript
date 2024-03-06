@@ -7,7 +7,7 @@ import {
   StateFn,
   gen,
 } from "./types.ts";
-
+import { assertIsNever } from "./utils.ts";
 const createSglSamplingParams = (
   params: Partial<SglSamplingParams>
 ): SglSamplingParams => {
@@ -72,18 +72,26 @@ const createSglModelRecursive = (
     captured: any;
     text: string;
     metaInfos: MetaInfo[];
-  }
+  },
+  isMutable: boolean
 ): StateFn<any> => {
   const handler: StateFn<any> = async (strings, ...keys) => {
     // iterate over string or key, in order
     // if key is a string, append to text
     // if key is a generator, call the model with the text and generator options
 
-    const rec: StateFn<any> = createSglModelRecursive(url, creatorOptions, {
-      captured: { ...handler.captured },
-      text: handler.text,
-      metaInfos: [...handler.metaInfos],
-    });
+    const rec: StateFn<any> = isMutable
+      ? handler
+      : createSglModelRecursive(
+          url,
+          creatorOptions,
+          {
+            captured: { ...handler.captured },
+            text: handler.text,
+            metaInfos: [...handler.metaInfos],
+          },
+          isMutable
+        );
 
     const addText = (text: string) => {
       if (creatorOptions.echo) {
@@ -102,21 +110,32 @@ const createSglModelRecursive = (
       } else if (typeof key === "number") {
         addText(String(key));
       } else {
-        const outWithMeta = await httpRequest(url, {
-          text: rec.text,
-          sampling_params: createSglSamplingParams({
-            temperature: creatorOptions.temperature,
-            max_new_tokens: key.options.maxTokens,
-            stop: key.options.stop,
-          }),
-        });
-        const { text: out, meta_info } = outWithMeta;
-        rec.metaInfos.push(meta_info);
-        rec.captured = {
-          ...rec.captured,
-          [key.name]: out,
-        };
-        addText(out);
+        switch (key._tag) {
+          case "LMGenerator": {
+            const outWithMeta = await httpRequest(url, {
+              text: rec.text,
+              sampling_params: createSglSamplingParams({
+                temperature: creatorOptions.temperature,
+                max_new_tokens: key.options.maxTokens,
+                stop: key.options.stop,
+              }),
+            });
+            const { text: out, meta_info } = outWithMeta;
+            rec.metaInfos.push(meta_info);
+            rec.captured = {
+              ...rec.captured,
+              [key.name]: out,
+            };
+            addText(out);
+            break;
+          }
+          case "LMSelector": {
+            throw new Error("Not implemented");
+          }
+          default: {
+            return assertIsNever(key);
+          }
+        }
       }
       addText(string);
     }
@@ -126,6 +145,31 @@ const createSglModelRecursive = (
   handler.captured = initialState.captured;
   handler.text = initialState.text;
   handler.metaInfos = initialState.metaInfos;
+  handler.mutable = () => {
+    return createSglModelRecursive(
+      url,
+      creatorOptions,
+      {
+        captured: { ...handler.captured },
+        text: handler.text,
+        metaInfos: [...handler.metaInfos],
+      },
+      true
+    );
+  };
+  handler.clone = () => {
+    return createSglModelRecursive(
+      url,
+      creatorOptions,
+      {
+        captured: { ...handler.captured },
+        text: handler.text,
+        metaInfos: [...handler.metaInfos],
+      },
+      handler.isMutable
+    );
+  };
+  handler.isMutable = isMutable;
 
   handler.gen = ((name: any, options: any) => {
     return handler`${gen(name, options)}`;
@@ -137,8 +181,13 @@ export const createSglModel = (
   url: string,
   options?: CreateSglModelOptions
 ): InitializedModel =>
-  createSglModelRecursive(url, options ?? {}, {
-    captured: {},
-    text: "",
-    metaInfos: [],
-  });
+  createSglModelRecursive(
+    url,
+    options ?? {},
+    {
+      captured: {},
+      text: "",
+      metaInfos: [],
+    },
+    false
+  );
