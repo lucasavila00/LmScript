@@ -1,7 +1,7 @@
-import { InitializedModel, SglModel } from "../mod.ts";
+import { InitModel, SglModel } from "../mod.ts";
 import { assertIsNever } from "./utils.ts";
 
-const toolUse4 = async (model: InitializedModel, question: string) => {
+const toolUse4 = async (model: InitModel, question: string) => {
   const [thread, captured] = await model
     .push(`To answer this question: ${question}. `)
     .push(`I need to use a `)
@@ -21,11 +21,7 @@ const toolUse4 = async (model: InitializedModel, question: string) => {
   }
 };
 
-const illustratePerson = (
-  model: InitializedModel,
-  quote: string,
-  title: string
-) =>
+const illustratePerson = (model: InitModel, quote: string, title: string) =>
   model
     .push(
       `<s> [INST] Instruct the generation of a pencil drawing of a person to illustrate the following answer to the question below:
@@ -109,12 +105,12 @@ Time Period: "In the 2020s" [/INST]\n`
     .push(`"\n`);
 
 const multiTurnQuestion = (
-  model: InitializedModel,
+  model: InitModel,
   question1: string,
   question2: string
 ) =>
   model
-    .assistant((m) => m.push("You are a helpful assistant."))
+    .system((m) => m.push("You are a helpful assistant."))
     .user((m) => m.push(question1))
     .assistant((m) => m.gen("answer1", { maxTokens: 256 }))
     .user((m) => m.push(question2))
@@ -136,7 +132,7 @@ const character_regex =
   `    "alive": "(Alive|Deceased)",\n` +
   `    "bogart": "[\\w\\d\\s]{1,16}"\n` +
   `\\}`;
-const character_gen = (model: InitializedModel, name: string) =>
+const character_gen = (model: InitModel, name: string) =>
   model
     .push(
       `${name} is a character in Harry Potter. Please fill in the following information about this character.\n`
