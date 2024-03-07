@@ -144,7 +144,7 @@ const character_gen = (model: InitializedModel, name: string) =>
     .gen("json_output", { maxTokens: 256, regex: character_regex });
 
 const main = async () => {
-  const model = SglModel.build({
+  const model = new SglModel({
     url: `http://localhost:30005`,
     echo: true,
     template: "llama-2-chat",

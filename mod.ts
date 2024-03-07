@@ -1,13 +1,13 @@
 export type InitializedModel = SglModel<{}>;
 
-type RunOptions = {
+export type RunOptions = {
   temperature?: number;
 };
 
-type SelectorOptions<S extends string> = {
+export type SelectorOptions<S extends string> = {
   choices: S[];
 };
-type GeneratorOptions = {
+export type GeneratorOptions = {
   stop?: string | string[];
   maxTokens?: number;
   regex?: string;
@@ -75,14 +75,14 @@ type Task = (
   acc: TaskAccumulator,
   t: RunOptions | undefined
 ) => Promise<TaskAccumulator>;
-type ChatTemplate =
+export type ChatTemplate =
   | "llama-2-chat"
   | "default"
   | "claude"
   | "chatml"
   | "chatml-llava"
   | "vicuna_v1.1";
-type CreateModelOptions = {
+export type CreateModelOptions = {
   url: string;
   temperature?: number;
   echo?: boolean;
@@ -131,29 +131,20 @@ const getRoleStart = (template: ChatTemplate, role: Role) =>
 const getRoleEnd = (template: ChatTemplate, role: Role) =>
   chatTemplates[template][role][1];
 
-export class SglModel<T> {
+/**
+ * The model is a thread of tasks that can be executed to generate text.
+ */
+export class SglModel<T = {}> {
   #tasks: Task[];
   #options: CreateModelOptions;
   #state: TaskAccumulator;
-  private constructor(
-    options: CreateModelOptions,
-    state: TaskAccumulator,
-    tasks: Task[]
-  ) {
+  constructor(options: CreateModelOptions) {
     this.#options = options;
-    this.#state = state;
-    this.#tasks = tasks;
-  }
-
-  static build(options: CreateModelOptions): SglModel<{}> {
-    return new SglModel(
-      options,
-      {
-        captured: {},
-        text: "",
-      },
-      []
-    );
+    this.#state = {
+      captured: {},
+      text: "",
+    };
+    this.#tasks = [];
   }
 
   #wrapRole<U>(role: Role, cb: (it: SglModel<T>) => SglModel<U>): SglModel<U> {
@@ -166,12 +157,27 @@ export class SglModel<T> {
     );
   }
 
+  /**
+   * Wraps the calls made to the model in the callback with the assistant role.
+   * The model should be configured with a template to support roles.
+   * If a template is not provided, an error will be thrown.
+   */
   assistant<U>(cb: (it: SglModel<T>) => SglModel<U>): SglModel<U> {
     return this.#wrapRole("assistant", cb);
   }
+  /**
+   * Wraps the calls made to the model in the callback with the system role.
+   * The model should be configured with a template to support roles.
+   * If a template is not provided, an error will be thrown.
+   */
   system<U>(cb: (it: SglModel<T>) => SglModel<U>): SglModel<U> {
     return this.#wrapRole("system", cb);
   }
+  /**
+   * Wraps the calls made to the model in the callback with the user role.
+   * The model should be configured with a template to support roles.
+   * If a template is not provided, an error will be thrown.
+   */
   user<U>(cb: (it: SglModel<T>) => SglModel<U>): SglModel<U> {
     return this.#wrapRole("user", cb);
   }
@@ -205,6 +211,17 @@ export class SglModel<T> {
   > {
     return this.#httpRequest(sglSelectData);
   }
+
+  #clone(state: TaskAccumulator, tasks: Task[]) {
+    const newInstance = new SglModel<T>(this.#options);
+    newInstance.#state = state;
+    newInstance.#tasks = tasks;
+    return newInstance;
+  }
+
+  /**
+   * Adds text to the thread.
+   */
   push(text: string): SglModel<T> {
     const task: Task = async (acc) => {
       if (this.#options.echo) {
@@ -212,7 +229,7 @@ export class SglModel<T> {
       }
       return { ...acc, text: acc.text + text };
     };
-    return new SglModel(this.#options, this.#state, [...this.#tasks, task]);
+    return this.#clone(this.#state, [...this.#tasks, task]);
   }
 
   #doSelection(
@@ -268,19 +285,25 @@ export class SglModel<T> {
       }
       return { ...acc, text: acc.text + decision };
     };
-    return new SglModel(this.#options, this.#state, [...this.#tasks, task]);
+    return this.#clone(this.#state, [...this.#tasks, task]);
   }
-  select<U extends string, S extends string>(
-    name: U,
-    options: SelectorOptions<S> | undefined
+
+  /**
+   * Selects a choice from a list of options.
+   * Capture the selected choice with a name.
+   */
+  select<N extends string, V extends string>(
+    name: N,
+    options: SelectorOptions<V> | undefined
   ): SglModel<{
-    [K in U | keyof T]: K extends U ? S : K extends keyof T ? T[K] : never;
+    [K in N | keyof T]: K extends N ? V : K extends keyof T ? T[K] : never;
   }>;
-  select<S extends string>(
-    options: SelectorOptions<S> | undefined
-  ): SglModel<T>;
+  /**
+   * Selects a choice from a list of options.
+   */
+  select<V extends string>(options: SelectorOptions<V>): SglModel<T>;
   select(
-    arg1?: string | SelectorOptions<string>,
+    arg1: string | SelectorOptions<string>,
     arg2?: SelectorOptions<string>
   ): any {
     if (typeof arg1 === "string") {
@@ -328,14 +351,21 @@ export class SglModel<T> {
 
       return { ...acc, text: acc.text + out };
     };
-    return new SglModel(this.#options, this.#state, [...this.#tasks, task]);
+    return this.#clone(this.#state, [...this.#tasks, task]);
   }
-  gen<U extends string>(
-    name: U,
+
+  /**
+   * Generates text and captures it with a name.
+   */
+  gen<N extends string>(
+    name: N,
     options?: GeneratorOptions | undefined
   ): SglModel<{
-    [K in keyof T | U]: K extends U ? string : K extends keyof T ? T[K] : never;
+    [K in keyof T | N]: K extends N ? string : K extends keyof T ? T[K] : never;
   }>;
+  /**
+   * Generates text.
+   */
   gen(options?: GeneratorOptions | undefined): SglModel<T>;
   gen(arg1?: string | GeneratorOptions, arg2?: GeneratorOptions): any {
     if (typeof arg1 === "string") {
@@ -344,12 +374,16 @@ export class SglModel<T> {
       return this.#doGeneration(null, arg1);
     }
   }
+
+  /**
+   * Executes the thread and returns the captured data and the conversation.
+   */
   async run(options?: RunOptions): Promise<[SglModel<T>, T, string]> {
     let state = { ...this.#state };
     for (const task of this.#tasks) {
       state = await task(state, options);
     }
-    const cl = new SglModel<T>(this.#options, state, []);
-    return [cl, state.captured as T, state.text];
+    const newInstance = this.#clone(state, []);
+    return [newInstance, state.captured as T, state.text];
   }
 }
