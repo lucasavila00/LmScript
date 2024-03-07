@@ -1,7 +1,7 @@
-import { InitModel, SglModel } from "../mod.ts";
+import { InitClient, SglClient } from "../mod.ts";
 import { assertIsNever } from "./utils.ts";
 
-const toolUse4 = async (model: InitModel, question: string) => {
+const toolUse = async (model: InitClient, question: string) => {
   const [thread, captured] = await model
     .push(`To answer this question: ${question}. `)
     .push(`I need to use a `)
@@ -21,7 +21,7 @@ const toolUse4 = async (model: InitModel, question: string) => {
   }
 };
 
-const illustratePerson = (model: InitModel, quote: string, title: string) =>
+const illustratePerson = (model: InitClient, quote: string, title: string) =>
   model
     .push(
       `<s> [INST] Instruct the generation of a pencil drawing of a person to illustrate the following answer to the question below:
@@ -105,7 +105,7 @@ Time Period: "In the 2020s" [/INST]\n`
     .push(`"\n`);
 
 const multiTurnQuestion = (
-  model: InitModel,
+  model: InitClient,
   question1: string,
   question2: string
 ) =>
@@ -117,7 +117,7 @@ const multiTurnQuestion = (
     .assistant((m) => m.gen("answer2", { maxTokens: 1025 }))
     .run();
 
-const character_regex =
+const characterRegex =
   `\\{\n` +
   `    "name": "[\\w\\d\\s]{1,16}",\n` +
   `    "house": "(Gryffindor|Slytherin|Ravenclaw|Hufflepuff)",\n` +
@@ -132,15 +132,15 @@ const character_regex =
   `    "alive": "(Alive|Deceased)",\n` +
   `    "bogart": "[\\w\\d\\s]{1,16}"\n` +
   `\\}`;
-const character_gen = (model: InitModel, name: string) =>
+const characterGen = (model: InitClient, name: string) =>
   model
     .push(
       `${name} is a character in Harry Potter. Please fill in the following information about this character.\n`
     )
-    .gen("json_output", { maxTokens: 256, regex: character_regex });
+    .gen("json_output", { maxTokens: 256, regex: characterRegex });
 
 const main = async () => {
-  const model = new SglModel({
+  const model = new SglClient({
     url: `http://localhost:30005`,
     echo: true,
     template: "llama-2-chat",
@@ -159,7 +159,7 @@ const main = async () => {
   console.log(conversation);
   console.log(captured.expression);
 
-  const [_2, cap2, conversation2] = await toolUse4(model, "What is 2 + 2?");
+  const [_2, cap2, conversation2] = await toolUse(model, "What is 2 + 2?");
 
   console.log(conversation2);
   console.log(cap2);
@@ -183,7 +183,7 @@ const main = async () => {
   console.log(conversation4);
   console.log(cap4);
 
-  const [_5, cap5, conversation5] = await character_gen(
+  const [_5, cap5, conversation5] = await characterGen(
     model,
     "Harry Potter"
   ).run({

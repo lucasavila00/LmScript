@@ -1,10 +1,10 @@
 /**
- * The type of a just-created model.
+ * The type of a just-created client.
  */
-export type InitModel = SglModel<{}>;
+export type InitClient = SglClient<{}>;
 
 /**
- * Options for the single execution of the model.
+ * Options for the single execution of the thread.
  */
 export type RunOptions = {
   temperature?: number;
@@ -42,7 +42,7 @@ type SglSamplingParams = {
 const createSglSamplingParams = (
   params: Partial<SglSamplingParams>,
   runOptions: RunOptions | undefined,
-  creatorOptions: CreateModelOptions | undefined
+  creatorOptions: CreateClientOptions | undefined
 ): SglSamplingParams => {
   return {
     skip_special_tokens: params.skip_special_tokens ?? true,
@@ -101,10 +101,10 @@ export type ChatTemplate =
   | "vicuna_v1.1";
 
 /**
- * Options for creating a new model.
+ * Options for creating a new client.
  * Template is required to support roles.
  */
-export type CreateModelOptions = {
+export type CreateClientOptions = {
   url: string;
   temperature?: number;
   echo?: boolean;
@@ -154,13 +154,13 @@ const getRoleEnd = (template: ChatTemplate, role: Role) =>
   chatTemplates[template][role][1];
 
 /**
- * The model is a thread of tasks that can be executed to generate text.
+ * The client is a thread of tasks that can be executed to generate text.
  */
-export class SglModel<T = {}> {
+export class SglClient<T = {}> {
   #tasks: Task[];
-  #options: CreateModelOptions;
+  #options: CreateClientOptions;
   #state: TaskAccumulator;
-  constructor(options: CreateModelOptions) {
+  constructor(options: CreateClientOptions) {
     this.#options = options;
     this.#state = {
       captured: {},
@@ -169,7 +169,10 @@ export class SglModel<T = {}> {
     this.#tasks = [];
   }
 
-  #wrapRole<U>(role: Role, cb: (it: SglModel<T>) => SglModel<U>): SglModel<U> {
+  #wrapRole<U>(
+    role: Role,
+    cb: (it: SglClient<T>) => SglClient<U>
+  ): SglClient<U> {
     const template = this.#options.template;
     if (template == null) {
       throw new Error("Template is required.");
@@ -180,17 +183,17 @@ export class SglModel<T = {}> {
   }
 
   /**
-   * Wraps the calls made to the model in the callback with the assistant role.
-   * The model should be configured with a template to support roles.
+   * Wraps the calls made to the client in the callback with the assistant role.
+   * The client should be configured with a template to support roles.
    * If a template is not provided, an error will be thrown.
    *
    * ```ts
    *   const multiTurnQuestion = (
-   *     model: InitModel,
+   *     client: InitClient,
    *     question1: string,
    *     question2: string
    *   ) =>
-   *     model
+   *     client
    *       .system((m) => m.push("You are a helpful assistant."))
    *       .user((m) => m.push(question1))
    *       .assistant((m) => m.gen("answer1", { maxTokens: 256 }))
@@ -199,21 +202,21 @@ export class SglModel<T = {}> {
    *       .run();
    * ```
    */
-  assistant<U>(cb: (it: SglModel<T>) => SglModel<U>): SglModel<U> {
+  assistant<U>(cb: (it: SglClient<T>) => SglClient<U>): SglClient<U> {
     return this.#wrapRole("assistant", cb);
   }
   /**
-   * Wraps the calls made to the model in the callback with the system role.
-   * The model should be configured with a template to support roles.
+   * Wraps the calls made to the client in the callback with the system role.
+   * The client should be configured with a template to support roles.
    * If a template is not provided, an error will be thrown.
    *
    * ```ts
    *   const multiTurnQuestion = (
-   *     model: InitModel,
+   *     client: InitClient,
    *     question1: string,
    *     question2: string
    *   ) =>
-   *     model
+   *     client
    *       .system((m) => m.push("You are a helpful assistant."))
    *       .user((m) => m.push(question1))
    *       .assistant((m) => m.gen("answer1", { maxTokens: 256 }))
@@ -222,21 +225,21 @@ export class SglModel<T = {}> {
    *       .run();
    * ```
    */
-  system<U>(cb: (it: SglModel<T>) => SglModel<U>): SglModel<U> {
+  system<U>(cb: (it: SglClient<T>) => SglClient<U>): SglClient<U> {
     return this.#wrapRole("system", cb);
   }
   /**
-   * Wraps the calls made to the model in the callback with the user role.
-   * The model should be configured with a template to support roles.
+   * Wraps the calls made to the client in the callback with the user role.
+   * The client should be configured with a template to support roles.
    * If a template is not provided, an error will be thrown.
    *
    * ```ts
    *   const multiTurnQuestion = (
-   *     model: InitModel,
+   *     client: InitClient,
    *     question1: string,
    *     question2: string
    *   ) =>
-   *     model
+   *     client
    *       .system((m) => m.push("You are a helpful assistant."))
    *       .user((m) => m.push(question1))
    *       .assistant((m) => m.gen("answer1", { maxTokens: 256 }))
@@ -245,7 +248,7 @@ export class SglModel<T = {}> {
    *       .run();
    * ```
    */
-  user<U>(cb: (it: SglModel<T>) => SglModel<U>): SglModel<U> {
+  user<U>(cb: (it: SglClient<T>) => SglClient<U>): SglClient<U> {
     return this.#wrapRole("user", cb);
   }
 
@@ -280,7 +283,7 @@ export class SglModel<T = {}> {
   }
 
   #clone(state: TaskAccumulator, tasks: Task[]) {
-    const newInstance = new SglModel<T>(this.#options);
+    const newInstance = new SglClient<T>(this.#options);
     newInstance.#state = state;
     newInstance.#tasks = tasks;
     return newInstance;
@@ -290,11 +293,11 @@ export class SglModel<T = {}> {
    * Adds text to the thread.
    *
    * ```ts
-   * const model = new SglModel({
+   * const client = new SglClient({
    *   url: `http://localhost:30005`,
    * });
    *
-   * const [threadContinuation, captured, conversation] = await model
+   * const [threadContinuation, captured, conversation] = await client
    *  .push(`<s> [INST] What is the sum of 2 + 2? Answer shortly. [/INST] `)
    *  .gen()
    *  .run();
@@ -302,7 +305,7 @@ export class SglModel<T = {}> {
    * console.log(conversation);
    * ```
    */
-  push(text: string): SglModel<T> {
+  push(text: string): SglClient<T> {
     const task: Task = async (acc) => {
       if (this.#options.echo) {
         console.log(text);
@@ -315,7 +318,7 @@ export class SglModel<T = {}> {
   #doSelection(
     name: string | undefined,
     options: SelectorOptions<string>
-  ): SglModel<T> {
+  ): SglClient<T> {
     const task: Task = async (acc, runOptions) => {
       // Cache common prefix
       const res = await this.#generationHttpRequest({
@@ -373,11 +376,11 @@ export class SglModel<T = {}> {
    * Capture the selected choice with a name.
    *
    * ```ts
-   * const model = new SglModel({
+   * const client = new SglClient({
    *   url: `http://localhost:30005`,
    * });
    *
-   * const [threadContinuation, captured, conversation] = await model
+   * const [threadContinuation, captured, conversation] = await client
    *  .push(`<s> [INST] Ice cream or cookies? [/INST] `)
    *  .select("desert", {
    *    choices: ["ice creams", "cookies"],
@@ -390,7 +393,7 @@ export class SglModel<T = {}> {
   select<N extends string, V extends string>(
     name: N,
     options: SelectorOptions<V> | undefined
-  ): SglModel<{
+  ): SglClient<{
     [K in N | keyof T]: K extends N ? V : K extends keyof T ? T[K] : never;
   }>;
   /**
@@ -398,11 +401,11 @@ export class SglModel<T = {}> {
    * Does not capture the selected choice with a name.
    *
    * ```ts
-   * const model = new SglModel({
+   * const client = new SglClient({
    *   url: `http://localhost:30005`,
    * });
    *
-   * const [threadContinuation, captured, conversation] = await model
+   * const [threadContinuation, captured, conversation] = await client
    *  .push(`<s> [INST] Ice cream or cookies? [/INST] `)
    *  .select({
    *    choices: ["ice creams", "cookies"],
@@ -411,7 +414,7 @@ export class SglModel<T = {}> {
    *
    * console.log(captured.desert);
    */
-  select<V extends string>(options: SelectorOptions<V>): SglModel<T>;
+  select<V extends string>(options: SelectorOptions<V>): SglClient<T>;
   select(
     arg1: string | SelectorOptions<string>,
     arg2?: SelectorOptions<string>
@@ -432,7 +435,7 @@ export class SglModel<T = {}> {
   #doGeneration(
     name: string | null,
     generatorOptions: GeneratorOptions | undefined
-  ): SglModel<T> {
+  ): SglClient<T> {
     const task: Task = async (acc, runOptions) => {
       const { text: out, meta_info: _ } = await this.#generationHttpRequest({
         text: acc.text,
@@ -468,11 +471,11 @@ export class SglModel<T = {}> {
    * Generates text and captures it with a name.
    *
    * ```ts
-   * const model = new SglModel({
+   * const client = new SglClient({
    *   url: `http://localhost:30005`,
    * });
    *
-   * const [threadContinuation, captured, conversation] = await model
+   * const [threadContinuation, captured, conversation] = await client
    *  .push(`<s> [INST] What is the sum of 2 + 2? Answer shortly. [/INST] `)
    *  .push(`Sure: The answer is "`)
    *  .gen("name", {
@@ -487,18 +490,18 @@ export class SglModel<T = {}> {
   gen<N extends string>(
     name: N,
     options?: GeneratorOptions | undefined
-  ): SglModel<{
+  ): SglClient<{
     [K in keyof T | N]: K extends N ? string : K extends keyof T ? T[K] : never;
   }>;
   /**
    * Generates text, but does not capture it with a name.
    *
    * ```ts
-   * const model = new SglModel({
+   * const client = new SglClient({
    *   url: `http://localhost:30005`,
    * });
    *
-   * const [threadContinuation, captured, conversation] = await model
+   * const [threadContinuation, captured, conversation] = await client
    *  .push(`<s> [INST] What is the sum of 2 + 2? Answer shortly. [/INST] `)
    *  .push(`Sure: The answer is "`)
    *  .gen({
@@ -510,7 +513,7 @@ export class SglModel<T = {}> {
    * console.log(conversation);
    * ```
    */
-  gen(options?: GeneratorOptions | undefined): SglModel<T>;
+  gen(options?: GeneratorOptions | undefined): SglClient<T>;
   gen(arg1?: string | GeneratorOptions, arg2?: GeneratorOptions): any {
     if (typeof arg1 === "string") {
       return this.#doGeneration(arg1, arg2);
@@ -523,11 +526,11 @@ export class SglModel<T = {}> {
    * Executes the thread and returns the captured data and the conversation.
    *
    * ```ts
-   * const model = new SglModel({
+   * const client = new SglClient({
    *  url: `http://localhost:30005`,
    * });
    *
-   * const [threadContinuation, captured, conversation] = await model
+   * const [threadContinuation, captured, conversation] = await client
    *  .push(`<s> [INST] What is the sum of 2 + 2? Answer shortly. [/INST] `)
    *  .gen("expression", {
    *    maxTokens: 512,
@@ -538,11 +541,11 @@ export class SglModel<T = {}> {
    * console.log(conversation);
    * console.log(captured.expression);
    *
-   * // The thread continuation can be used to continue the thread, it is a instance of SglModel.
+   * // The thread continuation can be used to continue the thread, it is a instance of SglClient.
    * threadContinuation.push(` </s>`).gen(...)
    * ```
    */
-  async run(options?: RunOptions): Promise<[SglModel<T>, T, string]> {
+  async run(options?: RunOptions): Promise<[SglClient<T>, T, string]> {
     let state = { ...this.#state };
     for (const task of this.#tasks) {
       state = await task(state, options);
