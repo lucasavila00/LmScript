@@ -21,14 +21,8 @@ const client = new SglClient({
 ```ts
 const [_, captured, conversation] = await model
   .push(`<s> [INST] What is the sum of 2 + 2? Answer shortly. [/INST] `)
-  .gen("expression", {
-    stop: ["</s>"],
-    maxTokens: 512,
-  })
-  .push(` </s>`)
-  .run({
-    temperature: 0.1,
-  });
+  .gen("expression", { maxTokens: 512 })
+  .run({ temperature: 0.1 });
 console.log(conversation);
 console.log(captured.expression);
 ```
@@ -36,6 +30,8 @@ console.log(captured.expression);
 ## Examples
 
 ### Tool Use
+
+The following examples makes use of the select feature.
 
 ```ts
 const toolUse = async (client: InitClient, question: string) => {
@@ -66,7 +62,7 @@ const [continuationThread, captured, conversation] = await toolUse(
 
 ### Multi Turn Question
 
-The following example makes use of the role feature
+The following example makes use of the roles feature
 
 ```ts
 const client = new SglClient({
@@ -100,21 +96,20 @@ console.log(captured);
 The following example makes use of the regex feature.
 
 ```ts
-const characterRegex =
-  `\\{\n` +
-  `    "name": "[\\w\\d\\s]{1,16}",\n` +
-  `    "house": "(Gryffindor|Slytherin|Ravenclaw|Hufflepuff)",\n` +
-  `    "blood status": "(Pure-blood|Half-blood|Muggle-born)",\n` +
-  `    "occupation": "(student|teacher|auror|ministry of magic|death eater|order of the phoenix)",\n` +
-  `    "wand": \\{\n` +
-  `        "wood": "[\\w\\d\\s]{1,16}",\n` +
-  `        "core": "[\\w\\d\\s]{1,16}",\n` +
-  `        "length": [0-9]{1,2}\\.[0-9]{0,2}\n` +
-  `    \\},\n` +
-  `    "patronus": "[\\w\\d\\s]{1,16}",\n` +
-  `    "alive": "(Alive|Deceased)",\n` +
-  `    "bogart": "[\\w\\d\\s]{1,16}"\n` +
-  `\\}`;
+const characterRegex = `\\{
+  "name": "[\\w\\d\\s]{1,16}",
+  "house": "(Gryffindor|Slytherin|Ravenclaw|Hufflepuff)",
+  "blood status": "(Pure-blood|Half-blood|Muggle-born)",
+  "occupation": "(student|teacher|auror|ministry of magic|death eater|order of the phoenix)",
+  "wand": \\{
+    "wood": "[\\w\\d\\s]{1,16}",
+    "core": "[\\w\\d\\s]{1,16}",
+    "length": [0-9]{1,2}\\.[0-9]{0,2}
+  \\},
+  "patronus": "[\\w\\d\\s]{1,16}",
+  "alive": "(Alive|Deceased)",
+  "bogart": "[\\w\\d\\s]{1,16}"
+\\}`;
 const characterGen = (client: InitClient, name: string) =>
   client
     .push(
