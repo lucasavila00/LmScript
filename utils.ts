@@ -1,3 +1,3 @@
-export const assertIsNever = <T>(x: never): T => {
+export const assertIsNever = (x: never): never => {
   throw new Error(`Unexpected: ${x}`);
 };
