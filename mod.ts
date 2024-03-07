@@ -10,6 +10,7 @@ type SelectorOptions<S extends string> = {
 type GeneratorOptions = {
   stop?: string | string[];
   maxTokens?: number;
+  regex?: string;
 };
 
 type SglSamplingParams = {
@@ -74,12 +75,62 @@ type Task = (
   acc: TaskAccumulator,
   t: RunOptions | undefined
 ) => Promise<TaskAccumulator>;
-
+type ChatTemplate =
+  | "llama-2-chat"
+  | "default"
+  | "claude"
+  | "chatml"
+  | "chatml-llava"
+  | "vicuna_v1.1";
 type CreateModelOptions = {
   url: string;
   temperature?: number;
   echo?: boolean;
+  template?: ChatTemplate;
 };
+type Role = "assistant" | "system" | "user";
+type ChatTemplateDefinition = Record<Role, [string, string]>;
+
+type AllChatTemplates = Record<ChatTemplate, ChatTemplateDefinition>;
+
+const chatTemplates: AllChatTemplates = {
+  default: {
+    system: ["SYSTEM:", "\n"],
+    user: ["USER:", "\n"],
+    assistant: ["ASSISTANT:", "\n"],
+  },
+  claude: {
+    system: ["", ""],
+    user: ["\n\nHuman: ", ""],
+    assistant: ["\n\nAssistant:", ""],
+  },
+  chatml: {
+    system: ["<|im_start|>system\n", "<|im_end|>\n"],
+    user: ["<|im_start|>user\n", "<|im_end|>\n"],
+    assistant: ["<|im_start|>assistant\n", "<|im_end|>\n"],
+  },
+  "chatml-llava": {
+    system: ["<|im_start|>system\n", "<|im_end|>\n"],
+    user: ["<|im_start|>user\n", "<|im_end|>\n"],
+    assistant: ["<|im_start|>assistant\n", "<|im_end|>\n"],
+  },
+  "vicuna_v1.1": {
+    system: ["", " "],
+    user: ["USER:", " "],
+    assistant: ["ASSISTANT:", "</s>"],
+  },
+  "llama-2-chat": {
+    system: ["<<SYS>>\n", "\n<</SYS>>\n\n"],
+    user: ["[INST] ", " [/INST]"],
+    assistant: ["", " </s><s>"],
+  },
+};
+
+const getRoleStart = (template: ChatTemplate, role: Role) =>
+  chatTemplates[template][role][0];
+const getRoleEnd = (template: ChatTemplate, role: Role) =>
+  chatTemplates[template][role][1];
+
 export class SglModel<T> {
   #tasks: Task[];
   #options: CreateModelOptions;
@@ -103,6 +154,26 @@ export class SglModel<T> {
       },
       []
     );
+  }
+
+  #wrapRole<U>(role: Role, cb: (it: SglModel<T>) => SglModel<U>): SglModel<U> {
+    const template = this.#options.template;
+    if (template == null) {
+      throw new Error("Template is required.");
+    }
+    return cb(this.push(getRoleStart(template, role))).push(
+      getRoleEnd(template, role)
+    );
+  }
+
+  assistant<U>(cb: (it: SglModel<T>) => SglModel<U>): SglModel<U> {
+    return this.#wrapRole("assistant", cb);
+  }
+  system<U>(cb: (it: SglModel<T>) => SglModel<U>): SglModel<U> {
+    return this.#wrapRole("system", cb);
+  }
+  user<U>(cb: (it: SglModel<T>) => SglModel<U>): SglModel<U> {
+    return this.#wrapRole("user", cb);
   }
 
   async #httpRequest<T>(data: object): Promise<T> {
@@ -236,6 +307,7 @@ export class SglModel<T> {
           {
             max_new_tokens: generatorOptions?.maxTokens,
             stop: generatorOptions?.stop,
+            regex: generatorOptions?.regex,
           },
           runOptions
         ),

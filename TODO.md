@@ -1,4 +1,0 @@
-- [ ] int
-- [ ] select
-- [ ] roles
-- [ ] regex

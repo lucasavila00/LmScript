@@ -1,4 +1,4 @@
-import { InitializedModel, SglModel } from "./model.ts";
+import { InitializedModel, SglModel } from "../mod.ts";
 import { assertIsNever } from "./utils.ts";
 
 const toolUse4 = async (model: InitializedModel, question: string) => {
@@ -108,10 +108,46 @@ Time Period: "In the 2020s" [/INST]\n`
     .gen("timePeriod", { stop: ['"', ".", "\n"], maxTokens: 512 })
     .push(`"\n`);
 
+const multiTurnQuestion = (
+  model: InitializedModel,
+  question1: string,
+  question2: string
+) =>
+  model
+    .assistant((m) => m.push("You are a helpful assistant."))
+    .user((m) => m.push(question1))
+    .assistant((m) => m.gen("answer1", { maxTokens: 256 }))
+    .user((m) => m.push(question2))
+    .assistant((m) => m.gen("answer2", { maxTokens: 1025 }))
+    .run();
+
+const character_regex =
+  `\\{\n` +
+  `    "name": "[\\w\\d\\s]{1,16}",\n` +
+  `    "house": "(Gryffindor|Slytherin|Ravenclaw|Hufflepuff)",\n` +
+  `    "blood status": "(Pure-blood|Half-blood|Muggle-born)",\n` +
+  `    "occupation": "(student|teacher|auror|ministry of magic|death eater|order of the phoenix)",\n` +
+  `    "wand": \\{\n` +
+  `        "wood": "[\\w\\d\\s]{1,16}",\n` +
+  `        "core": "[\\w\\d\\s]{1,16}",\n` +
+  `        "length": [0-9]{1,2}\\.[0-9]{0,2}\n` +
+  `    \\},\n` +
+  `    "patronus": "[\\w\\d\\s]{1,16}",\n` +
+  `    "alive": "(Alive|Deceased)",\n` +
+  `    "bogart": "[\\w\\d\\s]{1,16}"\n` +
+  `\\}`;
+const character_gen = (model: InitializedModel, name: string) =>
+  model
+    .push(
+      `${name} is a character in Harry Potter. Please fill in the following information about this character.\n`
+    )
+    .gen("json_output", { maxTokens: 256, regex: character_regex });
+
 const main = async () => {
   const model = SglModel.build({
-    url: `http://localhost:30004`,
+    url: `http://localhost:30005`,
     echo: true,
+    template: "llama-2-chat",
   });
 
   const [_, captured, conversation] = await model
@@ -143,38 +179,23 @@ const main = async () => {
   console.log(conversation3);
   console.log(cap3);
 
-  // console.log(out.text);
-  // console.log(out.captured);
-  // console.log(out.metaInfos);
+  const [_4, cap4, conversation4] = await multiTurnQuestion(
+    model,
+    "What is 2 + 2?",
+    "What is 3 + 3?"
+  );
+  console.log(conversation4);
+  console.log(cap4);
 
-  // const outMut = await illustratePersonMut(
-  //   model,
-  //   "The person is happy",
-  //   "What is the person doing?"
-  // );
+  const [_5, cap5, conversation5] = await character_gen(
+    model,
+    "Harry Potter"
+  ).run({
+    temperature: 0.1,
+  });
 
-  // console.log(outMut.text);
-  // console.log(outMut.captured);
-  // console.log(outMut.metaInfos);
-
-  // const multiTurn = await multiTurnQuestion(
-  //   model,
-  //   "What is 2 + 2?",
-  //   "What is 3 + 3?"
-  // );
-  // console.log(multiTurn.text);
-  // console.log(multiTurn.captured);
-  // console.log(multiTurn.metaInfos);
-
-  // const tool1 = await toolUse2(model, "What is 2 + 2?");
-  // console.log(tool1.text);
-  // console.log(tool1.captured);
-  // console.log(tool1.metaInfos);
-
-  // const tool2 = await toolUse(model, "What is 2 + 2?");
-  // console.log(tool2.text);
-  // console.log(tool2.captured);
-  // console.log(tool2.metaInfos);
+  console.log(conversation5);
+  console.log(cap5);
 };
 
 main().catch(console.error);
