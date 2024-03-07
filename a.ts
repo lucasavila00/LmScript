@@ -3,19 +3,19 @@ import { assertIsNever } from "./utils.ts";
 
 const toolUse4 = async (model: InitializedModel, question: string) => {
   const [thread, captured] = await model
-    .talk(`To answer this question: ${question}. `)
-    .talk(`I need to use a `)
+    .push(`To answer this question: ${question}. `)
+    .push(`I need to use a `)
     .select("tool", {
       choices: ["calculator", "search engine"],
     })
-    .talk(`. `)
+    .push(`. `)
     .run();
 
   switch (captured.tool) {
     case "calculator":
-      return thread.talk(`The math expression is `).gen("expression").run();
+      return thread.push(`The math expression is `).gen("expression").run();
     case "search engine":
-      return thread.talk(`The key word to search is `).gen("word").run();
+      return thread.push(`The key word to search is `).gen("word").run();
     default:
       return assertIsNever(captured.tool);
   }
@@ -27,7 +27,7 @@ const illustratePerson = (
   title: string
 ) =>
   model
-    .talk(
+    .push(
       `<s> [INST] Instruct the generation of a pencil drawing of a person to illustrate the following answer to the question below:
 
 ### Question
@@ -85,30 +85,42 @@ Subject: "A young black man wearing a dark suit"
 Subject Emotion: "Sad"
 Time Period: "In the 2020s" [/INST]\n`
     )
-    .talk(`Camera Angle: "Close-up shot of the face"\n`)
-    .talk(`Scene: "`)
+    // Force the model to generate a close-up illustration
+    .push(`Camera Angle: "Close-up shot of the face"\n`)
+
+    // start scene
+    .push(`Scene: "`)
     .gen("scene", { stop: ['"', ".", "\n"], maxTokens: 512 })
-    .talk(`"\n`)
-    .talk(`Subject: "`)
+    .push(`"\n`)
+
+    // start subject
+    .push(`Subject: "`)
     .gen("subject", { stop: ['"', ".", "\n"], maxTokens: 512 })
-    .talk(`"\n`)
-    .talk(`Subject Emotion: "`)
+    .push(`"\n`)
+
+    // start emotion
+    .push(`Subject Emotion: "`)
     .gen("emotion", { stop: ['"', ".", "\n"], maxTokens: 512 })
-    .talk(`"\n`)
-    .talk(`Time Period: "`)
+    .push(`"\n`)
+
+    // start time period
+    .push(`Time Period: "`)
     .gen("timePeriod", { stop: ['"', ".", "\n"], maxTokens: 512 })
-    .talk(`"\n`);
+    .push(`"\n`);
 
 const main = async () => {
-  const model = SglModel.fromUrl(`http://localhost:30004`);
+  const model = SglModel.build({
+    url: `http://localhost:30004`,
+    echo: true,
+  });
 
   const [_, captured, conversation] = await model
-    .talk(`<s> [INST] What is the sum of 2 + 2? Answer shortly. [/INST] `)
+    .push(`<s> [INST] What is the sum of 2 + 2? Answer shortly. [/INST] `)
     .gen("expression", {
       stop: ["</s>"],
       maxTokens: 512,
     })
-    .talk(` </s>`)
+    .push(` </s>`)
     .run({
       temperature: 0.1,
     });

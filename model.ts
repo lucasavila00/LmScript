@@ -70,19 +70,28 @@ type Task = (
   t: RunOptions | undefined
 ) => Promise<TaskAccumulator>;
 
+type CreateModelOptions = {
+  url: string;
+  temperature?: number;
+  echo?: boolean;
+};
 export class SglModel<T> {
   #tasks: Task[];
-  #url: string;
+  options: CreateModelOptions;
   #state: TaskAccumulator;
-  private constructor(url: string, state: TaskAccumulator, tasks: Task[]) {
-    this.#url = url;
+  private constructor(
+    options: CreateModelOptions,
+    state: TaskAccumulator,
+    tasks: Task[]
+  ) {
+    this.options = options;
     this.#state = state;
     this.#tasks = tasks;
   }
 
-  static fromUrl(url: string): SglModel<{}> {
+  static build(options: CreateModelOptions): SglModel<{}> {
     return new SglModel(
-      url,
+      options,
       {
         captured: {},
         text: "",
@@ -92,7 +101,7 @@ export class SglModel<T> {
   }
 
   async #httpRequest<T>(data: object): Promise<T> {
-    const response = await fetch(this.#url + "/generate", {
+    const response = await fetch(this.options.url + "/generate", {
       headers: {
         "Content-Type": "application/json",
       },
@@ -120,11 +129,14 @@ export class SglModel<T> {
   > {
     return this.#httpRequest(sglSelectData);
   }
-  talk(text: string): SglModel<T> {
+  push(text: string): SglModel<T> {
     const task: Task = async (acc) => {
+      if (this.options.echo) {
+        console.log(text);
+      }
       return { ...acc, text: acc.text + text };
     };
-    return new SglModel(this.#url, this.#state, [...this.#tasks, task]);
+    return new SglModel(this.options, this.#state, [...this.#tasks, task]);
   }
 
   #doSelection(
@@ -160,14 +172,14 @@ export class SglModel<T> {
         (r) => r.meta_info.normalized_prompt_logprob
       );
 
-      //   const prompt_logprob = obj.map((r) => r.meta_info.prompt_logprob);
-
       const argMax = normalized_prompt_logprob.reduce(
         (iMax, x, i, arr) => (x > arr[iMax] ? i : iMax),
         0
       );
       const decision = options.choices[argMax];
-
+      if (this.options.echo) {
+        console.log(decision);
+      }
       if (name != null) {
         return {
           ...acc,
@@ -180,7 +192,7 @@ export class SglModel<T> {
       }
       return { ...acc, text: acc.text + decision };
     };
-    return new SglModel(this.#url, this.#state, [...this.#tasks, task]);
+    return new SglModel(this.options, this.#state, [...this.#tasks, task]);
   }
   select<U extends string, S extends string>(
     name: U,
@@ -216,6 +228,9 @@ export class SglModel<T> {
           runOptions
         ),
       });
+      if (this.options.echo) {
+        console.log(out);
+      }
       if (name != null) {
         return {
           ...acc,
@@ -229,7 +244,7 @@ export class SglModel<T> {
 
       return { ...acc, text: acc.text + out };
     };
-    return new SglModel(this.#url, this.#state, [...this.#tasks, task]);
+    return new SglModel(this.options, this.#state, [...this.#tasks, task]);
   }
   gen<U extends string>(
     name: U,
@@ -250,7 +265,7 @@ export class SglModel<T> {
     for (const task of this.#tasks) {
       state = await task(state, options);
     }
-    const cl = new SglModel<T>(this.#url, state, []);
+    const cl = new SglModel<T>(this.options, state, []);
     return [cl, state.captured as T, state.text];
   }
 }
