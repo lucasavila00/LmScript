@@ -1,3 +1,4 @@
 {
-  "cSpell.words": ["chatml", "dtype", "llava", "logprob"]
+  "cSpell.words": ["chatml", "dtype", "llava", "logprob", "runpod"],
+  "deno.enable": true
 }

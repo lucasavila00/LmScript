@@ -1,4 +1,12 @@
-import { InitClient, SglClient } from "../mod.ts";
+import {
+  InitClient,
+  MetaInfoGeneration,
+  MetaInfoSelection,
+  SglClient,
+  SglFetcher,
+  SglGenerateData,
+  SglSelectData,
+} from "../mod.ts";
 import { assertIsNever } from "./utils.ts";
 
 const toolUse = async (model: InitClient, question: string) => {
@@ -117,26 +125,26 @@ const multiTurnQuestion = (
     .assistant((m) => m.gen("answer2", { maxTokens: 1025 }))
     .run();
 
-const characterRegex = `\\{
-  "name": "[\\w\\d\\s]{1,16}",
-  "house": "(Gryffindor|Slytherin|Ravenclaw|Hufflepuff)",
-  "blood status": "(Pure-blood|Half-blood|Muggle-born)",
-  "occupation": "(student|teacher|auror|ministry of magic|death eater|order of the phoenix)",
-  "wand": \\{
-    "wood": "[\\w\\d\\s]{1,16}",
-    "core": "[\\w\\d\\s]{1,16}",
-    "length": [0-9]{1,2}\\.[0-9]{0,2}
-  \\},
-  "patronus": "[\\w\\d\\s]{1,16}",
-  "alive": "(Alive|Deceased)",
-  "bogart": "[\\w\\d\\s]{1,16}"
-\\}`;
-const characterGen = (model: InitClient, name: string) =>
-  model
-    .push(
-      `${name} is a character in Harry Potter. Please fill in the following information about this character.\n`
-    )
-    .gen("json_output", { maxTokens: 256, regex: characterRegex });
+// const characterRegex = `\\{
+//   "name": "[\\w\\d\\s]{1,16}",
+//   "house": "(Gryffindor|Slytherin|Ravenclaw|Hufflepuff)",
+//   "blood status": "(Pure-blood|Half-blood|Muggle-born)",
+//   "occupation": "(student|teacher|auror|ministry of magic|death eater|order of the phoenix)",
+//   "wand": \\{
+//     "wood": "[\\w\\d\\s]{1,16}",
+//     "core": "[\\w\\d\\s]{1,16}",
+//     "length": [0-9]{1,2}\\.[0-9]{0,2}
+//   \\},
+//   "patronus": "[\\w\\d\\s]{1,16}",
+//   "alive": "(Alive|Deceased)",
+//   "bogart": "[\\w\\d\\s]{1,16}"
+// \\}`;
+// const characterGen = (model: InitClient, name: string) =>
+//   model
+//     .push(
+//       `${name} is a character in Harry Potter. Please fill in the following information about this character.\n`
+//     )
+//     .gen("json_output", { maxTokens: 256, regex: characterRegex });
 
 const main = async (client: InitClient) => {
   const [_, captured, conversation] = await client
@@ -176,29 +184,94 @@ const main = async (client: InitClient) => {
   console.log(conversation4);
   console.log(cap4);
 
-  const [_5, cap5, conversation5] = await characterGen(
-    client,
-    "Harry Potter"
-  ).run({
-    temperature: 0.1,
-  });
+  //   const [_5, cap5, conversation5] = await characterGen(
+  //     client,
+  //     "Harry Potter"
+  //   ).run({
+  //     temperature: 0.1,
+  //   });
 
-  console.log(conversation5);
-  console.log(cap5);
+  //   console.log(conversation5);
+  //   console.log(cap5);
 };
+class RunpodFetcher implements SglFetcher {
+  #url: string;
+  #apiToken: string;
+  constructor(url: string, apiToken: string) {
+    this.#url = url;
+    this.#apiToken = apiToken;
+  }
+  #monitorProgress<T>(_id: string): Promise<T> {
+    throw new Error("IN_PROGRESS Not implemented");
+  }
+  async #httpRequest<T>(data: object): Promise<T> {
+    console.log(`[${new Date().toISOString()}] Sending request to Runpod`);
+    const response = await fetch(this.#url + "/runsync", {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${this.#apiToken}`,
+      },
+      method: "POST",
+      body: JSON.stringify({
+        input: {
+          endpoint: "generate",
+          parameters: data,
+        },
+      }),
+    });
+    if (!response.ok) {
+      console.error((await response.text()).slice(0, 500));
+      throw new Error("HTTP error " + response.status);
+    }
 
+    const out = await response.json();
+
+    if (out.status == "COMPLETED") {
+      return out.output;
+    }
+    if (out.status == "IN_PROGRESS") {
+      console.log(out);
+      return this.#monitorProgress(out.id);
+    }
+    throw new Error("Runpod error: " + JSON.stringify(out));
+  }
+  generate(
+    data: SglGenerateData
+  ): Promise<{ text: string; meta_info: MetaInfoGeneration }> {
+    return this.#httpRequest(data);
+  }
+  select(
+    data: SglSelectData
+  ): Promise<{ text: string; meta_info: MetaInfoSelection }[]> {
+    return this.#httpRequest(data);
+  }
+}
+const getEnvVarOrThrow = (name: string): string => {
+  const value = Deno.env.get(name);
+  if (!value) {
+    throw new Error(`Environment variable ${name} not set`);
+  }
+  return value;
+};
 const bench = async () => {
   let promptTokens = 0;
   let completionTokens = 0;
-  const model = new SglClient(`http://localhost:10000`, {
-    echo: true,
-    template: "llama-2-chat",
-    reportUsage: (a) => {
-      promptTokens += a.promptTokens;
-      completionTokens += a.completionTokens;
-    },
-  });
-  const batch = Array.from({ length: 100 }, (_, _i) =>
+  const model = new SglClient(
+    new RunpodFetcher(
+      getEnvVarOrThrow("RUNPOD_URL"),
+      getEnvVarOrThrow("RUNPOD_TOKEN")
+    ),
+    {
+      echo: false,
+      template: "llama-2-chat",
+      reportUsage: (a) => {
+        promptTokens += a.promptTokens;
+        completionTokens += a.completionTokens;
+      },
+    }
+  );
+  const MAX_JOBS = 100;
+  const batch = Array.from({ length: MAX_JOBS }, (_, _i) =>
     main(model).catch((e) => {
       console.error(e);
     })

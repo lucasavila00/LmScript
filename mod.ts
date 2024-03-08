@@ -1,7 +1,7 @@
 /**
  * The type of a just-created client.
  */
-export type InitClient = SglClient<{}>;
+export type InitClient = SglClient<Record<string, never>>;
 
 /**
  * Options for the single execution of the thread.
@@ -62,21 +62,40 @@ const createSglSamplingParams = (
     dtype: params.dtype,
   };
 };
-type SglGenerateData = {
+
+/**
+ * Options for the generation task.
+ */
+export type SglGenerateData = {
   text: string;
   sampling_params: SglSamplingParams;
 };
-type SglSelectData = {
+
+/**
+ * Options for the selection task.
+ */
+export type SglSelectData = {
   text: string[];
   sampling_params: SglSamplingParams;
   return_logprob: boolean;
   logprob_start_len: number;
 };
-type MetaInfoGeneration = {
+
+/**
+ * Meta information about the generation task.
+ */
+export type MetaInfoGeneration = {
   prompt_tokens: number;
+  completion_tokens: number;
 };
-type MetaInfoSelection = {
+
+/**
+ * Meta information about the selection task.
+ */
+export type MetaInfoSelection = {
   prompt_tokens: number;
+  completion_tokens: number;
+
   normalized_prompt_logprob: number;
   prompt_logprob: number;
 };
@@ -105,10 +124,13 @@ export type ChatTemplate =
  * Template is required to support roles.
  */
 export type CreateClientOptions = {
-  url: string;
   temperature?: number;
   echo?: boolean;
   template?: ChatTemplate;
+  reportUsage?: (usage: {
+    promptTokens: number;
+    completionTokens: number;
+  }) => void;
 };
 type Role = "assistant" | "system" | "user";
 type ChatTemplateDefinition = Record<Role, [string, string]>;
@@ -154,19 +176,70 @@ const getRoleEnd = (template: ChatTemplate, role: Role) =>
   chatTemplates[template][role][1];
 
 /**
+ * Interface for fetching from a SGL server.
+ */
+export type SglFetcher = {
+  generate: (
+    data: SglGenerateData
+  ) => Promise<{ text: string; meta_info: MetaInfoGeneration }>;
+  select: (
+    data: SglSelectData
+  ) => Promise<Array<{ text: string; meta_info: MetaInfoSelection }>>;
+};
+
+/**
+ * Fetches from a regular SGL server.
+ */
+
+export class SglServerFetcher implements SglFetcher {
+  #url: string;
+  constructor(url: string) {
+    this.#url = url;
+  }
+  async #httpRequest<T>(data: object): Promise<T> {
+    const response = await fetch(this.#url + "/generate", {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      console.error((await response.text()).slice(0, 500));
+      throw new Error("HTTP error " + response.status);
+    }
+
+    return await response.json();
+  }
+  generate(
+    data: SglGenerateData
+  ): Promise<{ text: string; meta_info: MetaInfoGeneration }> {
+    return this.#httpRequest(data);
+  }
+  select(
+    data: SglSelectData
+  ): Promise<{ text: string; meta_info: MetaInfoSelection }[]> {
+    return this.#httpRequest(data);
+  }
+}
+
+/**
  * The client is a thread of tasks that can be executed to generate text.
  */
-export class SglClient<T = {}> {
+export class SglClient<T = Record<string, never>> {
   #tasks: Task[];
   #options: CreateClientOptions;
   #state: TaskAccumulator;
-  constructor(options: CreateClientOptions) {
-    this.#options = options;
+  #fetcher: SglFetcher;
+  constructor(endpoint: string | SglFetcher, options?: CreateClientOptions) {
+    this.#options = options ?? {};
     this.#state = {
       captured: {},
       text: "",
     };
     this.#tasks = [];
+    this.#fetcher =
+      typeof endpoint === "string" ? new SglServerFetcher(endpoint) : endpoint;
   }
 
   #wrapRole<U>(
@@ -252,38 +325,35 @@ export class SglClient<T = {}> {
     return this.#wrapRole("user", cb);
   }
 
-  async #httpRequest<T>(data: object): Promise<T> {
-    const response = await fetch(this.#options.url + "/generate", {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      method: "POST",
-      body: JSON.stringify(data),
-    });
-    if (!response.ok) {
-      console.error((await response.text()).slice(0, 500));
-      throw new Error("HTTP error " + response.status);
-    }
-    return await response.json();
-  }
-
-  #generationHttpRequest(sglGenerateData: SglGenerateData): Promise<{
+  async #generationHttpRequest(sglGenerateData: SglGenerateData): Promise<{
     text: string;
     meta_info: MetaInfoGeneration;
   }> {
-    return this.#httpRequest(sglGenerateData);
+    const out = await this.#fetcher.generate(sglGenerateData);
+    this.#options.reportUsage?.({
+      promptTokens: out.meta_info.prompt_tokens,
+      completionTokens: out.meta_info.completion_tokens,
+    });
+    return out;
   }
-  #selectionHttpRequest(sglSelectData: SglSelectData): Promise<
+  async #selectionHttpRequest(sglSelectData: SglSelectData): Promise<
     Array<{
       text: string;
       meta_info: MetaInfoSelection;
     }>
   > {
-    return this.#httpRequest(sglSelectData);
+    const out = await this.#fetcher.select(sglSelectData);
+    for (const item of out) {
+      this.#options.reportUsage?.({
+        promptTokens: item.meta_info.prompt_tokens,
+        completionTokens: item.meta_info.completion_tokens,
+      });
+    }
+    return out;
   }
 
   #clone(state: TaskAccumulator, tasks: Task[]) {
-    const newInstance = new SglClient<T>(this.#options);
+    const newInstance = new SglClient<T>(this.#fetcher, this.#options);
     newInstance.#state = state;
     newInstance.#tasks = tasks;
     return newInstance;
@@ -306,11 +376,11 @@ export class SglClient<T = {}> {
    * ```
    */
   push(text: string): SglClient<T> {
-    const task: Task = async (acc) => {
+    const task: Task = (acc) => {
       if (this.#options.echo) {
         console.log(text);
       }
-      return { ...acc, text: acc.text + text };
+      return Promise.resolve({ ...acc, text: acc.text + text });
     };
     return this.#clone(this.#state, [...this.#tasks, task]);
   }
@@ -418,7 +488,7 @@ export class SglClient<T = {}> {
   select(
     arg1: string | SelectorOptions<string>,
     arg2?: SelectorOptions<string>
-  ): any {
+  ): unknown {
     if (typeof arg1 === "string") {
       return this.#doSelection(arg1, arg2!);
     }
@@ -514,7 +584,7 @@ export class SglClient<T = {}> {
    * ```
    */
   gen(options?: GeneratorOptions | undefined): SglClient<T>;
-  gen(arg1?: string | GeneratorOptions, arg2?: GeneratorOptions): any {
+  gen(arg1?: string | GeneratorOptions, arg2?: GeneratorOptions): unknown {
     if (typeof arg1 === "string") {
       return this.#doGeneration(arg1, arg2);
     } else {
