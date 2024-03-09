@@ -1,3 +1,5 @@
+import { assertIsNever } from "./utils.ts";
+
 export type TasksOutput = { text: string; captured: Record<string, string> };
 
 /**
@@ -25,8 +27,23 @@ export type SelectTask = {
   name: string | undefined;
   choices: string[];
 };
+export type RepeatTask = {
+  tag: "RepeatTask";
+  variable: string;
+};
 
-export type Task = AddTextTask | GenerateTask | SelectTask;
+export type MatchTask = {
+  tag: "MatchTask";
+  variable: string;
+  choices: Record<string, Task[]>;
+};
+
+export type Task =
+  | AddTextTask
+  | GenerateTask
+  | SelectTask
+  | RepeatTask
+  | MatchTask;
 
 type SglSamplingParams = {
   skip_special_tokens: boolean;
@@ -73,7 +90,7 @@ export type FetcherSamplingParams = {
 export type GenerationThread = {
   sampling_params: FetcherSamplingParams;
   tasks: Task[];
-  initial_text: string;
+  initial_state: ClientState;
 };
 
 /**
@@ -113,93 +130,23 @@ type MetaInfoSelection = {
   prompt_logprob: number;
 };
 
-/**
- * Fetches from a regular SGL server.
- */
+export type ClientState = {
+  text: string;
+  captured: Record<string, string>;
+};
 
-export class SglServerFetcher implements SglFetcher {
-  readonly #url: string;
-
-  constructor(url: string) {
+class SglServerExecutor {
+  #state: ClientState;
+  #url: string;
+  #sampling_params: FetcherSamplingParams;
+  constructor(
+    url: string,
+    sampling_params: FetcherSamplingParams,
+    state: ClientState
+  ) {
+    this.#state = JSON.parse(JSON.stringify(state));
     this.#url = url;
-  }
-  async runThread(data: GenerationThread): Promise<TasksOutput> {
-    let text = data.initial_text;
-    const captured: Record<string, string> = {};
-    for (const task of data.tasks) {
-      switch (task.tag) {
-        case "AddTextTask": {
-          text += task.text;
-          break;
-        }
-        case "GenerateTask": {
-          const out = await this.#generate({
-            text,
-            sampling_params: createSglSamplingParams(
-              {
-                max_new_tokens: task.max_tokens,
-                stop: task.stop,
-              },
-              data.sampling_params
-            ),
-          });
-          text += out.text;
-          if (task.name != null) {
-            captured[task.name] = out.text;
-          }
-          break;
-        }
-        case "SelectTask": {
-          // Cache common prefix
-          const res = await this.#generate({
-            text: text,
-            sampling_params: createSglSamplingParams(
-              { max_new_tokens: 0, temperature: 0.0 },
-              data.sampling_params
-            ),
-          });
-
-          const prompt_len = res.meta_info.prompt_tokens;
-
-          const obj = await this.#select({
-            text: task.choices.map((c) => text + c),
-            sampling_params: createSglSamplingParams(
-              {
-                max_new_tokens: 0,
-                temperature: 0.0,
-              },
-              data.sampling_params
-            ),
-            return_logprob: true,
-            logprob_start_len: Math.max(prompt_len - 2, 0),
-          });
-
-          const normalized_prompt_logprob = obj.map(
-            (r) => r.meta_info.normalized_prompt_logprob
-          );
-
-          const argMax = normalized_prompt_logprob.reduce(
-            (iMax, x, i, arr) => (x > arr[iMax] ? i : iMax),
-            0
-          );
-          const decision = task.choices[argMax];
-
-          text += decision;
-          if (task.name != null) {
-            captured[task.name] = decision;
-          }
-
-          break;
-        }
-        default:
-          throw new Error("Unknown task type");
-      }
-    }
-
-    return {
-      text,
-      captured,
-    };
+    this.#sampling_params = sampling_params;
   }
 
   async #httpRequest<T>(data: object): Promise<T> {
@@ -235,5 +182,123 @@ export class SglServerFetcher implements SglFetcher {
     data: SglSelectData
   ): Promise<{ text: string; meta_info: MetaInfoSelection }[]> {
     return this.#httpRequest(data);
+  }
+  getState(): { text: string; captured: Record<string, string> } {
+    return this.#state;
+  }
+  async runTask(task: Task): Promise<void> {
+    switch (task.tag) {
+      case "AddTextTask": {
+        this.#state.text += task.text;
+        break;
+      }
+      case "GenerateTask": {
+        const out = await this.#generate({
+          text: this.#state.text,
+          sampling_params: createSglSamplingParams(
+            {
+              max_new_tokens: task.max_tokens,
+              stop: task.stop,
+            },
+            this.#sampling_params
+          ),
+        });
+        this.#state.text += out.text;
+        if (task.name != null) {
+          this.#state.captured[task.name] = out.text;
+        }
+        break;
+      }
+      case "SelectTask": {
+        // Cache common prefix
+        const res = await this.#generate({
+          text: this.#state.text,
+          sampling_params: createSglSamplingParams(
+            { max_new_tokens: 0, temperature: 0.0 },
+            this.#sampling_params
+          ),
+        });
+
+        const prompt_len = res.meta_info.prompt_tokens;
+
+        const obj = await this.#select({
+          text: task.choices.map((c) => this.#state.text + c),
+          sampling_params: createSglSamplingParams(
+            {
+              max_new_tokens: 0,
+              temperature: 0.0,
+            },
+            this.#sampling_params
+          ),
+          return_logprob: true,
+          logprob_start_len: Math.max(prompt_len - 2, 0),
+        });
+
+        const normalized_prompt_logprob = obj.map(
+          (r) => r.meta_info.normalized_prompt_logprob
+        );
+
+        const argMax = normalized_prompt_logprob.reduce(
+          (iMax, x, i, arr) => (x > arr[iMax] ? i : iMax),
+          0
+        );
+        const decision = task.choices[argMax];
+
+        this.#state.text += decision;
+        if (task.name != null) {
+          this.#state.captured[task.name] = decision;
+        }
+
+        break;
+      }
+      case "RepeatTask": {
+        const value = this.#state.captured[task.variable];
+        if (value == null) {
+          throw new Error(`Variable ${task.variable} not found`);
+        }
+        this.#state.text += value;
+        break;
+      }
+      case "MatchTask": {
+        const value = this.#state.captured[task.variable];
+        if (value == null) {
+          throw new Error(`Variable ${task.variable} not found`);
+        }
+        const tasks = task.choices[value];
+        if (tasks == null) {
+          throw new Error(`Variable ${task.variable} not found`);
+        }
+        for (const innerTask of tasks) {
+          await this.runTask(innerTask);
+        }
+        break;
+      }
+      default: {
+        return assertIsNever(task);
+      }
+    }
+  }
+}
+
+/**
+ * Fetches from a regular SGL server.
+ */
+
+export class SglServerFetcher implements SglFetcher {
+  readonly #url: string;
+
+  constructor(url: string) {
+    this.#url = url;
+  }
+  async runThread(data: GenerationThread): Promise<TasksOutput> {
+    const executor = new SglServerExecutor(
+      this.#url,
+      data.sampling_params,
+      data.initial_state
+    );
+    for (const task of data.tasks) {
+      await executor.runTask(task);
+    }
+    return executor.getState();
   }
 }

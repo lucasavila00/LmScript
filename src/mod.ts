@@ -1,14 +1,17 @@
 import {
+  ClientState,
   FetcherSamplingParams,
+  MatchTask,
   SglFetcher,
   SglServerFetcher,
   Task,
 } from "./sgl-fetcher.ts";
-
+type EmptyRecord = Record<never, string>;
+type AnyRecord = Record<string, string>;
 /**
  * The type of a just-created client.
  */
-export type InitClient = SglClient<Record<never, never>>;
+export type InitClient = SglClient<EmptyRecord, EmptyRecord>;
 
 /**
  * Supported chat templates.
@@ -25,7 +28,7 @@ export type ChatTemplate =
  * Options for creating a new client.
  * Template is required to support roles.
  */
-export type CreateClientOptions = {
+export type CreateClientOptions = FetcherSamplingParams & {
   template?: ChatTemplate;
 };
 type Role = "assistant" | "system" | "user";
@@ -71,9 +74,6 @@ const getRoleStart = (template: ChatTemplate, role: Role) =>
 const getRoleEnd = (template: ChatTemplate, role: Role) =>
   chatTemplates[template][role][1];
 
-type ClientState = {
-  text: string;
-};
 /**
  * Options for the selection task.
  */
@@ -94,7 +94,8 @@ export type GeneratorOptions = {
  * The client is a thread of tasks that can be executed to generate text.
  */
 export class SglClient<
-  T extends Record<string, string> = Record<never, never>
+  GEN extends Record<string, string> = EmptyRecord,
+  SEL extends Record<string, string> = EmptyRecord
 > {
   #tasks: Task[];
   readonly #options: CreateClientOptions;
@@ -104,16 +105,20 @@ export class SglClient<
     this.#options = options ?? {};
     this.#state = {
       text: "",
+      captured: {},
     };
     this.#tasks = [];
     this.#fetcher =
       typeof endpoint === "string" ? new SglServerFetcher(endpoint) : endpoint;
   }
 
-  #wrapRole<U extends Record<string, string>>(
+  #wrapRole<
+    GEN2 extends Record<string, string>,
+    SEL2 extends Record<string, string>
+  >(
     role: Role,
-    cb: (it: SglClient<T>) => SglClient<U>
-  ): SglClient<U> {
+    cb: (it: SglClient<GEN, SEL>) => SglClient<GEN2, SEL2>
+  ): SglClient<GEN2, SEL2> {
     const template = this.#options.template;
     if (template == null) {
       throw new Error("Template is required.");
@@ -143,9 +148,12 @@ export class SglClient<
    *       .run();
    * ```
    */
-  assistant<U extends Record<string, string>>(
-    cb: (it: SglClient<T>) => SglClient<U>
-  ): SglClient<U> {
+  assistant<
+    GEN2 extends Record<string, string>,
+    SEL2 extends Record<string, string>
+  >(
+    cb: (it: SglClient<GEN, SEL>) => SglClient<GEN2, SEL2>
+  ): SglClient<GEN2, SEL2> {
     return this.#wrapRole("assistant", cb);
   }
   /**
@@ -168,9 +176,12 @@ export class SglClient<
    *       .run();
    * ```
    */
-  system<U extends Record<string, string>>(
-    cb: (it: SglClient<T>) => SglClient<U>
-  ): SglClient<U> {
+  system<
+    GEN2 extends Record<string, string>,
+    SEL2 extends Record<string, string>
+  >(
+    cb: (it: SglClient<GEN, SEL>) => SglClient<GEN2, SEL2>
+  ): SglClient<GEN2, SEL2> {
     return this.#wrapRole("system", cb);
   }
   /**
@@ -193,14 +204,17 @@ export class SglClient<
    *       .run();
    * ```
    */
-  user<U extends Record<string, string>>(
-    cb: (it: SglClient<T>) => SglClient<U>
-  ): SglClient<U> {
+  user<
+    GEN2 extends Record<string, string>,
+    SEL2 extends Record<string, string>
+  >(
+    cb: (it: SglClient<GEN, SEL>) => SglClient<GEN2, SEL2>
+  ): SglClient<GEN2, SEL2> {
     return this.#wrapRole("user", cb);
   }
 
   #clone(state: ClientState, tasks: Task[]) {
-    const newInstance = new SglClient<T>(this.#fetcher, this.#options);
+    const newInstance = new SglClient<GEN, SEL>(this.#fetcher, this.#options);
     newInstance.#state = state;
     newInstance.#tasks = tasks;
     return newInstance;
@@ -222,7 +236,7 @@ export class SglClient<
    * console.log(conversation);
    * ```
    */
-  push(text: string): SglClient<T> {
+  push(text: string): SglClient<GEN, SEL> {
     return this.#clone(this.#state, [
       ...this.#tasks,
       {
@@ -235,13 +249,57 @@ export class SglClient<
   #doSelection(
     name: string | undefined,
     options: SelectorOptions<string>
-  ): SglClient<T> {
+  ): SglClient<GEN, SEL> {
     return this.#clone(this.#state, [
       ...this.#tasks,
       {
         tag: "SelectTask",
         choices: options.choices,
         name,
+      },
+    ]);
+  }
+
+  match<K extends keyof SEL>(
+    variable: K
+  ): <
+    GEN2 extends Record<string, string>,
+    SEL2 extends Record<string, string>
+  >(choices: {
+    [P in SEL[K]]: (client: SglClient<GEN, SEL>) => SglClient<GEN2, SEL2>;
+  }) => SglClient<GEN2, SEL2> {
+    return (choices) => {
+      const matchTask: MatchTask = {
+        tag: "MatchTask",
+        variable: String(variable),
+        choices: Object.fromEntries(
+          Object.entries(choices).map(([key, valueUntyped]) => {
+            const value: (
+              client: SglClient<AnyRecord, AnyRecord>
+            ) => SglClient<AnyRecord, AnyRecord> =
+              // deno-lint-ignore no-explicit-any
+              valueUntyped as any;
+            const client = new SglClient<AnyRecord, AnyRecord>(
+              this.#fetcher,
+              this.#options
+            );
+            const out = value(client);
+            const tasks: Task[] = out.#tasks;
+            return [key, tasks];
+          })
+        ),
+      };
+      // deno-lint-ignore no-explicit-any
+      return this.#clone(this.#state, [...this.#tasks, matchTask]) as any;
+    };
+  }
+
+  repeat(variable: keyof GEN | keyof SEL): SglClient<GEN, SEL> {
+    return this.#clone(this.#state, [
+      ...this.#tasks,
+      {
+        tag: "RepeatTask",
+        variable: String(variable),
       },
     ]);
   }
@@ -268,9 +326,16 @@ export class SglClient<
   select<N extends string, V extends string>(
     name: N,
     options: SelectorOptions<V> | undefined
-  ): SglClient<{
-    [K in N | keyof T]: K extends N ? V : K extends keyof T ? T[K] : never;
-  }>;
+  ): SglClient<
+    GEN,
+    {
+      [K in keyof SEL | N]: K extends N
+        ? V
+        : K extends keyof SEL
+        ? SEL[K]
+        : never;
+    }
+  >;
   /**
    * Selects a choice from a list of options.
    * Does not capture the selected choice with a name.
@@ -289,7 +354,7 @@ export class SglClient<
    *
    * console.log(captured.desert);
    */
-  select<V extends string>(options: SelectorOptions<V>): SglClient<T>;
+  select<V extends string>(options: SelectorOptions<V>): SglClient<GEN, SEL>;
   select(
     arg1: string | SelectorOptions<string>,
     arg2?: SelectorOptions<string>
@@ -303,7 +368,7 @@ export class SglClient<
   #doGeneration(
     name: string | undefined,
     generatorOptions: GeneratorOptions | undefined
-  ): SglClient<T> {
+  ): SglClient<GEN, SEL> {
     return this.#clone(this.#state, [
       ...this.#tasks,
       {
@@ -342,9 +407,16 @@ export class SglClient<
   gen<N extends string>(
     name: N,
     options?: GeneratorOptions | undefined
-  ): SglClient<{
-    [K in keyof T | N]: K extends N ? string : K extends keyof T ? T[K] : never;
-  }>;
+  ): SglClient<
+    {
+      [K in keyof GEN | N]: K extends N
+        ? string
+        : K extends keyof GEN
+        ? GEN[K]
+        : never;
+    },
+    SEL
+  >;
   /**
    * Generates text, but does not capture it with a name.
    *
@@ -365,7 +437,7 @@ export class SglClient<
    * console.log(conversation);
    * ```
    */
-  gen(options?: GeneratorOptions | undefined): SglClient<T>;
+  gen(options?: GeneratorOptions | undefined): SglClient<GEN, SEL>;
   gen(arg1?: string | GeneratorOptions, arg2?: GeneratorOptions): unknown {
     if (typeof arg1 === "string") {
       return this.#doGeneration(arg1, arg2);
@@ -374,7 +446,19 @@ export class SglClient<
     }
   }
 
-  #runThreadJustText(): Promise<[SglClient<T>, T, string]> {
+  #runThreadJustText(): Promise<
+    [
+      SglClient<GEN, SEL>,
+      {
+        [K in keyof GEN | keyof SEL]: K extends keyof GEN
+          ? GEN[K]
+          : K extends keyof SEL
+          ? SEL[K]
+          : never;
+      },
+      string
+    ]
+  > {
     let text = this.#state.text;
     for (const task of this.#tasks) {
       if (task.tag === "AddTextTask") {
@@ -383,8 +467,12 @@ export class SglClient<
         throw new Error("Expected only text.");
       }
     }
-    const newInstance = this.#clone({ text }, []);
-    return Promise.resolve([newInstance, {} as T, text]);
+    const newInstance = this.#clone(
+      { text, captured: this.#state.captured },
+      []
+    );
+    // deno-lint-ignore no-explicit-any
+    return Promise.resolve([newInstance, this.#state.captured as any, text]);
   }
 
   /**
@@ -410,9 +498,19 @@ export class SglClient<
    * threadContinuation.push(` </s>`).gen(...)
    * ```
    */
-  async run(
-    options?: FetcherSamplingParams
-  ): Promise<[SglClient<T>, T, string]> {
+  async run(options?: FetcherSamplingParams): Promise<
+    [
+      SglClient<GEN, SEL>,
+      {
+        [K in keyof GEN | keyof SEL]: K extends keyof GEN
+          ? GEN[K]
+          : K extends keyof SEL
+          ? SEL[K]
+          : never;
+      },
+      string
+    ]
+  > {
     const areAllTasksText = this.#tasks.every(
       (task) => task.tag === "AddTextTask"
     );
@@ -421,11 +519,12 @@ export class SglClient<
     }
 
     const out = await this.#fetcher.runThread({
-      sampling_params: options ?? {},
+      sampling_params: { ...this.#options, ...options },
       tasks: this.#tasks,
-      initial_text: this.#state.text,
+      initial_state: this.#state,
     });
     const newInstance = this.#clone(out, []);
-    return [newInstance, out.captured as T, out.text];
+    // deno-lint-ignore no-explicit-any
+    return [newInstance, out.captured as any, out.text];
   }
 }

@@ -1,6 +1,5 @@
 import { InitClient, SglClient } from "../src/mod.ts";
-import { assertIsNever } from "./utils.ts";
-
+import { assertIsNever } from "../src/utils.ts";
 const toolUse = async (model: InitClient, question: string) => {
   const [thread, captured] = await model
     .push(`To answer this question: ${question}. `)
@@ -19,6 +18,23 @@ const toolUse = async (model: InitClient, question: string) => {
     default:
       return assertIsNever(captured.tool);
   }
+};
+
+const toolUseMatching = async (model: InitClient, question: string) => {
+  return await model
+    .push(`To answer this question: ${question}. `)
+    .push(`I need to use a `)
+    .select("tool", {
+      choices: ["calculator", "search engine"],
+    })
+    .push(`. `)
+    .match("tool")({
+      calculator: (thread) =>
+        thread.push(`The math expression is `).gen("tool_usage"),
+      "search engine": (thread) =>
+        thread.push(`The key word to search is `).gen("tool_usage"),
+    })
+    .run();
 };
 
 const illustratePerson = (model: InitClient, quote: string, title: string) =>
@@ -142,28 +158,32 @@ const main = async (client: InitClient) => {
   const [_, captured, conversation] = await client
     .push(`<s> [INST] What is the sum of 2 + 2? Answer shortly. [/INST] `)
     .gen("expression", {
-      stop: ["</s>"],
       maxTokens: 512,
     })
     .push(` </s>`)
-    .run({
-      temperature: 0.1,
-    });
+    .push("Repeating: ")
+    .repeat("expression")
+    .run();
   console.log(conversation);
-  console.log(captured.expression);
+  console.log(captured);
 
   const [_2, cap2, conversation2] = await toolUse(client, "What is 2 + 2?");
 
   console.log(conversation2);
   console.log(cap2);
+  const [_22, cap22, conversation22] = await toolUseMatching(
+    client,
+    "What is 2 + 2?"
+  );
+
+  console.log(conversation22);
+  console.log(cap22);
 
   const [_3, cap3, conversation3] = await illustratePerson(
     client,
     "The person is happy",
     "What is the person doing?"
-  ).run({
-    temperature: 0.1,
-  });
+  ).run();
 
   console.log(conversation3);
   console.log(cap3);
@@ -190,8 +210,9 @@ const main = async (client: InitClient) => {
 const bench = async () => {
   const model = new SglClient(`http://localhost:30004`, {
     template: "llama-2-chat",
+    temperature: 0.1,
   });
-  const batch = Array.from({ length: 10 }, (_, _i) =>
+  const batch = Array.from({ length: 1 }, (_, _i) =>
     main(model).catch((e) => {
       console.error(e);
     })

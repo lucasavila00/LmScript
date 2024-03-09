@@ -4,7 +4,7 @@ import {
   SglFetcher,
   TasksOutput,
 } from "../src/sgl-fetcher.ts";
-import { assertIsNever } from "./utils.ts";
+import { assertIsNever } from "../src/utils.ts";
 
 const toolUse = async (model: InitClient, question: string) => {
   const [thread, captured] = await model
