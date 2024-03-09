@@ -1,4 +1,4 @@
-import { InitClient, SglClient } from "../mod.ts";
+import { InitClient, SglClient } from "../src/mod.ts";
 import { assertIsNever } from "./utils.ts";
 
 const toolUse = async (model: InitClient, question: string) => {
@@ -117,26 +117,26 @@ const multiTurnQuestion = (
     .assistant((m) => m.gen("answer2", { maxTokens: 1025 }))
     .run();
 
-const characterRegex = `\\{
-  "name": "[\\w\\d\\s]{1,16}",
-  "house": "(Gryffindor|Slytherin|Ravenclaw|Hufflepuff)",
-  "blood status": "(Pure-blood|Half-blood|Muggle-born)",
-  "occupation": "(student|teacher|auror|ministry of magic|death eater|order of the phoenix)",
-  "wand": \\{
-    "wood": "[\\w\\d\\s]{1,16}",
-    "core": "[\\w\\d\\s]{1,16}",
-    "length": [0-9]{1,2}\\.[0-9]{0,2}
-  \\},
-  "patronus": "[\\w\\d\\s]{1,16}",
-  "alive": "(Alive|Deceased)",
-  "bogart": "[\\w\\d\\s]{1,16}"
-\\}`;
-const characterGen = (model: InitClient, name: string) =>
-  model
-    .push(
-      `${name} is a character in Harry Potter. Please fill in the following information about this character.\n`
-    )
-    .gen("json_output", { maxTokens: 256, regex: characterRegex });
+// const characterRegex = `\\{
+//   "name": "[\\w\\d\\s]{1,16}",
+//   "house": "(Gryffindor|Slytherin|Ravenclaw|Hufflepuff)",
+//   "blood status": "(Pure-blood|Half-blood|Muggle-born)",
+//   "occupation": "(student|teacher|auror|ministry of magic|death eater|order of the phoenix)",
+//   "wand": \\{
+//     "wood": "[\\w\\d\\s]{1,16}",
+//     "core": "[\\w\\d\\s]{1,16}",
+//     "length": [0-9]{1,2}\\.[0-9]{0,2}
+//   \\},
+//   "patronus": "[\\w\\d\\s]{1,16}",
+//   "alive": "(Alive|Deceased)",
+//   "bogart": "[\\w\\d\\s]{1,16}"
+// \\}`;
+// const characterGen = (model: InitClient, name: string) =>
+//   model
+//     .push(
+//       `${name} is a character in Harry Potter. Please fill in the following information about this character.\n`
+//     )
+//     .gen("json_output", { maxTokens: 256, regex: characterRegex });
 
 const main = async (client: InitClient) => {
   const [_, captured, conversation] = await client
@@ -176,29 +176,22 @@ const main = async (client: InitClient) => {
   console.log(conversation4);
   console.log(cap4);
 
-  const [_5, cap5, conversation5] = await characterGen(
-    client,
-    "Harry Potter"
-  ).run({
-    temperature: 0.1,
-  });
+  // const [_5, cap5, conversation5] = await characterGen(
+  //   client,
+  //   "Harry Potter"
+  // ).run({
+  //   temperature: 0.1,
+  // });
 
-  console.log(conversation5);
-  console.log(cap5);
+  // console.log(conversation5);
+  // console.log(cap5);
 };
 
 const bench = async () => {
-  let promptTokens = 0;
-  let completionTokens = 0;
-  const model = new SglClient(`http://localhost:10000`, {
-    echo: true,
+  const model = new SglClient(`http://localhost:30004`, {
     template: "llama-2-chat",
-    reportUsage: (a) => {
-      promptTokens += a.promptTokens;
-      completionTokens += a.completionTokens;
-    },
   });
-  const batch = Array.from({ length: 100 }, (_, _i) =>
+  const batch = Array.from({ length: 10 }, (_, _i) =>
     main(model).catch((e) => {
       console.error(e);
     })
@@ -208,14 +201,6 @@ const bench = async () => {
   await Promise.all(batch);
   const duration = Date.now() - start;
   console.log(`Duration: ${duration}ms`);
-  console.log(`Prompt tokens: ${promptTokens}`);
-  console.log(`Completion tokens: ${completionTokens}`);
-
-  const promptTokensPerMinute = (promptTokens / duration) * 60000;
-  const completionTokensPerMinute = (completionTokens / duration) * 60000;
-
-  console.log(`Prompt tokens per minute: ${promptTokensPerMinute}`);
-  console.log(`Completion tokens per minute: ${completionTokensPerMinute}`);
 };
 
 bench().catch(console.error);

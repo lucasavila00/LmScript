@@ -1,112 +1,14 @@
+import {
+  FetcherSamplingParams,
+  SglFetcher,
+  SglServerFetcher,
+  Task,
+} from "./sgl-fetcher.ts";
+
 /**
  * The type of a just-created client.
  */
 export type InitClient = SglClient<Record<string, never>>;
-
-/**
- * Options for the single execution of the thread.
- */
-export type RunOptions = {
-  temperature?: number;
-};
-
-/**
- * Options for the selection task.
- */
-export type SelectorOptions<S extends string> = {
-  choices: S[];
-};
-
-/**
- * Options for the generation task.
- */
-export type GeneratorOptions = {
-  stop?: string | string[];
-  maxTokens?: number;
-  regex?: string;
-};
-
-type SglSamplingParams = {
-  skip_special_tokens: boolean;
-  max_new_tokens: number;
-  stop: string | string[];
-  temperature: number;
-  top_p: number;
-  top_k: number;
-  frequency_penalty: number;
-  presence_penalty: number;
-  ignore_eos: boolean;
-  regex: string | undefined;
-  dtype: string | undefined;
-};
-const createSglSamplingParams = (
-  params: Partial<SglSamplingParams>,
-  runOptions: RunOptions | undefined,
-  creatorOptions: CreateClientOptions | undefined
-): SglSamplingParams => {
-  return {
-    skip_special_tokens: params.skip_special_tokens ?? true,
-    max_new_tokens: params.max_new_tokens ?? 16,
-    stop: params.stop ?? [],
-    temperature:
-      runOptions?.temperature ??
-      creatorOptions?.temperature ??
-      params.temperature ??
-      1.0,
-    top_p: params.top_p ?? 1.0,
-    top_k: params.top_k ?? -1,
-    frequency_penalty: params.frequency_penalty ?? 0.0,
-    presence_penalty: params.presence_penalty ?? 0.0,
-    ignore_eos: params.ignore_eos ?? false,
-    regex: params.regex,
-    dtype: params.dtype,
-  };
-};
-
-/**
- * Options for the generation task.
- */
-export type SglGenerateData = {
-  text: string;
-  sampling_params: SglSamplingParams;
-};
-
-/**
- * Options for the selection task.
- */
-export type SglSelectData = {
-  text: string[];
-  sampling_params: SglSamplingParams;
-  return_logprob: boolean;
-  logprob_start_len: number;
-};
-
-/**
- * Meta information about the generation task.
- */
-export type MetaInfoGeneration = {
-  prompt_tokens: number;
-  completion_tokens: number;
-};
-
-/**
- * Meta information about the selection task.
- */
-export type MetaInfoSelection = {
-  prompt_tokens: number;
-  completion_tokens: number;
-
-  normalized_prompt_logprob: number;
-  prompt_logprob: number;
-};
-type TaskAccumulator = {
-  captured: Record<string, string | undefined>;
-  text: string;
-};
-type Task = (
-  acc: TaskAccumulator,
-  t: RunOptions | undefined
-) => Promise<TaskAccumulator>;
 
 /**
  * Supported chat templates.
@@ -124,13 +26,7 @@ export type ChatTemplate =
  * Template is required to support roles.
  */
 export type CreateClientOptions = {
-  temperature?: number;
-  echo?: boolean;
   template?: ChatTemplate;
-  reportUsage?: (usage: {
-    promptTokens: number;
-    completionTokens: number;
-  }) => void;
 };
 type Role = "assistant" | "system" | "user";
 type ChatTemplateDefinition = Record<Role, [string, string]>;
@@ -175,66 +71,38 @@ const getRoleStart = (template: ChatTemplate, role: Role) =>
 const getRoleEnd = (template: ChatTemplate, role: Role) =>
   chatTemplates[template][role][1];
 
+type ClientState = {
+  text: string;
+};
 /**
- * Interface for fetching from a SGL server.
+ * Options for the selection task.
  */
-export type SglFetcher = {
-  generate: (
-    data: SglGenerateData
-  ) => Promise<{ text: string; meta_info: MetaInfoGeneration }>;
-  select: (
-    data: SglSelectData
-  ) => Promise<Array<{ text: string; meta_info: MetaInfoSelection }>>;
+export type SelectorOptions<S extends string> = {
+  choices: S[];
 };
 
 /**
- * Fetches from a regular SGL server.
+ * Options for the generation task.
  */
-
-export class SglServerFetcher implements SglFetcher {
-  #url: string;
-  constructor(url: string) {
-    this.#url = url;
-  }
-  async #httpRequest<T>(data: object): Promise<T> {
-    const response = await fetch(this.#url + "/generate", {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      method: "POST",
-      body: JSON.stringify(data),
-    });
-    if (!response.ok) {
-      console.error((await response.text()).slice(0, 500));
-      throw new Error("HTTP error " + response.status);
-    }
-
-    return await response.json();
-  }
-  generate(
-    data: SglGenerateData
-  ): Promise<{ text: string; meta_info: MetaInfoGeneration }> {
-    return this.#httpRequest(data);
-  }
-  select(
-    data: SglSelectData
-  ): Promise<{ text: string; meta_info: MetaInfoSelection }[]> {
-    return this.#httpRequest(data);
-  }
-}
+export type GeneratorOptions = {
+  stop?: string | string[];
+  maxTokens?: number;
+  regex?: string;
+};
 
 /**
  * The client is a thread of tasks that can be executed to generate text.
  */
-export class SglClient<T = Record<string, never>> {
+export class SglClient<
+  T extends Record<string, string> = Record<string, never>
+> {
   #tasks: Task[];
-  #options: CreateClientOptions;
-  #state: TaskAccumulator;
-  #fetcher: SglFetcher;
+  readonly #options: CreateClientOptions;
+  #state: ClientState;
+  readonly #fetcher: SglFetcher;
   constructor(endpoint: string | SglFetcher, options?: CreateClientOptions) {
     this.#options = options ?? {};
     this.#state = {
-      captured: {},
       text: "",
     };
     this.#tasks = [];
@@ -242,7 +110,7 @@ export class SglClient<T = Record<string, never>> {
       typeof endpoint === "string" ? new SglServerFetcher(endpoint) : endpoint;
   }
 
-  #wrapRole<U>(
+  #wrapRole<U extends Record<string, string>>(
     role: Role,
     cb: (it: SglClient<T>) => SglClient<U>
   ): SglClient<U> {
@@ -275,7 +143,9 @@ export class SglClient<T = Record<string, never>> {
    *       .run();
    * ```
    */
-  assistant<U>(cb: (it: SglClient<T>) => SglClient<U>): SglClient<U> {
+  assistant<U extends Record<string, string>>(
+    cb: (it: SglClient<T>) => SglClient<U>
+  ): SglClient<U> {
     return this.#wrapRole("assistant", cb);
   }
   /**
@@ -298,7 +168,9 @@ export class SglClient<T = Record<string, never>> {
    *       .run();
    * ```
    */
-  system<U>(cb: (it: SglClient<T>) => SglClient<U>): SglClient<U> {
+  system<U extends Record<string, string>>(
+    cb: (it: SglClient<T>) => SglClient<U>
+  ): SglClient<U> {
     return this.#wrapRole("system", cb);
   }
   /**
@@ -321,38 +193,13 @@ export class SglClient<T = Record<string, never>> {
    *       .run();
    * ```
    */
-  user<U>(cb: (it: SglClient<T>) => SglClient<U>): SglClient<U> {
+  user<U extends Record<string, string>>(
+    cb: (it: SglClient<T>) => SglClient<U>
+  ): SglClient<U> {
     return this.#wrapRole("user", cb);
   }
 
-  async #generationHttpRequest(sglGenerateData: SglGenerateData): Promise<{
-    text: string;
-    meta_info: MetaInfoGeneration;
-  }> {
-    const out = await this.#fetcher.generate(sglGenerateData);
-    this.#options.reportUsage?.({
-      promptTokens: out.meta_info.prompt_tokens,
-      completionTokens: out.meta_info.completion_tokens,
-    });
-    return out;
-  }
-  async #selectionHttpRequest(sglSelectData: SglSelectData): Promise<
-    Array<{
-      text: string;
-      meta_info: MetaInfoSelection;
-    }>
-  > {
-    const out = await this.#fetcher.select(sglSelectData);
-    for (const item of out) {
-      this.#options.reportUsage?.({
-        promptTokens: item.meta_info.prompt_tokens,
-        completionTokens: item.meta_info.completion_tokens,
-      });
-    }
-    return out;
-  }
-
-  #clone(state: TaskAccumulator, tasks: Task[]) {
+  #clone(state: ClientState, tasks: Task[]) {
     const newInstance = new SglClient<T>(this.#fetcher, this.#options);
     newInstance.#state = state;
     newInstance.#tasks = tasks;
@@ -376,69 +223,27 @@ export class SglClient<T = Record<string, never>> {
    * ```
    */
   push(text: string): SglClient<T> {
-    const task: Task = (acc) => {
-      if (this.#options.echo) {
-        console.log(text);
-      }
-      return Promise.resolve({ ...acc, text: acc.text + text });
-    };
-    return this.#clone(this.#state, [...this.#tasks, task]);
+    return this.#clone(this.#state, [
+      ...this.#tasks,
+      {
+        tag: "AddTextTask",
+        text,
+      },
+    ]);
   }
 
   #doSelection(
     name: string | undefined,
     options: SelectorOptions<string>
   ): SglClient<T> {
-    const task: Task = async (acc, runOptions) => {
-      // Cache common prefix
-      const res = await this.#generationHttpRequest({
-        text: acc.text,
-        sampling_params: this.#createSglSamplingParams(
-          {
-            max_new_tokens: 0,
-          },
-          runOptions
-        ),
-      });
-      const prompt_len = res.meta_info.prompt_tokens;
-
-      const obj = await this.#selectionHttpRequest({
-        text: options.choices.map((c) => acc.text + c),
-        sampling_params: this.#createSglSamplingParams(
-          {
-            max_new_tokens: 0,
-          },
-          runOptions
-        ),
-        return_logprob: true,
-        logprob_start_len: Math.max(prompt_len - 2, 0),
-      });
-
-      const normalized_prompt_logprob = obj.map(
-        (r) => r.meta_info.normalized_prompt_logprob
-      );
-
-      const argMax = normalized_prompt_logprob.reduce(
-        (iMax, x, i, arr) => (x > arr[iMax] ? i : iMax),
-        0
-      );
-      const decision = options.choices[argMax];
-      if (this.#options.echo) {
-        console.log(decision);
-      }
-      if (name != null) {
-        return {
-          ...acc,
-          text: acc.text + decision,
-          captured: {
-            ...acc.captured,
-            [name]: decision,
-          },
-        };
-      }
-      return { ...acc, text: acc.text + decision };
-    };
-    return this.#clone(this.#state, [...this.#tasks, task]);
+    return this.#clone(this.#state, [
+      ...this.#tasks,
+      {
+        tag: "SelectTask",
+        choices: options.choices,
+        name,
+      },
+    ]);
   }
 
   /**
@@ -495,46 +300,23 @@ export class SglClient<T = Record<string, never>> {
     return this.#doSelection(undefined, arg1!);
   }
 
-  #createSglSamplingParams(
-    params: Partial<SglSamplingParams>,
-    runOptions: RunOptions | undefined
-  ): SglSamplingParams {
-    return createSglSamplingParams(params, runOptions, this.#options);
-  }
-
   #doGeneration(
-    name: string | null,
+    name: string | undefined,
     generatorOptions: GeneratorOptions | undefined
   ): SglClient<T> {
-    const task: Task = async (acc, runOptions) => {
-      const { text: out, meta_info: _ } = await this.#generationHttpRequest({
-        text: acc.text,
-        sampling_params: this.#createSglSamplingParams(
-          {
-            max_new_tokens: generatorOptions?.maxTokens,
-            stop: generatorOptions?.stop,
-            regex: generatorOptions?.regex,
-          },
-          runOptions
-        ),
-      });
-      if (this.#options.echo) {
-        console.log(out);
-      }
-      if (name != null) {
-        return {
-          ...acc,
-          text: acc.text + out,
-          captured: {
-            ...acc.captured,
-            [name]: out,
-          },
-        };
-      }
-
-      return { ...acc, text: acc.text + out };
-    };
-    return this.#clone(this.#state, [...this.#tasks, task]);
+    return this.#clone(this.#state, [
+      ...this.#tasks,
+      {
+        tag: "GenerateTask",
+        name,
+        stop:
+          typeof generatorOptions?.stop === "string"
+            ? [generatorOptions.stop]
+            : generatorOptions?.stop ?? [],
+        max_tokens: generatorOptions?.maxTokens ?? 256,
+        regex: generatorOptions?.regex,
+      },
+    ]);
   }
 
   /**
@@ -588,8 +370,21 @@ export class SglClient<T = Record<string, never>> {
     if (typeof arg1 === "string") {
       return this.#doGeneration(arg1, arg2);
     } else {
-      return this.#doGeneration(null, arg1);
+      return this.#doGeneration(undefined, arg1);
     }
+  }
+
+  #runThreadJustText(): Promise<[SglClient<T>, T, string]> {
+    let text = this.#state.text;
+    for (const task of this.#tasks) {
+      if (task.tag === "AddTextTask") {
+        text += task.text;
+      } else {
+        throw new Error("Expected only text.");
+      }
+    }
+    const newInstance = this.#clone({ text }, []);
+    return Promise.resolve([newInstance, {} as T, text]);
   }
 
   /**
@@ -615,12 +410,22 @@ export class SglClient<T = Record<string, never>> {
    * threadContinuation.push(` </s>`).gen(...)
    * ```
    */
-  async run(options?: RunOptions): Promise<[SglClient<T>, T, string]> {
-    let state = { ...this.#state };
-    for (const task of this.#tasks) {
-      state = await task(state, options);
+  async run(
+    options?: FetcherSamplingParams
+  ): Promise<[SglClient<T>, T, string]> {
+    const areAllTasksText = this.#tasks.every(
+      (task) => task.tag === "AddTextTask"
+    );
+    if (areAllTasksText) {
+      return this.#runThreadJustText();
     }
-    const newInstance = this.#clone(state, []);
-    return [newInstance, state.captured as T, state.text];
+
+    const out = await this.#fetcher.runThread({
+      sampling_params: options ?? {},
+      tasks: this.#tasks,
+      initial_text: this.#state.text,
+    });
+    const newInstance = this.#clone(out, []);
+    return [newInstance, out.captured as T, out.text];
   }
 }

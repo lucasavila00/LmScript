@@ -2,6 +2,7 @@
   "name": "@lucasavila00/sgjs",
   "version": "0.0.12",
   "exports": {
-    ".": "./mod.ts"
+    ".": "./src/mod.ts",
+    "sgl-fetcher": "./src/sgl-fetcher.ts"
   }
 }
