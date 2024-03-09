@@ -1,3 +1,4 @@
+import { delay } from "./utils.ts";
 import { assertIsNever } from "./utils.ts";
 
 export type TasksOutput = { text: string; captured: Record<string, string> };
@@ -137,8 +138,8 @@ export type ClientState = {
 
 class SglServerExecutor {
   #state: ClientState;
-  #url: string;
-  #sampling_params: FetcherSamplingParams;
+  readonly #url: string;
+  readonly #sampling_params: FetcherSamplingParams;
   constructor(
     url: string,
     sampling_params: FetcherSamplingParams,
@@ -149,7 +150,7 @@ class SglServerExecutor {
     this.#sampling_params = sampling_params;
   }
 
-  async #httpRequest<T>(data: object): Promise<T> {
+  async #httpRequestNoRetry<T>(data: object): Promise<T> {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 60_000);
     try {
@@ -172,6 +173,18 @@ class SglServerExecutor {
     } finally {
       clearTimeout(timeout);
     }
+  }
+  async #httpRequest<T>(data: object): Promise<T> {
+    let lastError: unknown;
+    for (let i = 1; i < 5; i++) {
+      try {
+        return await this.#httpRequestNoRetry(data);
+      } catch (e) {
+        lastError = e;
+        await delay(1000 * i * i);
+      }
+    }
+    throw new Error(`HTTP request failed: ${lastError}`);
   }
   #generate(
     data: SglGenerateData

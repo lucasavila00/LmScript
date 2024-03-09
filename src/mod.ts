@@ -29,10 +29,10 @@ export type ChatTemplate =
  * Template is required to support roles.
  */
 export type CreateClientOptions = FetcherSamplingParams & {
-  template?: ChatTemplate;
+  template?: ChatTemplate | ChatTemplateDefinition;
 };
-type Role = "assistant" | "system" | "user";
-type ChatTemplateDefinition = Record<Role, [string, string]>;
+export type Role = "assistant" | "system" | "user";
+export type ChatTemplateDefinition = Record<Role, [string, string]>;
 
 type AllChatTemplates = Record<ChatTemplate, ChatTemplateDefinition>;
 
@@ -123,9 +123,13 @@ export class SglClient<
     if (template == null) {
       throw new Error("Template is required.");
     }
-    return cb(this.push(getRoleStart(template, role))).push(
-      getRoleEnd(template, role)
-    );
+    if (typeof template === "string") {
+      return cb(this.push(getRoleStart(template, role))).push(
+        getRoleEnd(template, role)
+      );
+    }
+    const [start, end] = template[role];
+    return cb(this.push(start)).push(end);
   }
 
   /**
@@ -134,23 +138,18 @@ export class SglClient<
    * If a template is not provided, an error will be thrown.
    *
    * ```ts
-   *   const multiTurnQuestion = (
-   *     client: InitClient,
-   *     question1: string,
-   *     question2: string
-   *   ) =>
-   *     client
-   *       .system((m) => m.push("You are a helpful assistant."))
-   *       .user((m) => m.push(question1))
-   *       .assistant((m) => m.gen("answer1", { maxTokens: 256 }))
-   *       .user((m) => m.push(question2))
-   *       .assistant((m) => m.gen("answer2", { maxTokens: 1025 }))
-   *       .run();
+   * client
+   *   .system((m) => m.push("You are a helpful assistant."))
+   *   .user((m) => m.push(question1))
+   *   .assistant((m) => m.gen("answer1", { maxTokens: 256 }))
+   *   .user((m) => m.push(question2))
+   *   .assistant((m) => m.gen("answer2", { maxTokens: 1025 }))
+   *   .run();
    * ```
    */
   assistant<
-    GEN2 extends Record<string, string>,
-    SEL2 extends Record<string, string>
+    GEN2 extends Record<string, string> = Record<never, never>,
+    SEL2 extends Record<string, string> = Record<never, never>
   >(
     cb: (it: SglClient<GEN, SEL>) => SglClient<GEN2, SEL2>
   ): SglClient<GEN2, SEL2> {
@@ -162,23 +161,18 @@ export class SglClient<
    * If a template is not provided, an error will be thrown.
    *
    * ```ts
-   *   const multiTurnQuestion = (
-   *     client: InitClient,
-   *     question1: string,
-   *     question2: string
-   *   ) =>
-   *     client
-   *       .system((m) => m.push("You are a helpful assistant."))
-   *       .user((m) => m.push(question1))
-   *       .assistant((m) => m.gen("answer1", { maxTokens: 256 }))
-   *       .user((m) => m.push(question2))
-   *       .assistant((m) => m.gen("answer2", { maxTokens: 1025 }))
-   *       .run();
+   * client
+   *   .system((m) => m.push("You are a helpful assistant."))
+   *   .user((m) => m.push(question1))
+   *   .assistant((m) => m.gen("answer1", { maxTokens: 256 }))
+   *   .user((m) => m.push(question2))
+   *   .assistant((m) => m.gen("answer2", { maxTokens: 1025 }))
+   *   .run();
    * ```
    */
   system<
-    GEN2 extends Record<string, string>,
-    SEL2 extends Record<string, string>
+    GEN2 extends Record<string, string> = Record<never, never>,
+    SEL2 extends Record<string, string> = Record<never, never>
   >(
     cb: (it: SglClient<GEN, SEL>) => SglClient<GEN2, SEL2>
   ): SglClient<GEN2, SEL2> {
@@ -190,23 +184,18 @@ export class SglClient<
    * If a template is not provided, an error will be thrown.
    *
    * ```ts
-   *   const multiTurnQuestion = (
-   *     client: InitClient,
-   *     question1: string,
-   *     question2: string
-   *   ) =>
-   *     client
-   *       .system((m) => m.push("You are a helpful assistant."))
-   *       .user((m) => m.push(question1))
-   *       .assistant((m) => m.gen("answer1", { maxTokens: 256 }))
-   *       .user((m) => m.push(question2))
-   *       .assistant((m) => m.gen("answer2", { maxTokens: 1025 }))
-   *       .run();
+   * client
+   *   .system((m) => m.push("You are a helpful assistant."))
+   *   .user((m) => m.push(question1))
+   *   .assistant((m) => m.gen("answer1", { maxTokens: 256 }))
+   *   .user((m) => m.push(question2))
+   *   .assistant((m) => m.gen("answer2", { maxTokens: 1025 }))
+   *   .run();
    * ```
    */
   user<
-    GEN2 extends Record<string, string>,
-    SEL2 extends Record<string, string>
+    GEN2 extends Record<string, string> = Record<never, never>,
+    SEL2 extends Record<string, string> = Record<never, never>
   >(
     cb: (it: SglClient<GEN, SEL>) => SglClient<GEN2, SEL2>
   ): SglClient<GEN2, SEL2> {
@@ -323,7 +312,7 @@ export class SglClient<
    * console.log(captured.desert);
    * ```
    */
-  select<N extends string, V extends string>(
+  select<const N extends string, const V extends string>(
     name: N,
     options: SelectorOptions<V> | undefined
   ): SglClient<
@@ -378,7 +367,7 @@ export class SglClient<
           typeof generatorOptions?.stop === "string"
             ? [generatorOptions.stop]
             : generatorOptions?.stop ?? [],
-        max_tokens: generatorOptions?.maxTokens ?? 256,
+        max_tokens: generatorOptions?.maxTokens ?? 16,
         regex: generatorOptions?.regex,
       },
     ]);
@@ -404,7 +393,7 @@ export class SglClient<
    * console.log(captured.name);
    * ```
    */
-  gen<N extends string>(
+  gen<const N extends string>(
     name: N,
     options?: GeneratorOptions | undefined
   ): SglClient<
@@ -448,7 +437,6 @@ export class SglClient<
 
   #runThreadJustText(): Promise<
     [
-      SglClient<GEN, SEL>,
       {
         [K in keyof GEN | keyof SEL]: K extends keyof GEN
           ? GEN[K]
@@ -456,6 +444,7 @@ export class SglClient<
           ? SEL[K]
           : never;
       },
+      SglClient<GEN, SEL>,
       string
     ]
   > {
@@ -472,7 +461,7 @@ export class SglClient<
       []
     );
     // deno-lint-ignore no-explicit-any
-    return Promise.resolve([newInstance, this.#state.captured as any, text]);
+    return Promise.resolve([this.#state.captured as any, newInstance, text]);
   }
 
   /**
@@ -500,7 +489,6 @@ export class SglClient<
    */
   async run(options?: FetcherSamplingParams): Promise<
     [
-      SglClient<GEN, SEL>,
       {
         [K in keyof GEN | keyof SEL]: K extends keyof GEN
           ? GEN[K]
@@ -508,6 +496,7 @@ export class SglClient<
           ? SEL[K]
           : never;
       },
+      SglClient<GEN, SEL>,
       string
     ]
   > {
@@ -525,6 +514,6 @@ export class SglClient<
     });
     const newInstance = this.#clone(out, []);
     // deno-lint-ignore no-explicit-any
-    return [newInstance, out.captured as any, out.text];
+    return [out.captured as any, newInstance, out.text];
   }
 }
