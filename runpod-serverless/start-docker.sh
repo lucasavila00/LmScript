@@ -1,0 +1,1 @@
+lscpu && (python3.11 -u /handler.py || python3.11 -u /handler.py)

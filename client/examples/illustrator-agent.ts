@@ -4,13 +4,13 @@ import { assertIsNever } from "../src/utils.ts";
 const PERSON_ILLUSTRATOR = "A person." as const;
 const OBJECT_ILLUSTRATOR = "An object." as const;
 class IllustrationPromptAgent {
-  readonly #client: InitClient;
+  readonly #init: InitClient;
   constructor(client: InitClient) {
-    this.#client = client;
+    this.#init = client;
   }
 
   #getIllustrationKind(content: string) {
-    return this.#client
+    return this.#init
       .user((c) =>
         c.push(
           `What is the best subject for the illustration to accompany the following?
@@ -47,7 +47,7 @@ Illustrate: ${OBJECT_ILLUSTRATOR}`
   }
 
   #getPersonIllustrationPrompt(content: string) {
-    return this.#client
+    return this.#init
       .user((c) =>
         c.push(
           `Instruct the generation of a pencil drawing of a person to illustrate the following:
@@ -132,7 +132,7 @@ Time Period: "In the 2020s"`
       );
   }
   #getObjectIllustrationPrompt(content: string) {
-    return this.#client
+    return this.#init
       .user((c) =>
         c.push(
           `Instruct the generation of a pencil drawing of an object that illustrate the following:
