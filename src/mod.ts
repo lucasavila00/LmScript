@@ -8,7 +8,7 @@ import {
 /**
  * The type of a just-created client.
  */
-export type InitClient = SglClient<Record<string, never>>;
+export type InitClient = SglClient<Record<never, never>>;
 
 /**
  * Supported chat templates.
@@ -94,7 +94,7 @@ export type GeneratorOptions = {
  * The client is a thread of tasks that can be executed to generate text.
  */
 export class SglClient<
-  T extends Record<string, string> = Record<string, never>
+  T extends Record<string, string> = Record<never, never>
 > {
   #tasks: Task[];
   readonly #options: CreateClientOptions;

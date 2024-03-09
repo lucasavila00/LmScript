@@ -3,6 +3,6 @@
   "version": "0.0.12",
   "exports": {
     ".": "./src/mod.ts",
-    "sgl-fetcher": "./src/sgl-fetcher.ts"
+    "./sgl-fetcher": "./src/sgl-fetcher.ts"
   }
 }
