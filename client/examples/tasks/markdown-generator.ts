@@ -3,11 +3,11 @@ import { InitClient } from "../../src/mod.ts";
 const listItemOrStop = (ai: InitClient) =>
   ai
     .select("list_item", {
-      choices: ["\n- ", "</s>"],
+      choices: ["\n- ", ai.eos()],
     })
     .match("list_item")({
     "\n- ": (c) => c.gen("list_item_content", { maxTokens: 256, stop: ["\n"] }),
-    "</s>": (c) => c.castGenerated("list_item_content"),
+    [ai.eos()]: (c) => c.castGenerated("list_item_content"),
   });
 const generateMarkdownList = async (client: InitClient, content: string) => {
   let state = client
@@ -39,7 +39,7 @@ ${content}
       captured: { list_item, list_item_content },
       state: ai,
     } = await listItemOrStop(state).run();
-    if (list_item === "</s>") {
+    if (list_item === ai.eos()) {
       break;
     }
     state = ai;
@@ -67,7 +67,9 @@ ${content}
 export const generateMarkdown = async (client: InitClient, content: string) => {
   const {
     captured: { heading },
-  } = await generateHeading(client, content).run();
+  } = await generateHeading(client, content).run({
+    temperature: 0.01,
+  });
 
   const items = await generateMarkdownList(client, content);
 

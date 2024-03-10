@@ -74,7 +74,7 @@ const multiTurnQuestion = (
 //     .gen("json_output", { maxTokens: 256, regex: characterRegex });
 
 export const kitchenSink = async (client: InitClient) => {
-  const { text: conversation } = await client
+  const { rawText: conversation } = await client
     .push(`<s> [INST] What is the sum of 2 + 2? Answer shortly. [/INST] `)
     .gen("expression", {
       maxTokens: 512,
@@ -85,10 +85,10 @@ export const kitchenSink = async (client: InitClient) => {
     .run();
   console.log(conversation);
 
-  const { text: conversation2 } = await toolUse(client, "What is 2 + 2?");
+  const { rawText: conversation2 } = await toolUse(client, "What is 2 + 2?");
 
   console.log(conversation2);
-  const { text: conversation22 } = await toolUseMatching(
+  const { rawText: conversation22 } = await toolUseMatching(
     client,
     "What is 2 + 2?"
   );
@@ -102,7 +102,7 @@ export const kitchenSink = async (client: InitClient) => {
 
   console.log(illustrationPrompt);
 
-  const { text: conversation4 } = await multiTurnQuestion(
+  const { rawText: conversation4 } = await multiTurnQuestion(
     client,
     "What is 2 + 2?",
     "What is 3 + 3?"

@@ -1,5 +1,5 @@
 {
-  "name": "@lucasavila00/sgjs",
+  "name": "@lmscript/client",
   "version": "0.0.12",
   "exports": {
     ".": "./src/mod.ts",

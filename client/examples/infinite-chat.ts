@@ -44,7 +44,7 @@ class InfiniteChat {
 
     const {
       captured: { response },
-      text: history,
+      rawText: history,
       state: ai,
     } = await this.#ai
       .user((t) => t.push(msg))

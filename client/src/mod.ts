@@ -32,7 +32,13 @@ export type CreateClientOptions = FetcherSamplingParams & {
   template?: ChatTemplate | ChatTemplateDefinition;
 };
 export type Role = "assistant" | "system" | "user";
-export type ChatTemplateDefinition = Record<Role, [string, string]>;
+export type ChatTemplateDefinition = {
+  assistant: [string, string];
+  system: [string, string];
+  user: [string, string];
+
+  eos: string | null;
+};
 
 type AllChatTemplates = Record<ChatTemplate, ChatTemplateDefinition>;
 
@@ -41,31 +47,37 @@ const chatTemplates: AllChatTemplates = {
     system: ["SYSTEM:", "\n"],
     user: ["USER:", "\n"],
     assistant: ["ASSISTANT:", "\n"],
+    eos: null,
   },
   claude: {
     system: ["", ""],
     user: ["\n\nHuman: ", ""],
     assistant: ["\n\nAssistant:", ""],
+    eos: null,
   },
   chatml: {
     system: ["<|im_start|>system\n", "<|im_end|>\n"],
     user: ["<|im_start|>user\n", "<|im_end|>\n"],
     assistant: ["<|im_start|>assistant\n", "<|im_end|>\n"],
+    eos: "<|im_end|>",
   },
   "chatml-llava": {
     system: ["<|im_start|>system\n", "<|im_end|>\n"],
     user: ["<|im_start|>user\n", "<|im_end|>\n"],
     assistant: ["<|im_start|>assistant\n", "<|im_end|>\n"],
+    eos: "<|im_end|>",
   },
   "vicuna_v1.1": {
     system: ["", " "],
     user: ["USER:", " "],
     assistant: ["ASSISTANT:", "</s>"],
+    eos: "</s>",
   },
   "llama-2-chat": {
     system: ["<<SYS>>\n", "\n<</SYS>>\n\n"],
     user: ["[INST] ", " [/INST]"],
     assistant: ["", " </s><s>"],
+    eos: "</s>",
   },
 };
 
@@ -73,6 +85,19 @@ const getRoleStart = (template: ChatTemplate, role: Role) =>
   chatTemplates[template][role][0];
 const getRoleEnd = (template: ChatTemplate, role: Role) =>
   chatTemplates[template][role][1];
+
+const ERROR_MESSAGES = {
+  missingTemplate: "Template is required.",
+  missingEosInTemplateConfig: "The template does not support eos.",
+} as const;
+
+const getEos = (template: ChatTemplate): Eos => {
+  const eos = chatTemplates[template].eos;
+  if (eos === null) {
+    throw new Error(ERROR_MESSAGES.missingEosInTemplateConfig);
+  }
+  return eos as Eos;
+};
 
 /**
  * Options for the selection task.
@@ -89,6 +114,13 @@ export type GeneratorOptions = {
   maxTokens?: number;
   // regex?: string;
 };
+
+/**
+ * A special type that represents the end of a message.
+ * Do not use this directly, use `client.eos()` instead.
+ */
+export type Eos =
+  "%%%%%%%%%HACK_TYPE_FOR_EOS_DO_NOT_USE_THIS_STRING_DIRECTLY%%%%%%%%%%";
 
 /**
  * The client is a thread of tasks that can be executed to generate text.
@@ -125,7 +157,7 @@ export class LmScript<
   startRole(role: Role): LmScript<GEN, SEL> {
     const template = this.#options.template;
     if (template == null) {
-      throw new Error("Template is required.");
+      throw new Error(ERROR_MESSAGES.missingTemplate);
     }
     if (typeof template === "string") {
       return this.push(getRoleStart(template, role));
@@ -133,17 +165,30 @@ export class LmScript<
     const [start] = template[role];
     return this.push(start);
   }
-
   endRole(role: Role): LmScript<GEN, SEL> {
     const template = this.#options.template;
     if (template == null) {
-      throw new Error("Template is required.");
+      throw new Error(ERROR_MESSAGES.missingTemplate);
     }
     if (typeof template === "string") {
       return this.push(getRoleEnd(template, role));
     }
     const [, end] = template[role];
     return this.push(end);
+  }
+  eos(): Eos {
+    const template = this.#options.template;
+    if (template == null) {
+      throw new Error(ERROR_MESSAGES.missingTemplate);
+    }
+    if (typeof template === "string") {
+      return getEos(template);
+    }
+    const eos = template.eos;
+    if (eos === null) {
+      throw new Error(ERROR_MESSAGES.missingEosInTemplateConfig);
+    }
+    return eos as Eos;
   }
 
   /**
@@ -307,6 +352,22 @@ export class LmScript<
     ]);
   }
 
+  castSelection<const N extends string>(
+    _name: N
+  ): LmScript<
+    {
+      [K in keyof SEL | N]: K extends N
+        ? never
+        : K extends keyof SEL
+        ? SEL[K]
+        : never;
+    },
+    GEN
+  > {
+    // deno-lint-ignore no-explicit-any
+    return this as any;
+  }
+
   /**
    * Selects a choice from a list of options.
    * Capture the selected choice with a name.
@@ -392,7 +453,7 @@ export class LmScript<
   ): LmScript<
     {
       [K in keyof GEN | N]: K extends N
-        ? string
+        ? never
         : K extends keyof GEN
         ? GEN[K]
         : never;
@@ -475,14 +536,14 @@ export class LmScript<
         : never;
     };
     state: LmScript<GEN, SEL>;
-    text: string;
+    rawText: string;
   }> {
     let text = this.#state.text;
     for (const task of this.#tasks) {
       if (task.tag === "AddTextTask") {
         text += task.text;
       } else {
-        throw new Error("Expected only text.");
+        throw new Error("INTERNAL ERROR: Expected only text.");
       }
     }
     const newInstance = this.#clone(
@@ -493,7 +554,7 @@ export class LmScript<
       // deno-lint-ignore no-explicit-any
       captured: this.#state.captured as any,
       state: newInstance,
-      text,
+      rawText: text,
     });
   }
 
@@ -529,7 +590,7 @@ export class LmScript<
         : never;
     };
     state: LmScript<GEN, SEL>;
-    text: string;
+    rawText: string;
   }> {
     const areAllTasksText = this.#tasks.every(
       (task) => task.tag === "AddTextTask"
@@ -549,7 +610,7 @@ export class LmScript<
       // deno-lint-ignore no-explicit-any
       captured: out.captured as any,
       state: newInstance,
-      text: out.text,
+      rawText: out.text,
     };
   }
 }
