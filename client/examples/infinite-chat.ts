@@ -1,4 +1,4 @@
-import { InitClient, SglClient } from "../src/mod.ts";
+import { InitClient, LmScript } from "../src/mod.ts";
 
 class InfiniteChat {
   readonly #client: InitClient;
@@ -55,7 +55,7 @@ class InfiniteChat {
 }
 
 const main = async () => {
-  const client = new SglClient(`http://localhost:30004`, {
+  const client = new LmScript(`http://localhost:30004`, {
     template: "llama-2-chat",
     temperature: 0.1,
   });

@@ -11,7 +11,7 @@ type AnyRecord = Record<string, string>;
 /**
  * The type of a just-created client.
  */
-export type InitClient = SglClient<EmptyRecord, EmptyRecord>;
+export type InitClient = LmScript<EmptyRecord, EmptyRecord>;
 
 /**
  * Supported chat templates.
@@ -93,7 +93,7 @@ export type GeneratorOptions = {
 /**
  * The client is a thread of tasks that can be executed to generate text.
  */
-export class SglClient<
+export class LmScript<
   GEN extends Record<string, string> = EmptyRecord,
   SEL extends Record<string, string> = EmptyRecord
 > {
@@ -117,8 +117,8 @@ export class SglClient<
     SEL2 extends Record<string, string>
   >(
     role: Role,
-    cb: (it: SglClient<GEN, SEL>) => SglClient<GEN2, SEL2>
-  ): SglClient<GEN2, SEL2> {
+    cb: (it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>
+  ): LmScript<GEN2, SEL2> {
     const template = this.#options.template;
     if (template == null) {
       throw new Error("Template is required.");
@@ -130,6 +130,30 @@ export class SglClient<
     }
     const [start, end] = template[role];
     return cb(this.push(start)).push(end);
+  }
+
+  startRole(role: Role): LmScript<GEN, SEL> {
+    const template = this.#options.template;
+    if (template == null) {
+      throw new Error("Template is required.");
+    }
+    if (typeof template === "string") {
+      return this.push(getRoleStart(template, role));
+    }
+    const [start] = template[role];
+    return this.push(start);
+  }
+
+  endRole(role: Role): LmScript<GEN, SEL> {
+    const template = this.#options.template;
+    if (template == null) {
+      throw new Error("Template is required.");
+    }
+    if (typeof template === "string") {
+      return this.push(getRoleEnd(template, role));
+    }
+    const [, end] = template[role];
+    return this.push(end);
   }
 
   /**
@@ -151,8 +175,8 @@ export class SglClient<
     GEN2 extends Record<string, string> = Record<never, never>,
     SEL2 extends Record<string, string> = Record<never, never>
   >(
-    cb: (it: SglClient<GEN, SEL>) => SglClient<GEN2, SEL2>
-  ): SglClient<GEN2, SEL2> {
+    cb: (it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>
+  ): LmScript<GEN2, SEL2> {
     return this.#wrapRole("assistant", cb);
   }
   /**
@@ -174,8 +198,8 @@ export class SglClient<
     GEN2 extends Record<string, string> = Record<never, never>,
     SEL2 extends Record<string, string> = Record<never, never>
   >(
-    cb: (it: SglClient<GEN, SEL>) => SglClient<GEN2, SEL2>
-  ): SglClient<GEN2, SEL2> {
+    cb: (it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>
+  ): LmScript<GEN2, SEL2> {
     return this.#wrapRole("system", cb);
   }
   /**
@@ -197,13 +221,13 @@ export class SglClient<
     GEN2 extends Record<string, string> = Record<never, never>,
     SEL2 extends Record<string, string> = Record<never, never>
   >(
-    cb: (it: SglClient<GEN, SEL>) => SglClient<GEN2, SEL2>
-  ): SglClient<GEN2, SEL2> {
+    cb: (it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>
+  ): LmScript<GEN2, SEL2> {
     return this.#wrapRole("user", cb);
   }
 
   #clone(state: ClientState, tasks: Task[]) {
-    const newInstance = new SglClient<GEN, SEL>(this.#fetcher, this.#options);
+    const newInstance = new LmScript<GEN, SEL>(this.#fetcher, this.#options);
     newInstance.#state = state;
     newInstance.#tasks = tasks;
     return newInstance;
@@ -225,7 +249,7 @@ export class SglClient<
    * console.log(conversation);
    * ```
    */
-  push(text: string): SglClient<GEN, SEL> {
+  push(text: string): LmScript<GEN, SEL> {
     return this.#clone(this.#state, [
       ...this.#tasks,
       {
@@ -238,7 +262,7 @@ export class SglClient<
   #doSelection(
     name: string | undefined,
     options: SelectorOptions<string>
-  ): SglClient<GEN, SEL> {
+  ): LmScript<GEN, SEL> {
     return this.#clone(this.#state, [
       ...this.#tasks,
       {
@@ -255,8 +279,8 @@ export class SglClient<
     GEN2 extends Record<string, string>,
     SEL2 extends Record<string, string>
   >(choices: {
-    [P in SEL[K]]: (client: SglClient<GEN, SEL>) => SglClient<GEN2, SEL2>;
-  }) => SglClient<GEN2, SEL2> {
+    [P in SEL[K]]: (client: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>;
+  }) => LmScript<GEN2, SEL2> {
     return (choices) => {
       const matchTask: MatchTask = {
         tag: "MatchTask",
@@ -264,11 +288,11 @@ export class SglClient<
         choices: Object.fromEntries(
           Object.entries(choices).map(([key, valueUntyped]) => {
             const value: (
-              client: SglClient<AnyRecord, AnyRecord>
-            ) => SglClient<AnyRecord, AnyRecord> =
+              client: LmScript<AnyRecord, AnyRecord>
+            ) => LmScript<AnyRecord, AnyRecord> =
               // deno-lint-ignore no-explicit-any
               valueUntyped as any;
-            const client = new SglClient<AnyRecord, AnyRecord>(
+            const client = new LmScript<AnyRecord, AnyRecord>(
               this.#fetcher,
               this.#options
             );
@@ -283,7 +307,7 @@ export class SglClient<
     };
   }
 
-  repeat(variable: keyof GEN | keyof SEL): SglClient<GEN, SEL> {
+  repeat(variable: keyof GEN | keyof SEL): LmScript<GEN, SEL> {
     return this.#clone(this.#state, [
       ...this.#tasks,
       {
@@ -315,7 +339,7 @@ export class SglClient<
   select<const N extends string, const V extends string>(
     name: N,
     options: SelectorOptions<V> | undefined
-  ): SglClient<
+  ): LmScript<
     GEN,
     {
       [K in keyof SEL | N]: K extends N
@@ -343,7 +367,7 @@ export class SglClient<
    *
    * console.log(captured.desert);
    */
-  select<V extends string>(options: SelectorOptions<V>): SglClient<GEN, SEL>;
+  select<V extends string>(options: SelectorOptions<V>): LmScript<GEN, SEL>;
   select(
     arg1: string | SelectorOptions<string>,
     arg2?: SelectorOptions<string>
@@ -357,7 +381,7 @@ export class SglClient<
   #doGeneration(
     name: string | undefined,
     generatorOptions: GeneratorOptions | undefined
-  ): SglClient<GEN, SEL> {
+  ): LmScript<GEN, SEL> {
     return this.#clone(this.#state, [
       ...this.#tasks,
       {
@@ -371,6 +395,22 @@ export class SglClient<
         // regex: generatorOptions?.regex,
       },
     ]);
+  }
+
+  castGenerated<const N extends string>(
+    _name: N
+  ): LmScript<
+    {
+      [K in keyof GEN | N]: K extends N
+        ? string
+        : K extends keyof GEN
+        ? GEN[K]
+        : never;
+    },
+    SEL
+  > {
+    // deno-lint-ignore no-explicit-any
+    return this as any;
   }
 
   /**
@@ -396,7 +436,7 @@ export class SglClient<
   gen<const N extends string>(
     name: N,
     options?: GeneratorOptions | undefined
-  ): SglClient<
+  ): LmScript<
     {
       [K in keyof GEN | N]: K extends N
         ? string
@@ -406,6 +446,7 @@ export class SglClient<
     },
     SEL
   >;
+
   /**
    * Generates text, but does not capture it with a name.
    *
@@ -426,7 +467,7 @@ export class SglClient<
    * console.log(conversation);
    * ```
    */
-  gen(options?: GeneratorOptions | undefined): SglClient<GEN, SEL>;
+  gen(options?: GeneratorOptions | undefined): LmScript<GEN, SEL>;
   gen(arg1?: string | GeneratorOptions, arg2?: GeneratorOptions): unknown {
     if (typeof arg1 === "string") {
       return this.#doGeneration(arg1, arg2);
@@ -444,7 +485,7 @@ export class SglClient<
           ? SEL[K]
           : never;
       },
-      SglClient<GEN, SEL>,
+      LmScript<GEN, SEL>,
       string
     ]
   > {
@@ -496,7 +537,7 @@ export class SglClient<
           ? SEL[K]
           : never;
       },
-      SglClient<GEN, SEL>,
+      LmScript<GEN, SEL>,
       string
     ]
   > {

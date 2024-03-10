@@ -1,10 +1,12 @@
 # LmScript
 
-Easy, fast and controllable interactions with Language Models in Typescript.
+LmScript: Fast and Controllable Language Model Interactions in Typescript - Open Source and Powered by SGLang
 
-LmScript is a suite of tools that allow usage of constrained generation in Typescript.
+- LMScript: a suite of tools for easy, fast, and controllable interactions with language models in Typescript.
+- Open models and open source.
+- Powered by SGLang.
 
-## Example
+## How the code looks like?
 
 ```ts
 const toolUse = async (model: InitClient, question: string) => {

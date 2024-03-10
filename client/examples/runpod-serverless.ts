@@ -1,4 +1,4 @@
-import { SglClient } from "../src/mod.ts";
+import { LmScript } from "../src/mod.ts";
 import { RunpodFetcher } from "../src/runpod-serverless-fetcher.ts";
 import { kitchenSink } from "./kitchen-sink.ts";
 
@@ -10,7 +10,7 @@ const getEnvVarOrThrow = (name: string): string => {
   return value;
 };
 const bench = async () => {
-  const model = new SglClient(
+  const model = new LmScript(
     new RunpodFetcher(
       getEnvVarOrThrow("RUNPOD_URL"),
       getEnvVarOrThrow("RUNPOD_TOKEN")
