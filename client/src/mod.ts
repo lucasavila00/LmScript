@@ -87,7 +87,7 @@ export type SelectorOptions<S extends string> = {
 export type GeneratorOptions = {
   stop?: string | string[];
   maxTokens?: number;
-  regex?: string;
+  // regex?: string;
 };
 
 /**
@@ -368,7 +368,7 @@ export class SglClient<
             ? [generatorOptions.stop]
             : generatorOptions?.stop ?? [],
         max_tokens: generatorOptions?.maxTokens ?? 16,
-        regex: generatorOptions?.regex,
+        // regex: generatorOptions?.regex,
       },
     ]);
   }
@@ -507,8 +507,9 @@ export class SglClient<
       return this.#runThreadJustText();
     }
 
+    const { template: _, ...restOptions } = this.#options;
     const out = await this.#fetcher.runThread({
-      sampling_params: { ...this.#options, ...options },
+      sampling_params: { ...restOptions, ...options },
       tasks: this.#tasks,
       initial_state: this.#state,
     });

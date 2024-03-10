@@ -1,4 +1,4 @@
-import { InitClient, SglClient } from "../src/mod.ts";
+import { InitClient } from "../src/mod.ts";
 import { assertIsNever } from "../src/utils.ts";
 import { getIllustrationPrompt } from "./illustrator-agent.ts";
 const toolUse = async (model: InitClient, question: string) => {
@@ -72,7 +72,7 @@ const multiTurnQuestion = (
 //     )
 //     .gen("json_output", { maxTokens: 256, regex: characterRegex });
 
-const main = async (client: InitClient) => {
+export const kitchenSink = async (client: InitClient) => {
   const [captured, _, conversation] = await client
     .push(`<s> [INST] What is the sum of 2 + 2? Answer shortly. [/INST] `)
     .gen("expression", {
@@ -89,7 +89,7 @@ const main = async (client: InitClient) => {
 
   console.log(conversation2);
   console.log(cap2);
-  const [_22, cap22, conversation22] = await toolUseMatching(
+  const [cap22, _22, conversation22] = await toolUseMatching(
     client,
     "What is 2 + 2?"
   );
@@ -122,22 +122,3 @@ const main = async (client: InitClient) => {
   // console.log(conversation5);
   // console.log(cap5);
 };
-
-const bench = async () => {
-  const model = new SglClient(`http://localhost:30004`, {
-    template: "llama-2-chat",
-    temperature: 0.1,
-  });
-  const batch = Array.from({ length: 1 }, (_, _i) =>
-    main(model).catch((e) => {
-      console.error(e);
-    })
-  );
-
-  const start = Date.now();
-  await Promise.all(batch);
-  const duration = Date.now() - start;
-  console.log(`Duration: ${duration}ms`);
-};
-
-bench().catch(console.error);

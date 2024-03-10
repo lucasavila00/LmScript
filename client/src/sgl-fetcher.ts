@@ -20,7 +20,7 @@ export type GenerateTask = {
   name: string | undefined;
   stop: string[];
   max_tokens: number;
-  regex: string | undefined;
+  // regex: string | undefined;
 };
 
 export type SelectTask = {

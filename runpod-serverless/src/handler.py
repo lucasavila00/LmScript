@@ -61,82 +61,107 @@ class SelectTask(BaseModel):
     choices: list[str]
 
 
-class GenerateThread(BaseModel):
+class RepeatTask(BaseModel):
+    tag: Literal["RepeatTask"]
+    variable: str
+
+
+class MatchTask(BaseModel):
+    tag: Literal["MatchTask"]
+    variable: str
+    choices: dict[str, List["Task"]]
+
+
+Task = Union[AddTextTask, GenerateTask, SelectTask, MatchTask, RepeatTask]
+
+
+class ClientState(BaseModel):
+    text: str
+    captured: dict[str, str]
+
+
+class GenerationThread(BaseModel):
     sampling_params: dict
-    tasks: List[Union[AddTextTask, GenerateTask, SelectTask]]
-    initial_text: str
+    tasks: List[Task]
+    initial_state: ClientState
 
 
-async def generate_thread(parameters: GenerateThread):
-    captured = {}
-    text_accumulator = parameters.initial_text
-    # meta_infos = []
+async def generate_task(state: ClientState, t: Task, sampling_params: dict):
+    if isinstance(t, AddTextTask):
+        state.text += t.text
 
-    for t in parameters.tasks:
-        if isinstance(t, AddTextTask):
-            text_accumulator += t.text
-
-        elif isinstance(t, GenerateTask):
-            res = await generate(
-                {
-                    "text": text_accumulator,
-                    "sampling_params": {
-                        **parameters.sampling_params,
-                        "stop": t.stop,
-                        "max_new_tokens": (
-                            t.max_tokens
-                            if t.max_tokens is not None
-                            else parameters.sampling_params.get("max_new_tokens", None)
-                        ),
-                    },
-                }
-            )
-            text_accumulator += res["text"]
-            if t.name is not None:
-                captured[t.name] = res["text"]
-            # meta_infos += [res["meta_info"]]
-        elif isinstance(t, SelectTask):
-
-            # Cache common prefix
-            data = {
-                "text": text_accumulator,
+    elif isinstance(t, GenerateTask):
+        res = await generate(
+            {
+                "text": state.text,
                 "sampling_params": {
-                    "max_new_tokens": 0,
-                    "temperature": 0.0,
+                    **sampling_params,
+                    "stop": t.stop,
+                    "max_new_tokens": (
+                        t.max_tokens
+                        if t.max_tokens is not None
+                        else sampling_params.get("max_new_tokens", None)
+                    ),
                 },
             }
-            # self._add_images(s, data)
-            res = await generate(data)
-            prompt_len = res["meta_info"]["prompt_tokens"]
+        )
+        state.text += res["text"]
+        if t.name is not None:
+            state.captured[t.name] = res["text"]
+        # meta_infos += [res["meta_info"]]
+    elif isinstance(t, SelectTask):
 
-            # Compute logprob
-            data = {
-                "text": [text_accumulator + c for c in t.choices],
-                "sampling_params": {
-                    "max_new_tokens": 0,
-                    "temperature": 0.0,
-                },
-                "return_logprob": True,
-                "logprob_start_len": max(prompt_len - 2, 0),
-            }
+        # Cache common prefix
+        data = {
+            "text": state.text,
+            "sampling_params": {
+                "max_new_tokens": 0,
+                "temperature": 0.0,
+            },
+        }
+        # self._add_images(s, data)
+        res = await generate(data)
+        prompt_len = res["meta_info"]["prompt_tokens"]
 
-            obj = await generate(data)
-            normalized_prompt_logprob = [
-                r["meta_info"]["normalized_prompt_logprob"] for r in obj
-            ]
+        # Compute logprob
+        data = {
+            "text": [state.text + c for c in t.choices],
+            "sampling_params": {
+                "max_new_tokens": 0,
+                "temperature": 0.0,
+            },
+            "return_logprob": True,
+            "logprob_start_len": max(prompt_len - 2, 0),
+        }
 
-            decision = t.choices[np.argmax(normalized_prompt_logprob)]
+        obj = await generate(data)
+        normalized_prompt_logprob = [
+            r["meta_info"]["normalized_prompt_logprob"] for r in obj
+        ]
 
-            text_accumulator += decision
-            if t.name is not None:
-                captured[t.name] = decision
-            # meta_infos += [obj[np.argmax(normalized_prompt_logprob)]["meta_info"]]
-        else:
-            raise ValueError(f"Invalid task type: {t}")
-    return {
-        "text": text_accumulator,
-        "captured": captured,
-    }
+        decision = t.choices[np.argmax(normalized_prompt_logprob)]
+
+        state.text += decision
+        if t.name is not None:
+            state.captured[t.name] = decision
+        # meta_infos += [obj[np.argmax(normalized_prompt_logprob)]["meta_info"]]
+    elif isinstance(t, RepeatTask):
+        state.text += state.captured[t.variable]
+    elif isinstance(t, MatchTask):
+        value = state.captured[t.variable]
+        tasks = t.choices[value]
+        for t in tasks:
+            await generate_task(state, t, sampling_params)
+    else:
+        raise ValueError(f"Invalid task type: {t}")
+
+
+async def generate_thread(p: GenerationThread):
+    state = p.initial_state.copy()
+
+    for t in p.tasks:
+        await generate_task(state, t, p.sampling_params)
+    return state.dict()
 
 
 async def handler(job):
@@ -148,7 +173,7 @@ async def handler(job):
     elif endpoint == "generate":
         return await generate(job_input["parameters"])
     elif endpoint == "generate_thread":
-        return await generate_thread(GenerateThread(**job_input["parameters"]))
+        return await generate_thread(GenerationThread(**job_input["parameters"]))
     else:
         raise ValueError(f"Invalid endpoint `{endpoint}`.")
 

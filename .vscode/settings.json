@@ -1,4 +1,5 @@
 {
   "cSpell.words": ["chatml", "dtype", "llava", "logprob", "runpod"],
-  "deno.enable": true
+  "deno.enable": true,
+  "python.analysis.typeCheckingMode": "basic"
 }
