@@ -9,10 +9,24 @@ import numpy as np
 from huggingface_hub import snapshot_download
 import os
 
-print("Downloading model...")
-repo_id = os.environ.get("REPO_ID", "TheBloke/Mistral-7B-Instruct-v0.2-AWQ")
-model_path = snapshot_download(repo_id=repo_id)
-print(f"Model downloaded to {model_path}")
+model_downloaded = False
+
+try:
+    with open("/model_path.txt", "r") as f:
+        model_path = f.read()
+        if os.path.exists(model_path):
+            model_downloaded = True
+            print(f"Model found at {model_path}")
+except:
+    pass
+
+if not model_downloaded:
+    print("Downloading model...")
+    repo_id = os.environ.get("REPO_ID", "TheBloke/Mistral-7B-Instruct-v0.2-AWQ")
+    model_path = snapshot_download(repo_id=repo_id)
+    with open("/model_path.txt", "w") as f:
+        f.write(model_path)
+    print(f"Model downloaded to {model_path}")
 
 SGLANG_PORT, additional_ports = handle_port_init(30000, None, 1)
 RUNTIME = sgl.Runtime(
@@ -83,13 +97,23 @@ class ClientState(BaseModel):
     captured: dict[str, str]
 
 
+class FetcherSamplingParams(BaseModel):
+    temperature: Optional[float] = None
+    top_p: Optional[float] = None
+    top_k: Optional[int] = None
+    frequency_penalty: Optional[float] = None
+    presence_penalty: Optional[float] = None
+
+
 class GenerationThread(BaseModel):
-    sampling_params: dict
+    sampling_params: FetcherSamplingParams
     tasks: List[Task]
     initial_state: ClientState
 
 
-async def generate_task(state: ClientState, t: Task, sampling_params: dict):
+async def generate_task(
+    state: ClientState, t: Task, sampling_params: FetcherSamplingParams
+):
     if isinstance(t, AddTextTask):
         state.text += t.text
 
@@ -98,13 +122,11 @@ async def generate_task(state: ClientState, t: Task, sampling_params: dict):
             {
                 "text": state.text,
                 "sampling_params": {
-                    **sampling_params,
+                    **{
+                        k: v for k, v in sampling_params.dict().items() if v is not None
+                    },
                     "stop": t.stop,
-                    "max_new_tokens": (
-                        t.max_tokens
-                        if t.max_tokens is not None
-                        else sampling_params.get("max_new_tokens", None)
-                    ),
+                    "max_new_tokens": t.max_tokens,
                 },
             }
         )

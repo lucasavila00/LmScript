@@ -2,7 +2,6 @@
 
 ## TODO
 
-- [ ] handle sampling params in runpod pydantic
 - [ ] handling meta_info
 - [ ] handling regex
 
