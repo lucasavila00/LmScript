@@ -1,50 +1,18 @@
-import { delay } from "./utils.ts";
-import { assertIsNever } from "./utils.ts";
-
-export type TasksOutput = { text: string; captured: Record<string, string> };
-
 /**
- * Interface for fetching from a SGL server.
+ * This module contains the backend for the regular SGLang server.
+ * @module
  */
-export type SglFetcher = {
-  runThread: (data: GenerationThread) => Promise<TasksOutput>;
-};
 
-export type AddTextTask = {
-  tag: "AddTextTask";
-  text: string;
-};
-
-export type GenerateTask = {
-  tag: "GenerateTask";
-  name: string | undefined;
-  stop: string[];
-  max_tokens: number;
-  // regex: string | undefined;
-};
-
-export type SelectTask = {
-  tag: "SelectTask";
-  name: string | undefined;
-  choices: string[];
-};
-export type RepeatTask = {
-  tag: "RepeatTask";
-  variable: string;
-};
-
-export type MatchTask = {
-  tag: "MatchTask";
-  variable: string;
-  choices: Record<string, Task[]>;
-};
-
-export type Task =
-  | AddTextTask
-  | GenerateTask
-  | SelectTask
-  | RepeatTask
-  | MatchTask;
+import { delay } from "../utils.ts";
+import { assertIsNever } from "../utils.ts";
+import {
+  ClientState,
+  FetcherSamplingParams,
+  GenerationThread,
+  AbstractBackend,
+  Task,
+  TasksOutput,
+} from "./abstract.ts";
 
 type SglSamplingParams = {
   skip_special_tokens: boolean;
@@ -79,21 +47,6 @@ const createSglSamplingParams = (
     dtype: params.dtype,
   };
 };
-
-export type FetcherSamplingParams = {
-  temperature?: number;
-  top_p?: number;
-  top_k?: number;
-  frequency_penalty?: number;
-  presence_penalty?: number;
-};
-
-export type GenerationThread = {
-  sampling_params: FetcherSamplingParams;
-  tasks: Task[];
-  initial_state: ClientState;
-};
-
 /**
  * Options for the generation task.
  */
@@ -129,11 +82,6 @@ type MetaInfoSelection = {
 
   normalized_prompt_logprob: number;
   prompt_logprob: number;
-};
-
-export type ClientState = {
-  text: string;
-  captured: Record<string, string>;
 };
 
 class SglServerExecutor {
@@ -294,10 +242,10 @@ class SglServerExecutor {
 }
 
 /**
- * Fetches from a regular SGL server.
+ * Backend for the regular SGLang server.
  */
 
-export class SglServerFetcher implements SglFetcher {
+export class SGLangBackend implements AbstractBackend {
   readonly #url: string;
 
   constructor(url: string) {

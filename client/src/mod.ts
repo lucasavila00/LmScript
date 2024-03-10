@@ -1,15 +1,20 @@
+/**
+ * This module contains the LmScript client.
+ * @module
+ */
 import {
-  ClientState,
   FetcherSamplingParams,
-  MatchTask,
-  SglFetcher,
-  SglServerFetcher,
   Task,
-} from "./sgl-fetcher.ts";
+  ClientState,
+  AbstractBackend,
+  MatchTask,
+} from "./backends/abstract.ts";
+
 type EmptyRecord = Record<never, string>;
 type AnyRecord = Record<string, string>;
+
 /**
- * The type of a just-created client.
+ * The type of a just-created client, with no captured data.
  */
 export type InitClient = LmScript<EmptyRecord, EmptyRecord>;
 
@@ -31,7 +36,16 @@ export type ChatTemplate =
 export type CreateClientOptions = FetcherSamplingParams & {
   template?: ChatTemplate | ChatTemplateDefinition;
 };
+/**
+ * One of possible roles in a conversation.
+ */
 export type Role = "assistant" | "system" | "user";
+
+/**
+ * The definition of a chat template.
+ * There are a handful of commonly used templates, and each model uses a different one.
+ * Read the documentation for the model to know which template to use.
+ */
 export type ChatTemplateDefinition = {
   assistant: [string, string];
   system: [string, string];
@@ -132,16 +146,15 @@ export class LmScript<
   #tasks: Task[];
   readonly #options: CreateClientOptions;
   #state: ClientState;
-  readonly #fetcher: SglFetcher;
-  constructor(endpoint: string | SglFetcher, options?: CreateClientOptions) {
+  readonly #fetcher: AbstractBackend;
+  constructor(backend: AbstractBackend, options?: CreateClientOptions) {
     this.#options = options ?? {};
     this.#state = {
       text: "",
       captured: {},
     };
     this.#tasks = [];
-    this.#fetcher =
-      typeof endpoint === "string" ? new SglServerFetcher(endpoint) : endpoint;
+    this.#fetcher = backend;
   }
 
   #wrapRole<
@@ -154,6 +167,10 @@ export class LmScript<
     return cb(this.startRole(role)).endRole(role);
   }
 
+  /**
+   * Starts a role message in the conversation.
+   * Most of the times this should not be used directly, use `client.assistant`, `client.system`, or `client.user` instead.
+   */
   startRole(role: Role): LmScript<GEN, SEL> {
     const template = this.#options.template;
     if (template == null) {
@@ -165,6 +182,10 @@ export class LmScript<
     const [start] = template[role];
     return this.push(start);
   }
+  /**
+   * Ends a role message in the conversation.
+   * Most of the times this should not be used directly, use `client.assistant`, `client.system`, or `client.user` instead.
+   */
   endRole(role: Role): LmScript<GEN, SEL> {
     const template = this.#options.template;
     if (template == null) {
@@ -176,6 +197,9 @@ export class LmScript<
     const [, end] = template[role];
     return this.push(end);
   }
+  /**
+   * Returns the token that represents the end of a message.
+   */
   eos(): Eos {
     const template = this.#options.template;
     if (template == null) {
@@ -195,16 +219,6 @@ export class LmScript<
    * Wraps the calls made to the client in the callback with the assistant role.
    * The client should be configured with a template to support roles.
    * If a template is not provided, an error will be thrown.
-   *
-   * ```ts
-   * client
-   *   .system((m) => m.push("You are a helpful assistant."))
-   *   .user((m) => m.push(question1))
-   *   .assistant((m) => m.gen("answer1", { maxTokens: 256 }))
-   *   .user((m) => m.push(question2))
-   *   .assistant((m) => m.gen("answer2", { maxTokens: 1025 }))
-   *   .run();
-   * ```
    */
   assistant<
     GEN2 extends Record<string, string> = Record<never, never>,
@@ -218,16 +232,6 @@ export class LmScript<
    * Wraps the calls made to the client in the callback with the system role.
    * The client should be configured with a template to support roles.
    * If a template is not provided, an error will be thrown.
-   *
-   * ```ts
-   * client
-   *   .system((m) => m.push("You are a helpful assistant."))
-   *   .user((m) => m.push(question1))
-   *   .assistant((m) => m.gen("answer1", { maxTokens: 256 }))
-   *   .user((m) => m.push(question2))
-   *   .assistant((m) => m.gen("answer2", { maxTokens: 1025 }))
-   *   .run();
-   * ```
    */
   system<
     GEN2 extends Record<string, string> = Record<never, never>,
@@ -241,16 +245,6 @@ export class LmScript<
    * Wraps the calls made to the client in the callback with the user role.
    * The client should be configured with a template to support roles.
    * If a template is not provided, an error will be thrown.
-   *
-   * ```ts
-   * client
-   *   .system((m) => m.push("You are a helpful assistant."))
-   *   .user((m) => m.push(question1))
-   *   .assistant((m) => m.gen("answer1", { maxTokens: 256 }))
-   *   .user((m) => m.push(question2))
-   *   .assistant((m) => m.gen("answer2", { maxTokens: 1025 }))
-   *   .run();
-   * ```
    */
   user<
     GEN2 extends Record<string, string> = Record<never, never>,
@@ -270,19 +264,6 @@ export class LmScript<
 
   /**
    * Adds text to the thread.
-   *
-   * ```ts
-   * const client = new SglClient({
-   *   url: `http://localhost:30005`,
-   * });
-   *
-   * const [threadContinuation, captured, conversation] = await client
-   *  .push(`<s> [INST] What is the sum of 2 + 2? Answer shortly. [/INST] `)
-   *  .gen()
-   *  .run();
-   *
-   * console.log(conversation);
-   * ```
    */
   push(text: string): LmScript<GEN, SEL> {
     return this.#clone(this.#state, [
@@ -308,6 +289,15 @@ export class LmScript<
     ]);
   }
 
+  /**
+   * This is an advanced feature that is tricky to use, and exists for optimization.
+   * It reduces a round-trip to the server and improves cache locality.
+   *
+   * In general you should use `.run` and regular JavaScript conditionals over `.match`.
+   * This matches on a previous `select.` It takes a variable name and a map of choices.
+   * The types of all branches should be the same, use `.castSelection` or `.castGenerated` to change the types
+   * of branches that differ.
+   */
   match<K extends keyof SEL>(
     variable: K
   ): <
@@ -342,6 +332,9 @@ export class LmScript<
     };
   }
 
+  /**
+   * Repeats a captured variable.
+   */
   repeat(variable: keyof GEN | keyof SEL): LmScript<GEN, SEL> {
     return this.#clone(this.#state, [
       ...this.#tasks,
@@ -352,6 +345,9 @@ export class LmScript<
     ]);
   }
 
+  /**
+   * Fool the type-checker into thinking that a selection variable was captured.
+   */
   castSelection<const N extends string>(
     _name: N
   ): LmScript<
@@ -371,21 +367,6 @@ export class LmScript<
   /**
    * Selects a choice from a list of options.
    * Capture the selected choice with a name.
-   *
-   * ```ts
-   * const client = new SglClient({
-   *   url: `http://localhost:30005`,
-   * });
-   *
-   * const [threadContinuation, captured, conversation] = await client
-   *  .push(`<s> [INST] Ice cream or cookies? [/INST] `)
-   *  .select("desert", {
-   *    choices: ["ice creams", "cookies"],
-   *  })
-   *  .run();
-   *
-   * console.log(captured.desert);
-   * ```
    */
   select<const N extends string, const V extends string>(
     name: N,
@@ -403,20 +384,6 @@ export class LmScript<
   /**
    * Selects a choice from a list of options.
    * Does not capture the selected choice with a name.
-   *
-   * ```ts
-   * const client = new SglClient({
-   *   url: `http://localhost:30005`,
-   * });
-   *
-   * const [threadContinuation, captured, conversation] = await client
-   *  .push(`<s> [INST] Ice cream or cookies? [/INST] `)
-   *  .select({
-   *    choices: ["ice creams", "cookies"],
-   *  })
-   *  .run();
-   *
-   * console.log(captured.desert);
    */
   select<V extends string>(options: SelectorOptions<V>): LmScript<GEN, SEL>;
   select(
@@ -448,6 +415,9 @@ export class LmScript<
     ]);
   }
 
+  /**
+   * Fool the type-checker into thinking that a generated variable was captured.
+   */
   castGenerated<const N extends string>(
     _name: N
   ): LmScript<
@@ -466,23 +436,6 @@ export class LmScript<
 
   /**
    * Generates text and captures it with a name.
-   *
-   * ```ts
-   * const client = new SglClient({
-   *   url: `http://localhost:30005`,
-   * });
-   *
-   * const [threadContinuation, captured, conversation] = await client
-   *  .push(`<s> [INST] What is the sum of 2 + 2? Answer shortly. [/INST] `)
-   *  .push(`Sure: The answer is "`)
-   *  .gen("name", {
-   *     maxTokens: 512,
-   *     stop: ['"'],
-   *   })
-   *  .run();
-   *
-   * console.log(captured.name);
-   * ```
    */
   gen<const N extends string>(
     name: N,
@@ -500,23 +453,6 @@ export class LmScript<
 
   /**
    * Generates text, but does not capture it with a name.
-   *
-   * ```ts
-   * const client = new SglClient({
-   *   url: `http://localhost:30005`,
-   * });
-   *
-   * const [threadContinuation, captured, conversation] = await client
-   *  .push(`<s> [INST] What is the sum of 2 + 2? Answer shortly. [/INST] `)
-   *  .push(`Sure: The answer is "`)
-   *  .gen({
-   *     maxTokens: 512,
-   *     stop: ['"'],
-   *   })
-   *  .run();
-   *
-   * console.log(conversation);
-   * ```
    */
   gen(options?: GeneratorOptions | undefined): LmScript<GEN, SEL>;
   gen(arg1?: string | GeneratorOptions, arg2?: GeneratorOptions): unknown {
@@ -560,26 +496,6 @@ export class LmScript<
 
   /**
    * Executes the thread and returns the captured data and the conversation.
-   *
-   * ```ts
-   * const client = new SglClient({
-   *  url: `http://localhost:30005`,
-   * });
-   *
-   * const [threadContinuation, captured, conversation] = await client
-   *  .push(`<s> [INST] What is the sum of 2 + 2? Answer shortly. [/INST] `)
-   *  .gen("expression", {
-   *    maxTokens: 512,
-   *  })
-   *  .run({
-   *   temperature: 0.1,
-   *  });
-   * console.log(conversation);
-   * console.log(captured.expression);
-   *
-   * // The thread continuation can be used to continue the thread, it is a instance of SglClient.
-   * threadContinuation.push(` </s>`).gen(...)
-   * ```
    */
   async run(options?: FetcherSamplingParams): Promise<{
     captured: {

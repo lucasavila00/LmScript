@@ -1,5 +1,5 @@
 import { LmScript } from "../src/mod.ts";
-import { RunpodFetcher } from "../src/runpod-serverless-fetcher.ts";
+import { RunpodServerlessBackend } from "../src/backends/runpod-serverless.ts";
 import { kitchenSink } from "./kitchen-sink.ts";
 
 const getEnvVarOrThrow = (name: string): string => {
@@ -11,7 +11,7 @@ const getEnvVarOrThrow = (name: string): string => {
 };
 const bench = async () => {
   const model = new LmScript(
-    new RunpodFetcher(
+    new RunpodServerlessBackend(
       getEnvVarOrThrow("RUNPOD_URL"),
       getEnvVarOrThrow("RUNPOD_TOKEN")
     ),

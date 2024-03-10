@@ -1,8 +1,9 @@
 import { LmScript } from "../src/mod.ts";
 import { kitchenSink } from "./kitchen-sink.ts";
+import { SGLangBackend } from "../src/backends/sglang.ts";
 
 const bench = async () => {
-  const model = new LmScript(`http://localhost:30004`, {
+  const model = new LmScript(new SGLangBackend(`http://localhost:30004`), {
     template: "llama-2-chat",
     temperature: 0.1,
   });

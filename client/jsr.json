@@ -1,8 +1,9 @@
 {
   "name": "@lmscript/client",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "exports": {
     ".": "./src/mod.ts",
-    "./sgl-fetcher": "./src/sgl-fetcher.ts"
+    "./backends/sglang": "./src/backends/sglang.ts",
+    "./backends/runpod-serverless": "./src/backends/runpod-serverless.ts"
   }
 }

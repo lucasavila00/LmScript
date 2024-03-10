@@ -1,4 +1,5 @@
 import { InitClient, LmScript } from "../src/mod.ts";
+import { SGLangBackend } from "../src/backends/sglang.ts";
 
 class InfiniteChat {
   readonly #client: InitClient;
@@ -61,7 +62,8 @@ class InfiniteChat {
 }
 
 const main = async () => {
-  const client = new LmScript(`http://localhost:30004`, {
+  const backend = new SGLangBackend(`http://localhost:30004`);
+  const client = new LmScript(backend, {
     template: "llama-2-chat",
     temperature: 0.1,
   });

@@ -1,6 +1,14 @@
-import { GenerationThread, SglFetcher, TasksOutput } from "./sgl-fetcher.ts";
+/**
+ * This module contains the backend for the Runpod serverless API.
+ * @module
+ */
 
-export class RunpodFetcher implements SglFetcher {
+import { AbstractBackend, GenerationThread, TasksOutput } from "./abstract.ts";
+
+/**
+ * Backend for the Runpod serverless API.
+ */
+export class RunpodServerlessBackend implements AbstractBackend {
   #url: string;
   #apiToken: string;
   constructor(url: string, apiToken: string) {
