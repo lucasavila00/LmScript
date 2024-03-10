@@ -16,6 +16,8 @@ requests. It's recommended to use the 24gb server.
 
 ## TODO
 
+- [ ] MODEL_MODE
+
 - [ ] sampling params validation
 
 - [ ] make model configurable through env var, download it do runpod volume

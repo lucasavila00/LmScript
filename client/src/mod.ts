@@ -1,3 +1,4 @@
+import { OnCapture } from "./backends/abstract.ts";
 import {
   AbstractBackend,
   ClientState,
@@ -131,6 +132,7 @@ export type GeneratorOptions = {
  */
 export type Eos =
   "%%%%%%%%%HACK_TYPE_FOR_EOS_DO_NOT_USE_THIS_STRING_DIRECTLY%%%%%%%%%%";
+const NOOP = () => {};
 
 /**
  * The client is a thread of tasks that can be executed to generate text.
@@ -494,7 +496,11 @@ export class LmScript<
   /**
    * Executes the thread and returns the captured data and the conversation.
    */
-  async run(options?: FetcherSamplingParams): Promise<{
+  async run(
+    options?: FetcherSamplingParams & {
+      onCapture?: OnCapture;
+    },
+  ): Promise<{
     captured: {
       [K in keyof GEN | keyof SEL]: K extends keyof GEN ? GEN[K]
         : K extends keyof SEL ? SEL[K]
@@ -510,12 +516,13 @@ export class LmScript<
       return this.#runThreadJustText();
     }
 
-    const { template: _, ...restOptions } = this.#options;
+    const { template: _, ...restCreatorOptions } = this.#options;
+    const { onCapture, ...restOptions } = options ?? {};
     const out = await this.#fetcher.runThread({
-      sampling_params: { ...restOptions, ...options },
+      sampling_params: { ...restCreatorOptions, ...restOptions },
       tasks: this.#tasks,
       initial_state: this.#state,
-    });
+    }, onCapture ?? NOOP);
     const newInstance = this.#clone(out, []);
     return {
       // deno-lint-ignore no-explicit-any

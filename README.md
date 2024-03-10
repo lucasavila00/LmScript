@@ -3,7 +3,6 @@
 ## TODO
 
 - [ ] docs of runpod serverless image
-- [ ] runpod client async api
 - [ ] handling meta_info
 - [ ] handling regex
 

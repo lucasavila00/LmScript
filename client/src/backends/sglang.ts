@@ -5,6 +5,7 @@
 
 import { delay } from "../utils.ts";
 import { assertIsNever } from "../utils.ts";
+import { OnCapture } from "./abstract.ts";
 import {
   AbstractBackend,
   ClientState,
@@ -88,14 +89,17 @@ class SglServerExecutor {
   #state: ClientState;
   readonly #url: string;
   readonly #sampling_params: FetcherSamplingParams;
+  readonly #onCapture: OnCapture;
   constructor(
     url: string,
     sampling_params: FetcherSamplingParams,
     state: ClientState,
+    onCapture: OnCapture,
   ) {
     this.#state = JSON.parse(JSON.stringify(state));
     this.#url = url;
     this.#sampling_params = sampling_params;
+    this.#onCapture = onCapture;
   }
 
   async #httpRequestNoRetry<T>(data: object): Promise<T> {
@@ -167,6 +171,7 @@ class SglServerExecutor {
         this.#state.text += out.text;
         if (task.name != null) {
           this.#state.captured[task.name] = out.text;
+          this.#onCapture(task.name, out.text);
         }
         break;
       }
@@ -208,6 +213,7 @@ class SglServerExecutor {
         this.#state.text += decision;
         if (task.name != null) {
           this.#state.captured[task.name] = decision;
+          this.#onCapture(task.name, decision);
         }
 
         break;
@@ -251,11 +257,15 @@ export class SGLangBackend implements AbstractBackend {
   constructor(url: string) {
     this.#url = url;
   }
-  async runThread(data: GenerationThread): Promise<TasksOutput> {
+  async runThread(
+    data: GenerationThread,
+    onCapture: OnCapture,
+  ): Promise<TasksOutput> {
     const executor = new SglServerExecutor(
       this.#url,
       data.sampling_params,
       data.initial_state,
+      onCapture,
     );
     for (const task of data.tasks) {
       await executor.runTask(task);

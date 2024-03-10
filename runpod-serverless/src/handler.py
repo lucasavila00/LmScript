@@ -108,6 +108,11 @@ async def generate_task(state: ClientState, t: Task, sampling_params: dict):
         state.text += res["text"]
         if t.name is not None:
             state.captured[t.name] = res["text"]
+            yield {
+                "tag": "Capture",
+                "name": t.name,
+                "value": res["text"],
+            }
         # meta_infos += [res["meta_info"]]
     elif isinstance(t, SelectTask):
         # Cache common prefix
@@ -143,6 +148,11 @@ async def generate_task(state: ClientState, t: Task, sampling_params: dict):
         state.text += decision
         if t.name is not None:
             state.captured[t.name] = decision
+            yield {
+                "tag": "Capture",
+                "name": t.name,
+                "value": decision,
+            }
         # meta_infos += [obj[np.argmax(normalized_prompt_logprob)]["meta_info"]]
     elif isinstance(t, RepeatTask):
         state.text += state.captured[t.variable]
@@ -150,7 +160,8 @@ async def generate_task(state: ClientState, t: Task, sampling_params: dict):
         value = state.captured[t.variable]
         tasks = t.choices[value]
         for t in tasks:
-            await generate_task(state, t, sampling_params)
+            async for i in generate_task(state, t, sampling_params):
+                yield i
     else:
         raise ValueError(f"Invalid task type: {t}")
 
@@ -159,25 +170,30 @@ async def generate_thread(p: GenerationThread):
     state = p.initial_state.copy()
 
     for t in p.tasks:
-        await generate_task(state, t, p.sampling_params)
-    return state.dict()
+        async for i in generate_task(state, t, p.sampling_params):
+            yield i
+    yield {**state.dict(), "tag": "Finished"}
 
 
 async def handler(job):
-    print("Received job:", job)
     job_input = job["input"]
     endpoint = job_input["endpoint"]
     if endpoint == "get_model_info":
-        return await get_model_info()
+        yield await get_model_info()
     elif endpoint == "generate":
-        return await generate(job_input["parameters"])
+        yield await generate(job_input["parameters"])
     elif endpoint == "generate_thread":
-        return await generate_thread(GenerationThread(**job_input["parameters"]))
+        async for i in generate_thread(GenerationThread(**job_input["parameters"])):
+            yield i
     else:
         raise ValueError(f"Invalid endpoint `{endpoint}`.")
 
 
 if __name__ == "__main__":
     runpod.serverless.start(
-        {"handler": handler, "concurrency_modifier": adjust_concurrency}
+        {
+            "handler": handler,
+            "concurrency_modifier": adjust_concurrency,
+            "return_aggregate_stream": True,
+        }
     )

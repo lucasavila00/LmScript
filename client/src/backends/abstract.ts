@@ -6,10 +6,18 @@
 export type TasksOutput = { text: string; captured: Record<string, string> };
 
 /**
+ * Callback for capturing values from the AI model in real time.
+ */
+export type OnCapture = (name: string, value: string) => void;
+
+/**
  * Interface for fetching from a SGL server.
  */
 export type AbstractBackend = {
-  runThread: (data: GenerationThread) => Promise<TasksOutput>;
+  runThread: (
+    data: GenerationThread,
+    onCapture: OnCapture,
+  ) => Promise<TasksOutput>;
 };
 
 export type AddTextTask = {
