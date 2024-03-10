@@ -1,11 +1,21 @@
-import { OnCapture } from "./backends/abstract.ts";
 import {
   AbstractBackend,
   ClientState,
   FetcherSamplingParams,
   MatchTask,
+  OnCapture,
   Task,
 } from "./backends/abstract.ts";
+import {
+  ChatTemplate,
+  ChatTemplateDefinition,
+  Eos,
+  getEos,
+  getRoleEnd,
+  getRoleStart,
+  Role,
+} from "./chat-template.ts";
+import { ERROR_MESSAGES, NOOP } from "./utils.ts";
 
 type EmptyRecord = Record<never, string>;
 type AnyRecord = Record<string, string>;
@@ -14,101 +24,6 @@ type AnyRecord = Record<string, string>;
  * The type of a just-created client, with no captured data.
  */
 export type InitClient = LmScript<EmptyRecord, EmptyRecord>;
-
-/**
- * Supported chat templates.
- */
-export type ChatTemplate =
-  | "llama-2-chat"
-  | "default"
-  | "claude"
-  | "chatml"
-  | "chatml-llava"
-  | "vicuna_v1.1";
-
-/**
- * Options for creating a new client.
- * Template is required to support roles.
- */
-export type CreateClientOptions = FetcherSamplingParams & {
-  template?: ChatTemplate | ChatTemplateDefinition;
-};
-/**
- * One of possible roles in a conversation.
- */
-export type Role = "assistant" | "system" | "user";
-
-/**
- * The definition of a chat template.
- * There are a handful of commonly used templates, and each model uses a different one.
- * Read the documentation for the model to know which template to use.
- */
-export type ChatTemplateDefinition = {
-  assistant: [string, string];
-  system: [string, string];
-  user: [string, string];
-
-  eos: string | null;
-};
-
-type AllChatTemplates = Record<ChatTemplate, ChatTemplateDefinition>;
-
-const chatTemplates: AllChatTemplates = {
-  default: {
-    system: ["SYSTEM:", "\n"],
-    user: ["USER:", "\n"],
-    assistant: ["ASSISTANT:", "\n"],
-    eos: null,
-  },
-  claude: {
-    system: ["", ""],
-    user: ["\n\nHuman: ", ""],
-    assistant: ["\n\nAssistant:", ""],
-    eos: null,
-  },
-  chatml: {
-    system: ["<|im_start|>system\n", "<|im_end|>\n"],
-    user: ["<|im_start|>user\n", "<|im_end|>\n"],
-    assistant: ["<|im_start|>assistant\n", "<|im_end|>\n"],
-    eos: "<|im_end|>",
-  },
-  "chatml-llava": {
-    system: ["<|im_start|>system\n", "<|im_end|>\n"],
-    user: ["<|im_start|>user\n", "<|im_end|>\n"],
-    assistant: ["<|im_start|>assistant\n", "<|im_end|>\n"],
-    eos: "<|im_end|>",
-  },
-  "vicuna_v1.1": {
-    system: ["", " "],
-    user: ["USER:", " "],
-    assistant: ["ASSISTANT:", "</s>"],
-    eos: "</s>",
-  },
-  "llama-2-chat": {
-    system: ["<<SYS>>\n", "\n<</SYS>>\n\n"],
-    user: ["[INST] ", " [/INST]"],
-    assistant: ["", " </s><s>"],
-    eos: "</s>",
-  },
-};
-
-const getRoleStart = (template: ChatTemplate, role: Role) =>
-  chatTemplates[template][role][0];
-const getRoleEnd = (template: ChatTemplate, role: Role) =>
-  chatTemplates[template][role][1];
-
-const ERROR_MESSAGES = {
-  missingTemplate: "Template is required.",
-  missingEosInTemplateConfig: "The template does not support eos.",
-} as const;
-
-const getEos = (template: ChatTemplate): Eos => {
-  const eos = chatTemplates[template].eos;
-  if (eos === null) {
-    throw new Error(ERROR_MESSAGES.missingEosInTemplateConfig);
-  }
-  return eos as Eos;
-};
 
 /**
  * Options for the selection task.
@@ -127,13 +42,12 @@ export type GeneratorOptions = {
 };
 
 /**
- * A special type that represents the end of a message.
- * Do not use this directly, use `client.eos()` instead.
+ * Options for creating a new client.
+ * Template is required to support roles.
  */
-export type Eos =
-  "%%%%%%%%%HACK_TYPE_FOR_EOS_DO_NOT_USE_THIS_STRING_DIRECTLY%%%%%%%%%%";
-const NOOP = () => {};
-
+export type CreateClientOptions = FetcherSamplingParams & {
+  template?: ChatTemplate | ChatTemplateDefinition;
+};
 /**
  * The client is a thread of tasks that can be executed to generate text.
  */
@@ -146,7 +60,10 @@ export class LmScript<
   #state: ClientState;
   readonly #fetcher: AbstractBackend;
   constructor(backend: AbstractBackend, options?: CreateClientOptions) {
-    this.#options = options ?? {};
+    this.#options = {
+      ...(options ?? {}),
+      temperature: options?.temperature ?? 0.7,
+    };
     this.#state = {
       text: "",
       captured: {},
@@ -464,7 +381,7 @@ export class LmScript<
     }
   }
 
-  #runThreadJustText(): Promise<{
+  #executeJSONJustText(): Promise<{
     captured: {
       [K in keyof GEN | keyof SEL]: K extends keyof GEN ? GEN[K]
         : K extends keyof SEL ? SEL[K]
@@ -513,12 +430,12 @@ export class LmScript<
       (task) => task.tag === "AddTextTask",
     );
     if (areAllTasksText) {
-      return this.#runThreadJustText();
+      return this.#executeJSONJustText();
     }
 
     const { template: _, ...restCreatorOptions } = this.#options;
     const { onCapture, ...restOptions } = options ?? {};
-    const out = await this.#fetcher.runThread({
+    const out = await this.#fetcher.executeJSON({
       sampling_params: { ...restCreatorOptions, ...restOptions },
       tasks: this.#tasks,
       initial_state: this.#state,

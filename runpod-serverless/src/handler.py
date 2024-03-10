@@ -98,7 +98,7 @@ class ClientState(BaseModel):
 
 
 class FetcherSamplingParams(BaseModel):
-    temperature: Optional[float] = None
+    temperature: float
     top_p: Optional[float] = None
     top_k: Optional[int] = None
     frequency_penalty: Optional[float] = None

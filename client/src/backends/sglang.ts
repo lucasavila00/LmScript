@@ -257,7 +257,7 @@ export class SGLangBackend implements AbstractBackend {
   constructor(url: string) {
     this.#url = url;
   }
-  async runThread(
+  async executeJSON(
     data: GenerationThread,
     onCapture: OnCapture,
   ): Promise<TasksOutput> {

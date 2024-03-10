@@ -155,7 +155,7 @@ export class RunpodServerlessBackend implements AbstractBackend {
     }
   }
 
-  async runThread(
+  async executeJSON(
     data: GenerationThread,
     onCapture: OnCapture,
   ): Promise<TasksOutput> {

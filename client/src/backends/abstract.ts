@@ -14,7 +14,7 @@ export type OnCapture = (name: string, value: string) => void;
  * Interface for fetching from a SGL server.
  */
 export type AbstractBackend = {
-  runThread: (
+  executeJSON: (
     data: GenerationThread,
     onCapture: OnCapture,
   ) => Promise<TasksOutput>;
@@ -57,7 +57,7 @@ export type Task =
   | MatchTask;
 
 export type FetcherSamplingParams = {
-  temperature?: number;
+  temperature: number;
   top_p?: number;
   top_k?: number;
   frequency_penalty?: number;
