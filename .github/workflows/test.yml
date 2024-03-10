@@ -11,7 +11,7 @@ jobs:
       - uses: denoland/setup-deno@v1
         with:
           deno-version: v1.x # Run with latest stable Deno.
-
+      - run: cd client
       - run: deno fmt --check
       - run: deno lint
       - run: deno check src/**/*.ts
