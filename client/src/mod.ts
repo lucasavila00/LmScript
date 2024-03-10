@@ -1,7 +1,3 @@
-/**
- * This module contains the LmScript client.
- * @module
- */
 import {
   FetcherSamplingParams,
   Task,
