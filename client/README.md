@@ -32,7 +32,7 @@ Generates the text and captures it with a name.
 
 ```ts
 const { captured: { language } } = await client
-  .push("The best programming language is")
+  .push("The best programming language is ")
   .gen("language")
   .run();
 
@@ -45,10 +45,8 @@ Selects one of the choices.
 
 ```ts
 const { captured: { language } } = await client
-  .push("The best programming language is")
-  .select("language", {
-    choices: ["javascript", "typescript"],
-  })
+  .push("The best programming language is ")
+  .select("language", { choices: ["javascript", "typescript"] })
   .run();
 
 console.log(language);
@@ -101,4 +99,4 @@ const client = new LmScript(backend);
 
 ## License
 
-TODO
+[MIT](https://choosealicense.com/licenses/mit/)

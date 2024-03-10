@@ -2,9 +2,7 @@
 
 ## TODO
 
-- [ ] documentation for the runpod image
-- [ ] links to examples
-- [ ] license
+- [ ] docs of runpod serverless image
 - [ ] publish client to NPM, not just JSR
 - [ ] handling meta_info
 - [ ] handling regex
@@ -12,9 +10,30 @@
 # LmScript
 
 LmScript: Fast and Controllable Language Model Interactions in Typescript - Open
-Source and Powered by SGLang
+Source and Powered by [SGLang](https://github.com/sgl-project/sglang)
 
 - LMScript: a suite of tools for easy, fast, and controllable interactions with
   language models in Typescript.
 - Open models and open source.
 - Powered by SGLang.
+
+## What the code looks like?
+
+Check complete examples in the
+[client's examples folder](https://github.com/lucasavila00/LmScript/tree/main/client/examples).
+
+```ts
+const { captured: { language } } = await client
+  .push("The best programming language is ")
+  .select("language", { choices: ["javascript", "typescript"] })
+  .run();
+
+console.log(language);
+```
+
+## Projects
+
+| Project                                                                                                | Description                                                                                                          |
+| ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| [Typescript Client](https://github.com/lucasavila00/LmScript/tree/main/client)                         | Dependency-free client that can communicate with different [SGLang](https://github.com/sgl-project/sglang) backends. |
+| [Runpod Serverless Docker Image](https://github.com/lucasavila00/LmScript/tree/main/runpod-serverless) | Docker image that runs SGLang on [Runpod Serverless](https://www.runpod.io/serverless-gpu).                          |

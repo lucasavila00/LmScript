@@ -1,22 +1,13 @@
 # Runpod Serverless Docker Image
 
-TODO
+Pre-build Docker image that runs on
+[Runpod Serverless](https://www.runpod.io/serverless-gpu).
 
 ## Installation
 
 TODO
 
 ## Usage
-
-TODO
-
-## Contribution
-
-TODO
-
-## License
-
-TODO
 
 Available at https://hub.docker.com/r/degroote22/lmscript-runpod-serverless
 
@@ -32,3 +23,11 @@ requests. It's recommended to use the 24gb server.
 - [ ] make model configurable through env var, download it do runpod volume
 
 - [ ] make concurrency configurable through env var
+
+## Contribution
+
+TODO
+
+## License
+
+[MIT](https://choosealicense.com/licenses/mit/)
