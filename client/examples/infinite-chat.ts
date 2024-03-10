@@ -29,7 +29,7 @@ class InfiniteChat {
       const summary = await this.#summarize(ai);
       this.#ai = this.#client.system((t) =>
         t.push(
-          `You are participating of a conversation which was summarized by the AI Model as "${summary}".\n Continue the conversation.`
+          `You are participating of a conversation which was summarized by the AI Model as "${summary}".\n Continue the conversation.`,
         )
       );
     } else {

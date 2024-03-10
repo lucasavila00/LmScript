@@ -6,9 +6,10 @@ const listItemOrStop = (ai: InitClient) =>
       choices: ["\n- ", ai.eos()],
     })
     .match("list_item")({
-    "\n- ": (c) => c.gen("list_item_content", { maxTokens: 256, stop: ["\n"] }),
-    [ai.eos()]: (c) => c.castGenerated("list_item_content"),
-  });
+      "\n- ": (c) =>
+        c.gen("list_item_content", { maxTokens: 256, stop: ["\n"] }),
+      [ai.eos()]: (c) => c.castGenerated("list_item_content"),
+    });
 const generateMarkdownList = async (client: InitClient, content: string) => {
   let state = client
     .user((c) =>
@@ -26,7 +27,7 @@ Do not make up any content, use the content provided below.
 
 ## Content
 ${content}
-`
+`,
       )
     )
     .startRole("assistant")
@@ -57,7 +58,7 @@ const generateHeading = (client: InitClient, content: string) =>
         
 ## Content
 ${content}
-`
+`,
       )
     )
     .assistant((c) =>

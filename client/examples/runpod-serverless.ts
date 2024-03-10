@@ -13,18 +13,20 @@ const bench = async () => {
   const model = new LmScript(
     new RunpodServerlessBackend(
       getEnvVarOrThrow("RUNPOD_URL"),
-      getEnvVarOrThrow("RUNPOD_TOKEN")
+      getEnvVarOrThrow("RUNPOD_TOKEN"),
     ),
     {
       template: "llama-2-chat",
       temperature: 0.1,
-    }
+    },
   );
   const MAX_JOBS = 1;
-  const batch = Array.from({ length: MAX_JOBS }, (_, _i) =>
-    kitchenSink(model).catch((e) => {
-      console.error(e);
-    })
+  const batch = Array.from(
+    { length: MAX_JOBS },
+    (_, _i) =>
+      kitchenSink(model).catch((e) => {
+        console.error(e);
+      }),
   );
 
   const start = Date.now();

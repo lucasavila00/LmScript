@@ -2,11 +2,14 @@
 
 JS/TS Client for SGLang.
 
-SGLang is a structured generation language designed for large language models (LLMs). It makes your interaction with models faster and more controllable. Learn more at the [SGLang repository](https://github.com/sgl-project/sglang)
+SGLang is a structured generation language designed for large language models
+(LLMs). It makes your interaction with models faster and more controllable.
+Learn more at the [SGLang repository](https://github.com/sgl-project/sglang)
 
 ## Getting started
 
-1. Start the SGLang server. Follow [SGLang instructions](https://github.com/sgl-project/sglang?tab=readme-ov-file#backend-sglang-runtime-srt)
+1. Start the SGLang server. Follow
+   [SGLang instructions](https://github.com/sgl-project/sglang?tab=readme-ov-file#backend-sglang-runtime-srt)
 
 2. Create a JS client instance
 
@@ -56,7 +59,7 @@ const toolUse = async (client: InitClient, question: string) => {
 
 const [continuationThread, captured, conversation] = await toolUse(
   client,
-  "What is 2 + 2?"
+  "What is 2 + 2?",
 );
 ```
 
@@ -72,7 +75,7 @@ const client = new SglClient({
 const multiTurnQuestion = (
   client: InitClient,
   question1: string,
-  question2: string
+  question2: string,
 ) =>
   client
     .system((m) => m.push("You are a helpful assistant."))
@@ -85,7 +88,7 @@ const multiTurnQuestion = (
 const [continuationThread, captured, conversation] = await multiTurnQuestion(
   client,
   "What is 2 + 2?",
-  "What is 3 + 3?"
+  "What is 3 + 3?",
 );
 console.log(conversation);
 console.log(captured);
@@ -113,13 +116,13 @@ const characterRegex = `\\{
 const characterGen = (client: InitClient, name: string) =>
   client
     .push(
-      `${name} is a character in Harry Potter. Please fill in the following information about this character.\n`
+      `${name} is a character in Harry Potter. Please fill in the following information about this character.\n`,
     )
     .gen("json_output", { maxTokens: 256, regex: characterRegex });
 
 const [threadContinuation, captured, conversation] = await characterGen(
   client,
-  "Harry Potter"
+  "Harry Potter",
 ).run({
   temperature: 0,
 });

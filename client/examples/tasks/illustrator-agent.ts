@@ -31,7 +31,7 @@ Illustrate: ${PERSON_ILLUSTRATOR}
 
 #### Example 2
 Explanation: I'm choosing an object because the scene is about an object.
-Illustrate: ${OBJECT_ILLUSTRATOR}`
+Illustrate: ${OBJECT_ILLUSTRATOR}`,
         )
       )
       .assistant((c) =>
@@ -102,29 +102,25 @@ Camera Angle: "Close-up shot of the face"
 Scene: "A movie theater"
 Subject: "A young black man wearing a dark suit"
 Subject Emotion: "Sad"
-Time Period: "In the 2020s"`
+Time Period: "In the 2020s"`,
         )
       )
       .assistant((c) =>
         c
           // Force the model to generate a close-up illustration
           .push(`Camera Angle: "Close-up shot of the face"\n`)
-
           // start scene
           .push(`Scene: "`)
           .gen("scene", { stop: ['"', ".", "\n"], maxTokens: 512 })
           .push(`"\n`)
-
           // start subject
           .push(`Subject: "`)
           .gen("subject", { stop: ['"', ".", "\n"], maxTokens: 512 })
           .push(`"\n`)
-
           // start emotion
           .push(`Subject Emotion: "`)
           .gen("emotion", { stop: ['"', ".", "\n"], maxTokens: 512 })
           .push(`"\n`)
-
           // start time period
           .push(`Time Period: "`)
           .gen("timePeriod", { stop: ['"', ".", "\n"], maxTokens: 512 })
@@ -173,7 +169,7 @@ Time Period: "In the 2020s"
 #### Example 3
 Object: "A big flowing river"
 Scene: "A forest"
-Time Period: "In the 1500s"`
+Time Period: "In the 1500s"`,
         )
       )
       .assistant((c) =>
@@ -215,6 +211,6 @@ Time Period: "In the 1500s"`
 }
 export const getIllustrationPrompt = (
   client: InitClient,
-  content: string
+  content: string,
 ): Promise<string> =>
   new IllustrationPromptAgent(client).getIllustrationPrompt(content);

@@ -1,9 +1,9 @@
 import {
-  FetcherSamplingParams,
-  Task,
-  ClientState,
   AbstractBackend,
+  ClientState,
+  FetcherSamplingParams,
   MatchTask,
+  Task,
 } from "./backends/abstract.ts";
 
 type EmptyRecord = Record<never, string>;
@@ -137,7 +137,7 @@ export type Eos =
  */
 export class LmScript<
   GEN extends Record<string, string> = EmptyRecord,
-  SEL extends Record<string, string> = EmptyRecord
+  SEL extends Record<string, string> = EmptyRecord,
 > {
   #tasks: Task[];
   readonly #options: CreateClientOptions;
@@ -155,10 +155,10 @@ export class LmScript<
 
   #wrapRole<
     GEN2 extends Record<string, string>,
-    SEL2 extends Record<string, string>
+    SEL2 extends Record<string, string>,
   >(
     role: Role,
-    cb: (it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>
+    cb: (it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>,
   ): LmScript<GEN2, SEL2> {
     return cb(this.startRole(role)).endRole(role);
   }
@@ -218,9 +218,9 @@ export class LmScript<
    */
   assistant<
     GEN2 extends Record<string, string> = Record<never, never>,
-    SEL2 extends Record<string, string> = Record<never, never>
+    SEL2 extends Record<string, string> = Record<never, never>,
   >(
-    cb: (it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>
+    cb: (it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>,
   ): LmScript<GEN2, SEL2> {
     return this.#wrapRole("assistant", cb);
   }
@@ -231,9 +231,9 @@ export class LmScript<
    */
   system<
     GEN2 extends Record<string, string> = Record<never, never>,
-    SEL2 extends Record<string, string> = Record<never, never>
+    SEL2 extends Record<string, string> = Record<never, never>,
   >(
-    cb: (it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>
+    cb: (it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>,
   ): LmScript<GEN2, SEL2> {
     return this.#wrapRole("system", cb);
   }
@@ -244,9 +244,9 @@ export class LmScript<
    */
   user<
     GEN2 extends Record<string, string> = Record<never, never>,
-    SEL2 extends Record<string, string> = Record<never, never>
+    SEL2 extends Record<string, string> = Record<never, never>,
   >(
-    cb: (it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>
+    cb: (it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>,
   ): LmScript<GEN2, SEL2> {
     return this.#wrapRole("user", cb);
   }
@@ -273,7 +273,7 @@ export class LmScript<
 
   #doSelection(
     name: string | undefined,
-    options: SelectorOptions<string>
+    options: SelectorOptions<string>,
   ): LmScript<GEN, SEL> {
     return this.#clone(this.#state, [
       ...this.#tasks,
@@ -295,13 +295,15 @@ export class LmScript<
    * of branches that differ.
    */
   match<K extends keyof SEL>(
-    variable: K
+    variable: K,
   ): <
     GEN2 extends Record<string, string>,
-    SEL2 extends Record<string, string>
-  >(choices: {
-    [P in SEL[K]]: (client: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>;
-  }) => LmScript<GEN2, SEL2> {
+    SEL2 extends Record<string, string>,
+  >(
+    choices: {
+      [P in SEL[K]]: (client: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>;
+    },
+  ) => LmScript<GEN2, SEL2> {
     return (choices) => {
       const matchTask: MatchTask = {
         tag: "MatchTask",
@@ -309,18 +311,18 @@ export class LmScript<
         choices: Object.fromEntries(
           Object.entries(choices).map(([key, valueUntyped]) => {
             const value: (
-              client: LmScript<AnyRecord, AnyRecord>
+              client: LmScript<AnyRecord, AnyRecord>,
             ) => LmScript<AnyRecord, AnyRecord> =
               // deno-lint-ignore no-explicit-any
               valueUntyped as any;
             const client = new LmScript<AnyRecord, AnyRecord>(
               this.#fetcher,
-              this.#options
+              this.#options,
             );
             const out = value(client);
             const tasks: Task[] = out.#tasks;
             return [key, tasks];
-          })
+          }),
         ),
       };
       // deno-lint-ignore no-explicit-any
@@ -345,13 +347,11 @@ export class LmScript<
    * Fool the type-checker into thinking that a selection variable was captured.
    */
   castSelection<const N extends string>(
-    _name: N
+    _name: N,
   ): LmScript<
     {
-      [K in keyof SEL | N]: K extends N
-        ? never
-        : K extends keyof SEL
-        ? SEL[K]
+      [K in keyof SEL | N]: K extends N ? never
+        : K extends keyof SEL ? SEL[K]
         : never;
     },
     GEN
@@ -366,14 +366,12 @@ export class LmScript<
    */
   select<const N extends string, const V extends string>(
     name: N,
-    options: SelectorOptions<V> | undefined
+    options: SelectorOptions<V> | undefined,
   ): LmScript<
     GEN,
     {
-      [K in keyof SEL | N]: K extends N
-        ? V
-        : K extends keyof SEL
-        ? SEL[K]
+      [K in keyof SEL | N]: K extends N ? V
+        : K extends keyof SEL ? SEL[K]
         : never;
     }
   >;
@@ -384,7 +382,7 @@ export class LmScript<
   select<V extends string>(options: SelectorOptions<V>): LmScript<GEN, SEL>;
   select(
     arg1: string | SelectorOptions<string>,
-    arg2?: SelectorOptions<string>
+    arg2?: SelectorOptions<string>,
   ): unknown {
     if (typeof arg1 === "string") {
       return this.#doSelection(arg1, arg2!);
@@ -394,17 +392,16 @@ export class LmScript<
 
   #doGeneration(
     name: string | undefined,
-    generatorOptions: GeneratorOptions | undefined
+    generatorOptions: GeneratorOptions | undefined,
   ): LmScript<GEN, SEL> {
     return this.#clone(this.#state, [
       ...this.#tasks,
       {
         tag: "GenerateTask",
         name,
-        stop:
-          typeof generatorOptions?.stop === "string"
-            ? [generatorOptions.stop]
-            : generatorOptions?.stop ?? [],
+        stop: typeof generatorOptions?.stop === "string"
+          ? [generatorOptions.stop]
+          : generatorOptions?.stop ?? [],
         max_tokens: generatorOptions?.maxTokens ?? 16,
         // regex: generatorOptions?.regex,
       },
@@ -415,13 +412,11 @@ export class LmScript<
    * Fool the type-checker into thinking that a generated variable was captured.
    */
   castGenerated<const N extends string>(
-    _name: N
+    _name: N,
   ): LmScript<
     {
-      [K in keyof GEN | N]: K extends N
-        ? never
-        : K extends keyof GEN
-        ? GEN[K]
+      [K in keyof GEN | N]: K extends N ? never
+        : K extends keyof GEN ? GEN[K]
         : never;
     },
     SEL
@@ -435,13 +430,11 @@ export class LmScript<
    */
   gen<const N extends string>(
     name: N,
-    options?: GeneratorOptions | undefined
+    options?: GeneratorOptions | undefined,
   ): LmScript<
     {
-      [K in keyof GEN | N]: K extends N
-        ? string
-        : K extends keyof GEN
-        ? GEN[K]
+      [K in keyof GEN | N]: K extends N ? string
+        : K extends keyof GEN ? GEN[K]
         : never;
     },
     SEL
@@ -461,10 +454,8 @@ export class LmScript<
 
   #runThreadJustText(): Promise<{
     captured: {
-      [K in keyof GEN | keyof SEL]: K extends keyof GEN
-        ? GEN[K]
-        : K extends keyof SEL
-        ? SEL[K]
+      [K in keyof GEN | keyof SEL]: K extends keyof GEN ? GEN[K]
+        : K extends keyof SEL ? SEL[K]
         : never;
     };
     state: LmScript<GEN, SEL>;
@@ -480,7 +471,7 @@ export class LmScript<
     }
     const newInstance = this.#clone(
       { text, captured: this.#state.captured },
-      []
+      [],
     );
     return Promise.resolve({
       // deno-lint-ignore no-explicit-any
@@ -495,17 +486,15 @@ export class LmScript<
    */
   async run(options?: FetcherSamplingParams): Promise<{
     captured: {
-      [K in keyof GEN | keyof SEL]: K extends keyof GEN
-        ? GEN[K]
-        : K extends keyof SEL
-        ? SEL[K]
+      [K in keyof GEN | keyof SEL]: K extends keyof GEN ? GEN[K]
+        : K extends keyof SEL ? SEL[K]
         : never;
     };
     state: LmScript<GEN, SEL>;
     rawText: string;
   }> {
     const areAllTasksText = this.#tasks.every(
-      (task) => task.tag === "AddTextTask"
+      (task) => task.tag === "AddTextTask",
     );
     if (areAllTasksText) {
       return this.#runThreadJustText();

@@ -7,10 +7,12 @@ const bench = async () => {
     template: "llama-2-chat",
     temperature: 0.1,
   });
-  const batch = Array.from({ length: 1 }, (_, _i) =>
-    kitchenSink(model).catch((e) => {
-      console.error(e);
-    })
+  const batch = Array.from(
+    { length: 1 },
+    (_, _i) =>
+      kitchenSink(model).catch((e) => {
+        console.error(e);
+      }),
   );
 
   const start = Date.now();

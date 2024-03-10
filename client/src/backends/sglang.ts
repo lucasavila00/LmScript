@@ -6,10 +6,10 @@
 import { delay } from "../utils.ts";
 import { assertIsNever } from "../utils.ts";
 import {
+  AbstractBackend,
   ClientState,
   FetcherSamplingParams,
   GenerationThread,
-  AbstractBackend,
   Task,
   TasksOutput,
 } from "./abstract.ts";
@@ -29,7 +29,7 @@ type SglSamplingParams = {
 };
 const createSglSamplingParams = (
   params: Partial<SglSamplingParams>,
-  fetcher_params: Partial<FetcherSamplingParams>
+  fetcher_params: Partial<FetcherSamplingParams>,
 ): SglSamplingParams => {
   return {
     skip_special_tokens: params.skip_special_tokens ?? true,
@@ -38,10 +38,10 @@ const createSglSamplingParams = (
     temperature: fetcher_params?.temperature ?? params.temperature ?? 1.0,
     top_p: fetcher_params.top_p ?? params.top_p ?? 1.0,
     top_k: fetcher_params.top_k ?? params.top_k ?? -1,
-    frequency_penalty:
-      fetcher_params.frequency_penalty ?? params.frequency_penalty ?? 0.0,
-    presence_penalty:
-      fetcher_params.presence_penalty ?? params.presence_penalty ?? 0.0,
+    frequency_penalty: fetcher_params.frequency_penalty ??
+      params.frequency_penalty ?? 0.0,
+    presence_penalty: fetcher_params.presence_penalty ??
+      params.presence_penalty ?? 0.0,
     ignore_eos: params.ignore_eos ?? false,
     regex: params.regex,
     dtype: params.dtype,
@@ -91,7 +91,7 @@ class SglServerExecutor {
   constructor(
     url: string,
     sampling_params: FetcherSamplingParams,
-    state: ClientState
+    state: ClientState,
   ) {
     this.#state = JSON.parse(JSON.stringify(state));
     this.#url = url;
@@ -135,12 +135,12 @@ class SglServerExecutor {
     throw new Error(`HTTP request failed: ${lastError}`);
   }
   #generate(
-    data: SglGenerateData
+    data: SglGenerateData,
   ): Promise<{ text: string; meta_info: MetaInfoGeneration }> {
     return this.#httpRequest(data);
   }
   #select(
-    data: SglSelectData
+    data: SglSelectData,
   ): Promise<{ text: string; meta_info: MetaInfoSelection }[]> {
     return this.#httpRequest(data);
   }
@@ -161,7 +161,7 @@ class SglServerExecutor {
               max_new_tokens: task.max_tokens,
               stop: task.stop,
             },
-            this.#sampling_params
+            this.#sampling_params,
           ),
         });
         this.#state.text += out.text;
@@ -176,7 +176,7 @@ class SglServerExecutor {
           text: this.#state.text,
           sampling_params: createSglSamplingParams(
             { max_new_tokens: 0, temperature: 0.0 },
-            this.#sampling_params
+            this.#sampling_params,
           ),
         });
 
@@ -189,19 +189,19 @@ class SglServerExecutor {
               max_new_tokens: 0,
               temperature: 0.0,
             },
-            this.#sampling_params
+            this.#sampling_params,
           ),
           return_logprob: true,
           logprob_start_len: Math.max(prompt_len - 2, 0),
         });
 
         const normalized_prompt_logprob = obj.map(
-          (r) => r.meta_info.normalized_prompt_logprob
+          (r) => r.meta_info.normalized_prompt_logprob,
         );
 
         const argMax = normalized_prompt_logprob.reduce(
           (iMax, x, i, arr) => (x > arr[iMax] ? i : iMax),
-          0
+          0,
         );
         const decision = task.choices[argMax];
 
@@ -255,7 +255,7 @@ export class SGLangBackend implements AbstractBackend {
     const executor = new SglServerExecutor(
       this.#url,
       data.sampling_params,
-      data.initial_state
+      data.initial_state,
     );
     for (const task of data.tasks) {
       await executor.runTask(task);
