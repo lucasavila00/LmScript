@@ -9,7 +9,9 @@ class InfiniteChat {
   }
 
   async #summarize(ai: InitClient) {
-    const [{ summary }] = await ai
+    const {
+      captured: { summary },
+    } = await ai
       .user((c) => c.push("Summarize the conversation."))
       .assistant((c) =>
         c.gen("summary", {
@@ -40,7 +42,11 @@ class InfiniteChat {
       return;
     }
 
-    const [{ response }, ai, history] = await this.#ai
+    const {
+      captured: { response },
+      text: history,
+      state: ai,
+    } = await this.#ai
       .user((t) => t.push(msg))
       .assistant((t) =>
         t.gen("response", {

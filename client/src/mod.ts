@@ -119,17 +119,7 @@ export class LmScript<
     role: Role,
     cb: (it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>
   ): LmScript<GEN2, SEL2> {
-    const template = this.#options.template;
-    if (template == null) {
-      throw new Error("Template is required.");
-    }
-    if (typeof template === "string") {
-      return cb(this.push(getRoleStart(template, role))).push(
-        getRoleEnd(template, role)
-      );
-    }
-    const [start, end] = template[role];
-    return cb(this.push(start)).push(end);
+    return cb(this.startRole(role)).endRole(role);
   }
 
   startRole(role: Role): LmScript<GEN, SEL> {
@@ -476,19 +466,17 @@ export class LmScript<
     }
   }
 
-  #runThreadJustText(): Promise<
-    [
-      {
-        [K in keyof GEN | keyof SEL]: K extends keyof GEN
-          ? GEN[K]
-          : K extends keyof SEL
-          ? SEL[K]
-          : never;
-      },
-      LmScript<GEN, SEL>,
-      string
-    ]
-  > {
+  #runThreadJustText(): Promise<{
+    captured: {
+      [K in keyof GEN | keyof SEL]: K extends keyof GEN
+        ? GEN[K]
+        : K extends keyof SEL
+        ? SEL[K]
+        : never;
+    };
+    state: LmScript<GEN, SEL>;
+    text: string;
+  }> {
     let text = this.#state.text;
     for (const task of this.#tasks) {
       if (task.tag === "AddTextTask") {
@@ -501,8 +489,12 @@ export class LmScript<
       { text, captured: this.#state.captured },
       []
     );
-    // deno-lint-ignore no-explicit-any
-    return Promise.resolve([this.#state.captured as any, newInstance, text]);
+    return Promise.resolve({
+      // deno-lint-ignore no-explicit-any
+      captured: this.#state.captured as any,
+      state: newInstance,
+      text,
+    });
   }
 
   /**
@@ -528,19 +520,17 @@ export class LmScript<
    * threadContinuation.push(` </s>`).gen(...)
    * ```
    */
-  async run(options?: FetcherSamplingParams): Promise<
-    [
-      {
-        [K in keyof GEN | keyof SEL]: K extends keyof GEN
-          ? GEN[K]
-          : K extends keyof SEL
-          ? SEL[K]
-          : never;
-      },
-      LmScript<GEN, SEL>,
-      string
-    ]
-  > {
+  async run(options?: FetcherSamplingParams): Promise<{
+    captured: {
+      [K in keyof GEN | keyof SEL]: K extends keyof GEN
+        ? GEN[K]
+        : K extends keyof SEL
+        ? SEL[K]
+        : never;
+    };
+    state: LmScript<GEN, SEL>;
+    text: string;
+  }> {
     const areAllTasksText = this.#tasks.every(
       (task) => task.tag === "AddTextTask"
     );
@@ -555,7 +545,11 @@ export class LmScript<
       initial_state: this.#state,
     });
     const newInstance = this.#clone(out, []);
-    // deno-lint-ignore no-explicit-any
-    return [out.captured as any, newInstance, out.text];
+    return {
+      // deno-lint-ignore no-explicit-any
+      captured: out.captured as any,
+      state: newInstance,
+      text: out.text,
+    };
   }
 }

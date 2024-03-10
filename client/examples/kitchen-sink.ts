@@ -3,7 +3,7 @@ import { assertIsNever } from "../src/utils.ts";
 import { getIllustrationPrompt } from "./tasks/illustrator-agent.ts";
 import { generateMarkdown } from "./tasks/markdown-generator.ts";
 const toolUse = async (model: InitClient, question: string) => {
-  const [captured, thread] = await model
+  const { captured, state: thread } = await model
     .push(`To answer this question: ${question}. `)
     .push(`I need to use a `)
     .select("tool", {
@@ -74,7 +74,7 @@ const multiTurnQuestion = (
 //     .gen("json_output", { maxTokens: 256, regex: characterRegex });
 
 export const kitchenSink = async (client: InitClient) => {
-  const [captured, _, conversation] = await client
+  const { text: conversation } = await client
     .push(`<s> [INST] What is the sum of 2 + 2? Answer shortly. [/INST] `)
     .gen("expression", {
       maxTokens: 512,
@@ -84,19 +84,16 @@ export const kitchenSink = async (client: InitClient) => {
     .repeat("expression")
     .run();
   console.log(conversation);
-  console.log(captured);
 
-  const [cap2, _2, conversation2] = await toolUse(client, "What is 2 + 2?");
+  const { text: conversation2 } = await toolUse(client, "What is 2 + 2?");
 
   console.log(conversation2);
-  console.log(cap2);
-  const [cap22, _22, conversation22] = await toolUseMatching(
+  const { text: conversation22 } = await toolUseMatching(
     client,
     "What is 2 + 2?"
   );
 
   console.log(conversation22);
-  console.log(cap22);
 
   const illustrationPrompt = await getIllustrationPrompt(
     client,
@@ -105,13 +102,12 @@ export const kitchenSink = async (client: InitClient) => {
 
   console.log(illustrationPrompt);
 
-  const [cap4, _4, conversation4] = await multiTurnQuestion(
+  const { text: conversation4 } = await multiTurnQuestion(
     client,
     "What is 2 + 2?",
     "What is 3 + 3?"
   );
   console.log(conversation4);
-  console.log(cap4);
 
   const md = await generateMarkdown(
     client,

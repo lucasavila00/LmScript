@@ -1,5 +1,5 @@
-import { InitClient } from "../src/mod.ts";
-import { assertIsNever } from "../src/utils.ts";
+import { InitClient } from "../../src/mod.ts";
+import { assertIsNever } from "../../src/utils.ts";
 
 const PERSON_ILLUSTRATOR = "A person." as const;
 const OBJECT_ILLUSTRATOR = "An object." as const;
@@ -191,16 +191,20 @@ Time Period: "In the 1500s"`
   }
 
   async getIllustrationPrompt(content: string): Promise<string> {
-    const [{ illustrator }] = await this.#getIllustrationKind(content).run();
+    const {
+      captured: { illustrator },
+    } = await this.#getIllustrationKind(content).run();
     switch (illustrator) {
       case PERSON_ILLUSTRATOR: {
-        const [{ emotion, subject, scene, timePeriod }] =
-          await this.#getPersonIllustrationPrompt(content).run();
+        const {
+          captured: { emotion, subject, scene, timePeriod },
+        } = await this.#getPersonIllustrationPrompt(content).run();
         return `${emotion} ${subject} in ${scene}. ${timePeriod}. Close-up of the face.`;
       }
       case OBJECT_ILLUSTRATOR: {
-        const [{ object, scene, timePeriod }] =
-          await this.#getObjectIllustrationPrompt(content).run();
+        const {
+          captured: { object, scene, timePeriod },
+        } = await this.#getObjectIllustrationPrompt(content).run();
         return `${object} in ${scene}. ${timePeriod}.`;
       }
       default: {
