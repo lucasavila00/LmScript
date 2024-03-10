@@ -6,17 +6,20 @@ from sglang.srt.utils import handle_port_init
 import os
 from pydantic import BaseModel
 import numpy as np
+from huggingface_hub import snapshot_download
+import os
 
-# Initialize the SGLang runtime before handling requests
-with open("path.txt", "r") as f:
-    model_path = f.read()
+print("Downloading model...")
+repo_id = os.environ.get("REPO_ID", "TheBloke/Mistral-7B-Instruct-v0.2-AWQ")
+model_path = snapshot_download(repo_id=repo_id)
+print(f"Model downloaded to {model_path}")
 
 SGLANG_PORT, additional_ports = handle_port_init(30000, None, 1)
 RUNTIME = sgl.Runtime(
     model_path=model_path,
     port=SGLANG_PORT,
     additional_ports=additional_ports,
-    model_mode=["flashinfer"] if os.environ.get("MODEL_MODE") == "flashinfer" else [],
+    model_mode=[] if os.environ.get("DISABLE_FLASH_INFER") == "yes" else ["flashinfer"],
 )
 print(f"Initialized SGLang runtime: {RUNTIME.url}")
 
@@ -40,7 +43,7 @@ async def generate(parameters: dict):
 
 
 def adjust_concurrency(_current_concurrency):
-    return 3
+    return int(os.environ.get("CONCURRENCY_PER_WORKER", "3"))
 
 
 class AddTextTask(BaseModel):

@@ -7,4 +7,6 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
-    
+    environment:
+      - DISABLE_FLASH_INFER=yes
+      - CONCURRENCY_PER_WORKER=1

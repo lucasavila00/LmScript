@@ -73,7 +73,7 @@ export class RunpodServerlessBackend implements AbstractBackend {
     this.#apiToken = apiToken;
   }
 
-  async #fetch<T>(
+  async #fetchNoRetry<T>(
     url: string,
     body?: string,
   ): Promise<T> {
@@ -91,6 +91,22 @@ export class RunpodServerlessBackend implements AbstractBackend {
     }
     const out = await response.json();
     return out;
+  }
+
+  async #fetch<T>(
+    url: string,
+    body?: string,
+  ): Promise<T> {
+    let lastError: unknown;
+    for (let i = 1; i < 5; i++) {
+      try {
+        return await this.#fetchNoRetry(url, body);
+      } catch (e) {
+        lastError = e;
+        await delay(1000 * i * i);
+      }
+    }
+    throw new Error(`HTTP request failed: ${lastError}`);
   }
 
   async #monitorProgress(

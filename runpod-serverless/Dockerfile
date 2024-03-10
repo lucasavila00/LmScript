@@ -4,10 +4,13 @@ COPY builder/requirements.txt /requirements.txt
 RUN python3.11 -m pip install -r /requirements.txt --no-cache-dir && \
     rm /requirements.txt
 
-# Cache Models
-COPY builder/cache_models.py /cache_models.py
-RUN python3.11 /cache_models.py && \
-    rm /cache_models.py
+ARG BASE_PATH="/runpod-volume"
+
+ENV BASE_PATH=$BASE_PATH \
+    HF_DATASETS_CACHE="${BASE_PATH}/huggingface-cache/datasets" \
+    HUGGINGFACE_HUB_CACHE="${BASE_PATH}/huggingface-cache/hub" \
+    HF_HOME="${BASE_PATH}/huggingface-cache/hub" \
+    HF_TRANSFER=1
 
 RUN python3.11 -m pip install flashinfer -i https://flashinfer.ai/whl/cu121/torch2.1/
 
