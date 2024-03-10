@@ -18,8 +18,6 @@ requests. It's recommended to use the 24gb server.
 
 - [ ] sampling params validation
 
-- [ ] instructions on how to create a serverless runpod worker
-
 - [ ] make model configurable through env var, download it do runpod volume
 
 - [ ] make concurrency configurable through env var

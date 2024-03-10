@@ -1,6 +1,9 @@
 # LmScript Client
 
-Typescript client for LmScript.
+Dependency-Free Typescript client for LmScript.
+
+The Complete API documentation is available at the project's
+[JSR page](https://jsr.io/@lmscript/client).
 
 ## Installation
 
@@ -10,6 +13,9 @@ Follow the instructions on the project's
 [JSR page](https://jsr.io/@lmscript/client).
 
 ## Usage
+
+There are more complete examples in the
+[client's examples folder](https://github.com/lucasavila00/LmScript/tree/main/client/examples).
 
 ### Adding text to context
 
@@ -73,6 +79,9 @@ console.log(language);
 
 ### SGLang Backend
 
+Use it with a regular
+[SGLang server](https://github.com/sgl-project/sglang?tab=readme-ov-file#using-local-models).
+
 ```ts
 import { LmScript } from "@lmscript/client";
 import { SGLangBackend } from "@lmscript/client/backends/sglang";
@@ -85,6 +94,9 @@ const client = new LmScript(backend, {
 ```
 
 ### Runpod Serverless Backend
+
+Use it LmScript's
+[Runpod Serverless Docker Image](https://github.com/lucasavila00/LmScript/tree/main/runpod-serverless).
 
 ```ts
 import { LmScript } from "@lmscript/client";

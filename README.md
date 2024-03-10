@@ -3,14 +3,14 @@
 ## TODO
 
 - [ ] docs of runpod serverless image
-- [ ] publish client to NPM, not just JSR
+- [ ] runpod client async api
 - [ ] handling meta_info
 - [ ] handling regex
 
 # LmScript
 
 LmScript: Fast and Controllable Language Model Interactions in Typescript - Open
-Source and Powered by [SGLang](https://github.com/sgl-project/sglang)
+Source and Powered by [SGLang](https://github.com/sgl-project/sglang).
 
 - LMScript: a suite of tools for easy, fast, and controllable interactions with
   language models in Typescript.
@@ -18,9 +18,6 @@ Source and Powered by [SGLang](https://github.com/sgl-project/sglang)
 - Powered by SGLang.
 
 ## What the code looks like?
-
-Check complete examples in the
-[client's examples folder](https://github.com/lucasavila00/LmScript/tree/main/client/examples).
 
 ```ts
 const { captured: { language } } = await client
@@ -30,6 +27,9 @@ const { captured: { language } } = await client
 
 console.log(language);
 ```
+
+There are more complete examples in the
+[client's examples folder](https://github.com/lucasavila00/LmScript/tree/main/client/examples).
 
 ## Projects
 
