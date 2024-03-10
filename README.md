@@ -2,11 +2,9 @@
 
 ## TODO
 
-- [ ] documentation for the js client
-- [ ] documentation for the js client + sgl fetcher
-- [ ] documentation for the js client + runpod fetcher
-- [ ] documentation for the runpod fetcher
+- [ ] documentation for the runpod image
 - [ ] links to examples
+- [ ] license
 - [ ] publish client to NPM, not just JSR
 - [ ] handling meta_info
 - [ ] handling regex

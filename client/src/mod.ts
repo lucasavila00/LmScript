@@ -165,7 +165,8 @@ export class LmScript<
 
   /**
    * Starts a role message in the conversation.
-   * Most of the times this should not be used directly, use `client.assistant`, `client.system`, or `client.user` instead.
+   *
+   * Most of the time this should not be used directly, use `client.assistant`, `client.system`, or `client.user` instead.
    */
   startRole(role: Role): LmScript<GEN, SEL> {
     const template = this.#options.template;
@@ -180,7 +181,8 @@ export class LmScript<
   }
   /**
    * Ends a role message in the conversation.
-   * Most of the times this should not be used directly, use `client.assistant`, `client.system`, or `client.user` instead.
+   *
+   * Most of the time this should not be used directly, use `client.assistant`, `client.system`, or `client.user` instead.
    */
   endRole(role: Role): LmScript<GEN, SEL> {
     const template = this.#options.template;
@@ -213,7 +215,9 @@ export class LmScript<
 
   /**
    * Wraps the calls made to the client in the callback with the assistant role.
+   *
    * The client should be configured with a template to support roles.
+   *
    * If a template is not provided, an error will be thrown.
    */
   assistant<
@@ -226,7 +230,9 @@ export class LmScript<
   }
   /**
    * Wraps the calls made to the client in the callback with the system role.
+   *
    * The client should be configured with a template to support roles.
+   *
    * If a template is not provided, an error will be thrown.
    */
   system<
@@ -239,7 +245,9 @@ export class LmScript<
   }
   /**
    * Wraps the calls made to the client in the callback with the user role.
+   *
    * The client should be configured with a template to support roles.
+   *
    * If a template is not provided, an error will be thrown.
    */
   user<
@@ -290,7 +298,9 @@ export class LmScript<
    * It reduces a round-trip to the server and improves cache locality.
    *
    * In general you should use `.run` and regular JavaScript conditionals over `.match`.
+   *
    * This matches on a previous `select.` It takes a variable name and a map of choices.
+   *
    * The types of all branches should be the same, use `.castSelection` or `.castGenerated` to change the types
    * of branches that differ.
    */

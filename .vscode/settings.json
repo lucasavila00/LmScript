@@ -1,5 +1,13 @@
 {
-  "cSpell.words": ["chatml", "dtype", "llava", "logprob", "runpod", "sglang"],
+  "cSpell.words": [
+    "chatml",
+    "dtype",
+    "llava",
+    "lmscript",
+    "logprob",
+    "runpod",
+    "sglang"
+  ],
   "deno.enable": true,
   "python.analysis.typeCheckingMode": "basic"
 }
