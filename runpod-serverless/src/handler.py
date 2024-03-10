@@ -110,7 +110,6 @@ async def generate_task(state: ClientState, t: Task, sampling_params: dict):
             state.captured[t.name] = res["text"]
         # meta_infos += [res["meta_info"]]
     elif isinstance(t, SelectTask):
-
         # Cache common prefix
         data = {
             "text": state.text,
