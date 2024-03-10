@@ -1,6 +1,6 @@
-# MlScript Client
+# LmScript Client
 
-Typescript client for MlScript.
+Typescript client for LmScript.
 
 ## Installation
 
