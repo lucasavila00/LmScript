@@ -66,12 +66,17 @@ const multiTurnQuestion = (
 //   "alive": "(Alive|Deceased)",
 //   "bogart": "[\\w\\d\\s]{1,16}"
 // \\}`;
-// const characterGen = (model: InitClient, name: string) =>
-//   model
-//     .push(
-//       `${name} is a character in Harry Potter. Please fill in the following information about this character.\n`
-//     )
-//     .gen("json_output", { maxTokens: 256, regex: characterRegex });
+const characterRegex = `\\{
+  "name": "[\\w\\d\\s]{1,16}",
+  "house": "(Gryffindor|Slytherin|Ravenclaw|Hufflepuff)",
+  "blood status": "(Pure-blood|Half-blood|Muggle-born)"
+\\}`;
+const characterGen = (model: InitClient, name: string) =>
+  model
+    .push(
+      `${name} is a character in Harry Potter. Please fill in the following information about this character.\n`,
+    )
+    .gen("json_output", { maxTokens: 256, regex: characterRegex });
 
 export const kitchenSink = async (client: InitClient) => {
   const { rawText: conversation } = await client
@@ -116,13 +121,12 @@ export const kitchenSink = async (client: InitClient) => {
 
   console.log(md);
 
-  // const [_5, cap5, conversation5] = await characterGen(
-  //   client,
-  //   "Harry Potter"
-  // ).run({
-  //   temperature: 0.1,
-  // });
+  const { rawText: conversation5 } = await characterGen(
+    client,
+    "Harry Potter",
+  ).run({
+    temperature: 0.1,
+  });
 
-  // console.log(conversation5);
-  // console.log(cap5);
+  console.log(conversation5);
 };

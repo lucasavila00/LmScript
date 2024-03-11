@@ -4,6 +4,7 @@ import {
   FetcherSamplingParams,
   MatchTask,
   OnCapture,
+  ReportUsage,
   Task,
 } from "./backends/abstract.ts";
 import {
@@ -38,7 +39,7 @@ export type SelectorOptions<S extends string> = {
 export type GeneratorOptions = {
   stop?: string | string[];
   maxTokens?: number;
-  // regex?: string;
+  regex?: string;
 };
 
 /**
@@ -332,7 +333,7 @@ export class LmScript<
           ? [generatorOptions.stop]
           : generatorOptions?.stop ?? [],
         max_tokens: generatorOptions?.maxTokens ?? 16,
-        // regex: generatorOptions?.regex,
+        regex: generatorOptions?.regex,
       },
     ]);
   }
@@ -416,6 +417,7 @@ export class LmScript<
   async run(
     options?: FetcherSamplingParams & {
       onCapture?: OnCapture;
+      reportUsage?: ReportUsage;
     },
   ): Promise<{
     captured: {
@@ -439,7 +441,9 @@ export class LmScript<
       sampling_params: { ...restCreatorOptions, ...restOptions },
       tasks: this.#tasks,
       initial_state: this.#state,
-    }, onCapture ?? NOOP);
+    }, {
+      onCapture: onCapture ?? NOOP,
+    });
     const newInstance = this.#clone(out, []);
     return {
       // deno-lint-ignore no-explicit-any

@@ -3,50 +3,23 @@
  * @module
  */
 
-import { delay } from "../utils.ts";
+import { delay, NOOP } from "../utils.ts";
 import { assertIsNever } from "../utils.ts";
-import { OnCapture } from "./abstract.ts";
 import {
   AbstractBackend,
   ClientState,
+  ExecutionCallbacks,
   FetcherSamplingParams,
   GenerationThread,
+  ReportUsage,
   Task,
   TasksOutput,
 } from "./abstract.ts";
 
-type SglSamplingParams = {
-  skip_special_tokens: boolean;
-  max_new_tokens: number;
-  stop: string | string[];
-  temperature: number;
-  top_p: number;
-  top_k: number;
-  frequency_penalty: number;
-  presence_penalty: number;
-  ignore_eos: boolean;
-  regex: string | undefined;
-  dtype: string | undefined;
-};
-const createSglSamplingParams = (
-  params: Partial<SglSamplingParams>,
-  fetcher_params: Partial<FetcherSamplingParams>,
-): SglSamplingParams => {
-  return {
-    skip_special_tokens: params.skip_special_tokens ?? true,
-    max_new_tokens: params.max_new_tokens ?? 16,
-    stop: params.stop ?? [],
-    temperature: fetcher_params?.temperature ?? params.temperature ?? 1.0,
-    top_p: fetcher_params.top_p ?? params.top_p ?? 1.0,
-    top_k: fetcher_params.top_k ?? params.top_k ?? -1,
-    frequency_penalty: fetcher_params.frequency_penalty ??
-      params.frequency_penalty ?? 0.0,
-    presence_penalty: fetcher_params.presence_penalty ??
-      params.presence_penalty ?? 0.0,
-    ignore_eos: params.ignore_eos ?? false,
-    regex: params.regex,
-    dtype: params.dtype,
-  };
+type SglSamplingParams = FetcherSamplingParams & {
+  max_new_tokens?: number;
+  stop?: string[];
+  regex?: string;
 };
 /**
  * Options for the generation task.
@@ -89,17 +62,21 @@ class SglServerExecutor {
   #state: ClientState;
   readonly #url: string;
   readonly #sampling_params: FetcherSamplingParams;
-  readonly #onCapture: OnCapture;
+  readonly #callbacks: ExecutionCallbacks;
+  readonly #reportUsage: ReportUsage;
+
   constructor(
     url: string,
     sampling_params: FetcherSamplingParams,
     state: ClientState,
-    onCapture: OnCapture,
+    callbacks: ExecutionCallbacks,
+    reportUsage: ReportUsage,
   ) {
     this.#state = JSON.parse(JSON.stringify(state));
     this.#url = url;
     this.#sampling_params = sampling_params;
-    this.#onCapture = onCapture;
+    this.#callbacks = callbacks;
+    this.#reportUsage = reportUsage;
   }
 
   async #httpRequestNoRetry<T>(data: object): Promise<T> {
@@ -127,26 +104,44 @@ class SglServerExecutor {
     }
   }
   async #httpRequest<T>(data: object): Promise<T> {
-    let lastError: unknown;
+    let lastError: unknown = null;
     for (let i = 1; i < 5; i++) {
       try {
+        if (lastError != null) {
+          await delay(1000 * i * i);
+        }
         return await this.#httpRequestNoRetry(data);
       } catch (e) {
         lastError = e;
-        await delay(1000 * i * i);
       }
     }
     throw new Error(`HTTP request failed: ${lastError}`);
   }
-  #generate(
+  async #generate(
     data: SglGenerateData,
   ): Promise<{ text: string; meta_info: MetaInfoGeneration }> {
-    return this.#httpRequest(data);
+    const out = await this.#httpRequest<
+      { text: string; meta_info: MetaInfoGeneration }
+    >(data);
+    this.#reportUsage({
+      completionTokens: out.meta_info.completion_tokens,
+      promptTokens: out.meta_info.prompt_tokens,
+    });
+    return out;
   }
-  #select(
+  async #select(
     data: SglSelectData,
   ): Promise<{ text: string; meta_info: MetaInfoSelection }[]> {
-    return this.#httpRequest(data);
+    const out = await this.#httpRequest<
+      { text: string; meta_info: MetaInfoSelection }[]
+    >(data);
+    for (const item of out) {
+      this.#reportUsage({
+        completionTokens: item.meta_info.completion_tokens,
+        promptTokens: item.meta_info.prompt_tokens,
+      });
+    }
+    return out;
   }
   getState(): { text: string; captured: Record<string, string> } {
     return this.#state;
@@ -160,18 +155,20 @@ class SglServerExecutor {
       case "GenerateTask": {
         const out = await this.#generate({
           text: this.#state.text,
-          sampling_params: createSglSamplingParams(
-            {
-              max_new_tokens: task.max_tokens,
-              stop: task.stop,
-            },
-            this.#sampling_params,
-          ),
+          sampling_params: {
+            ...this.#sampling_params,
+            max_new_tokens: task.max_tokens,
+            stop: task.stop,
+            regex: task.regex,
+          },
         });
         this.#state.text += out.text;
         if (task.name != null) {
           this.#state.captured[task.name] = out.text;
-          this.#onCapture(task.name, out.text);
+          this.#callbacks.onCapture({
+            name: task.name,
+            value: out.text,
+          });
         }
         break;
       }
@@ -179,23 +176,22 @@ class SglServerExecutor {
         // Cache common prefix
         const res = await this.#generate({
           text: this.#state.text,
-          sampling_params: createSglSamplingParams(
-            { max_new_tokens: 0, temperature: 0.0 },
-            this.#sampling_params,
-          ),
+          sampling_params: {
+            ...this.#sampling_params,
+            max_new_tokens: 0,
+            temperature: 0.0,
+          },
         });
 
         const prompt_len = res.meta_info.prompt_tokens;
 
         const obj = await this.#select({
           text: task.choices.map((c) => this.#state.text + c),
-          sampling_params: createSglSamplingParams(
-            {
-              max_new_tokens: 0,
-              temperature: 0.0,
-            },
-            this.#sampling_params,
-          ),
+          sampling_params: {
+            ...this.#sampling_params,
+            max_new_tokens: 0,
+            temperature: 0.0,
+          },
           return_logprob: true,
           logprob_start_len: Math.max(prompt_len - 2, 0),
         });
@@ -213,7 +209,10 @@ class SglServerExecutor {
         this.#state.text += decision;
         if (task.name != null) {
           this.#state.captured[task.name] = decision;
-          this.#onCapture(task.name, decision);
+          this.#callbacks.onCapture({
+            name: task.name,
+            value: decision,
+          });
         }
 
         break;
@@ -253,19 +252,23 @@ class SglServerExecutor {
 
 export class SGLangBackend implements AbstractBackend {
   readonly #url: string;
-
-  constructor(url: string) {
+  readonly #reportUsage: ReportUsage;
+  constructor(url: string, callbacks?: {
+    reportUsage?: ReportUsage;
+  }) {
     this.#url = url;
+    this.#reportUsage = callbacks?.reportUsage ?? NOOP;
   }
   async executeJSON(
     data: GenerationThread,
-    onCapture: OnCapture,
+    callbacks: ExecutionCallbacks,
   ): Promise<TasksOutput> {
     const executor = new SglServerExecutor(
       this.#url,
       data.sampling_params,
       data.initial_state,
-      onCapture,
+      callbacks,
+      this.#reportUsage,
     );
     for (const task of data.tasks) {
       await executor.runTask(task);

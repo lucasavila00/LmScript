@@ -8,7 +8,19 @@ export type TasksOutput = { text: string; captured: Record<string, string> };
 /**
  * Callback for capturing values from the AI model in real time.
  */
-export type OnCapture = (name: string, value: string) => void;
+export type OnCapture = (args: {
+  name: string;
+  value: string;
+}) => void;
+
+export type ReportUsage = (args: {
+  promptTokens: number;
+  completionTokens: number;
+}) => void;
+
+export type ExecutionCallbacks = {
+  onCapture: OnCapture;
+};
 
 /**
  * Interface for fetching from a SGL server.
@@ -16,7 +28,7 @@ export type OnCapture = (name: string, value: string) => void;
 export type AbstractBackend = {
   executeJSON: (
     data: GenerationThread,
-    onCapture: OnCapture,
+    callbacks: ExecutionCallbacks,
   ) => Promise<TasksOutput>;
 };
 
@@ -30,7 +42,7 @@ export type GenerateTask = {
   name: string | undefined;
   stop: string[];
   max_tokens: number;
-  // regex: string | undefined;
+  regex: string | undefined;
 };
 
 export type SelectTask = {

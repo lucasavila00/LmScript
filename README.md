@@ -1,10 +1,3 @@
-# Work in progress.
-
-## TODO
-
-- [ ] handling meta_info
-- [ ] handling regex
-
 # LmScript
 
 LmScript: Fast and Controllable Language Model Interactions in Typescript - Open

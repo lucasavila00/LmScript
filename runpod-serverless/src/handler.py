@@ -1,7 +1,10 @@
 from typing import List, Literal, Optional, Union
 import httpx
 import runpod
-import sglang as sgl
+import sglang
+
+sglang.__file__ = "/sglang/python/sglang/srt"
+import sglang.api as sgl
 from sglang.srt.utils import handle_port_init
 import os
 from pydantic import BaseModel
@@ -67,9 +70,10 @@ class AddTextTask(BaseModel):
 
 class GenerateTask(BaseModel):
     tag: Literal["GenerateTask"]
-    name: Optional[str]
+    name: Optional[str] = None
     stop: list[str]
     max_tokens: int
+    regex: Optional[str] = None
 
 
 class SelectTask(BaseModel):
@@ -95,6 +99,8 @@ Task = Union[AddTextTask, GenerateTask, SelectTask, MatchTask, RepeatTask]
 class ClientState(BaseModel):
     text: str
     captured: dict[str, str]
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
 
 
 class FetcherSamplingParams(BaseModel):
@@ -118,18 +124,18 @@ async def generate_task(
         state.text += t.text
 
     elif isinstance(t, GenerateTask):
-        res = await generate(
-            {
-                "text": state.text,
-                "sampling_params": {
-                    **{
-                        k: v for k, v in sampling_params.dict().items() if v is not None
-                    },
-                    "stop": t.stop,
-                    "max_new_tokens": t.max_tokens,
-                },
-            }
-        )
+        params = {
+            **{k: v for k, v in sampling_params.dict().items() if v is not None},
+            "stop": t.stop,
+            "max_new_tokens": t.max_tokens,
+        }
+        if t.regex is not None:
+            params["regex"] = t.regex
+        res = await generate({"text": state.text, "sampling_params": params})
+
+        state.prompt_tokens += res["meta_info"]["prompt_tokens"]
+        state.completion_tokens += res["meta_info"]["completion_tokens"]
+
         state.text += res["text"]
         if t.name is not None:
             state.captured[t.name] = res["text"]
@@ -138,7 +144,6 @@ async def generate_task(
                 "name": t.name,
                 "value": res["text"],
             }
-        # meta_infos += [res["meta_info"]]
     elif isinstance(t, SelectTask):
         # Cache common prefix
         data = {
@@ -150,6 +155,10 @@ async def generate_task(
         }
         # self._add_images(s, data)
         res = await generate(data)
+
+        state.prompt_tokens += res["meta_info"]["prompt_tokens"]
+        state.completion_tokens += res["meta_info"]["completion_tokens"]
+
         prompt_len = res["meta_info"]["prompt_tokens"]
 
         # Compute logprob
@@ -163,9 +172,13 @@ async def generate_task(
             "logprob_start_len": max(prompt_len - 2, 0),
         }
 
-        obj = await generate(data)
+        arr = await generate(data)
+        for i in arr:
+            state.prompt_tokens += i["meta_info"]["prompt_tokens"]
+            state.completion_tokens += i["meta_info"]["completion_tokens"]
+
         normalized_prompt_logprob = [
-            r["meta_info"]["normalized_prompt_logprob"] for r in obj
+            r["meta_info"]["normalized_prompt_logprob"] for r in arr
         ]
 
         decision = t.choices[np.argmax(normalized_prompt_logprob)]
@@ -178,7 +191,6 @@ async def generate_task(
                 "name": t.name,
                 "value": decision,
             }
-        # meta_infos += [obj[np.argmax(normalized_prompt_logprob)]["meta_info"]]
     elif isinstance(t, RepeatTask):
         state.text += state.captured[t.variable]
     elif isinstance(t, MatchTask):

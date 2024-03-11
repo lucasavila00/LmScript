@@ -10,10 +10,18 @@ const getEnvVarOrThrow = (name: string): string => {
   return value;
 };
 const bench = async () => {
+  let promptTokens = 0;
+  let completionTokens = 0;
   const model = new LmScript(
     new RunpodServerlessBackend(
       getEnvVarOrThrow("RUNPOD_URL"),
       getEnvVarOrThrow("RUNPOD_TOKEN"),
+      {
+        reportUsage: ({ promptTokens: pt, completionTokens: ct }) => {
+          promptTokens += pt;
+          completionTokens += ct;
+        },
+      },
     ),
     {
       template: "llama-2-chat",
@@ -33,6 +41,8 @@ const bench = async () => {
   await Promise.all(batch);
   const duration = Date.now() - start;
   console.log(`Duration: ${duration}ms`);
+  console.log(`Prompt tokens: ${promptTokens}`);
+  console.log(`Completion tokens: ${completionTokens}`);
 };
 
 bench().catch(console.error);

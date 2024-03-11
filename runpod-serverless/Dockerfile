@@ -1,9 +1,5 @@
 FROM runpod/base:0.6.1-cuda12.1.0
 
-COPY builder/requirements.txt /requirements.txt
-RUN python3.11 -m pip install -r /requirements.txt --no-cache-dir && \
-    rm /requirements.txt
-
 ARG BASE_PATH="/runpod-volume"
 
 ENV BASE_PATH=$BASE_PATH \
@@ -11,6 +7,13 @@ ENV BASE_PATH=$BASE_PATH \
     HUGGINGFACE_HUB_CACHE="${BASE_PATH}/huggingface-cache/hub" \
     HF_HOME="${BASE_PATH}/huggingface-cache/hub" \
     HF_TRANSFER=1
+
+COPY builder/requirements.txt /requirements.txt
+RUN python3.11 -m pip install -r /requirements.txt --no-cache-dir && \
+    rm /requirements.txt
+
+RUN git clone https://github.com/sgl-project/sglang.git
+RUN cd sglang && git checkout 30d67b2bca647d7a52fddc42a6d48842610cfec3 && python3.11 -m pip install --upgrade pip && python3.11 -m pip install -e "python[all]"
 
 RUN python3.11 -m pip install flashinfer -i https://flashinfer.ai/whl/cu121/torch2.1/
 
