@@ -50,10 +50,10 @@ async def get_model_info():
         return resp.json()
 
 
-async def generate(parameters: dict):
+async def generate(parameters: dict, *, timeout: int):
     async with httpx.AsyncClient() as client:
         resp = await client.post(
-            f"http://localhost:{SGLANG_PORT}/generate", json=parameters, timeout=30
+            f"http://localhost:{SGLANG_PORT}/generate", json=parameters, timeout=timeout
         )
         resp.raise_for_status()
         return resp.json()
@@ -117,6 +117,9 @@ class GenerationThread(BaseModel):
     initial_state: ClientState
 
 
+BASE_TIMEOUT = 30
+
+
 async def generate_task(
     state: ClientState, t: Task, sampling_params: FetcherSamplingParams
 ):
@@ -131,7 +134,10 @@ async def generate_task(
         }
         if t.regex is not None:
             params["regex"] = t.regex
-        res = await generate({"text": state.text, "sampling_params": params})
+        res = await generate(
+            {"text": state.text, "sampling_params": params},
+            timeout=BASE_TIMEOUT * 6 if t.regex is not None else BASE_TIMEOUT,
+        )
 
         state.prompt_tokens += res["meta_info"]["prompt_tokens"]
         state.completion_tokens += res["meta_info"]["completion_tokens"]
@@ -154,7 +160,7 @@ async def generate_task(
             },
         }
         # self._add_images(s, data)
-        res = await generate(data)
+        res = await generate(data, timeout=BASE_TIMEOUT)
 
         state.prompt_tokens += res["meta_info"]["prompt_tokens"]
         state.completion_tokens += res["meta_info"]["completion_tokens"]
@@ -172,7 +178,7 @@ async def generate_task(
             "logprob_start_len": max(prompt_len - 2, 0),
         }
 
-        arr = await generate(data)
+        arr = await generate(data, timeout=BASE_TIMEOUT)
         for i in arr:
             state.prompt_tokens += i["meta_info"]["prompt_tokens"]
             state.completion_tokens += i["meta_info"]["completion_tokens"]
@@ -218,7 +224,7 @@ async def handler(job):
     if endpoint == "get_model_info":
         yield await get_model_info()
     elif endpoint == "generate":
-        yield await generate(job_input["parameters"])
+        yield await generate(job_input["parameters"], timeout=BASE_TIMEOUT)
     elif endpoint == "generate_thread":
         async for i in generate_thread(GenerationThread(**job_input["parameters"])):
             yield i

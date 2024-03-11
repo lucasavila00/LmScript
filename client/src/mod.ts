@@ -49,6 +49,17 @@ export type GeneratorOptions = {
 export type CreateClientOptions = FetcherSamplingParams & {
   template?: ChatTemplate | ChatTemplateDefinition;
 };
+const validateRegex = (regex: string) => {
+  if (regex == "") {
+    return false;
+  }
+  try {
+    new RegExp(regex);
+    return true;
+  } catch {
+    return false;
+  }
+};
 /**
  * The client is a thread of tasks that can be executed to generate text.
  */
@@ -324,6 +335,9 @@ export class LmScript<
     name: string | undefined,
     generatorOptions: GeneratorOptions | undefined,
   ): LmScript<GEN, SEL> {
+    if (generatorOptions?.regex && !validateRegex(generatorOptions.regex)) {
+      throw new Error("Invalid regex");
+    }
     return this.#clone(this.#state, [
       ...this.#tasks,
       {
