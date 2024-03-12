@@ -85,29 +85,3 @@ export type ClientState = {
   text: string;
   captured: Record<string, string>;
 };
-
-export type PostJsonFetcher = <T>(
-  url: string,
-  headers: Record<string, string>,
-  body: object | undefined,
-) => Promise<T>;
-
-export const defaultPostJsonFetcher: PostJsonFetcher = async <T>(
-  url: string,
-  headers: Record<string, string>,
-  body: object | undefined,
-): Promise<T> => {
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...headers,
-    },
-    body: JSON.stringify(body),
-  });
-  if (!response.ok) {
-    console.error((await response.text()).slice(0, 500));
-    throw new Error("HTTP error " + response.status);
-  }
-  return response.json();
-};

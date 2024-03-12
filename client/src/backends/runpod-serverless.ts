@@ -4,12 +4,7 @@
  */
 
 import { delay, NOOP } from "../utils.ts";
-import {
-  defaultPostJsonFetcher,
-  ExecutionCallbacks,
-  PostJsonFetcher,
-  ReportUsage,
-} from "./abstract.ts";
+import { ExecutionCallbacks, ReportUsage } from "./abstract.ts";
 import { AbstractBackend, GenerationThread, TasksOutput } from "./abstract.ts";
 
 type RunpodStreamResponse =
@@ -70,27 +65,42 @@ type RunSyncResponse = {
  * Backend for the Runpod serverless API.
  */
 export class RunpodServerlessBackend implements AbstractBackend {
-  readonly #url: string;
-  readonly #apiToken: string;
-  readonly #reportUsage: ReportUsage;
-  readonly #fetcher: PostJsonFetcher;
+  #url: string;
+  #apiToken: string;
+  #reportUsage: ReportUsage;
   constructor(
     url: string,
     apiToken: string,
-    options?: {
-      reportUsage: ReportUsage;
-      fetcher?: PostJsonFetcher;
-    },
+    callbacks?: { reportUsage: ReportUsage },
   ) {
     this.#url = url;
     this.#apiToken = apiToken;
-    this.#reportUsage = options?.reportUsage ?? NOOP;
-    this.#fetcher = options?.fetcher ?? defaultPostJsonFetcher;
+    this.#reportUsage = callbacks?.reportUsage ?? NOOP;
+  }
+
+  async #fetchNoRetry<T>(
+    url: string,
+    body?: string,
+  ): Promise<T> {
+    const response = await fetch(url, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${this.#apiToken}`,
+      },
+      method: "POST",
+      body,
+    });
+    if (!response.ok) {
+      console.error((await response.text()).slice(0, 500));
+      throw new Error("HTTP error " + response.status);
+    }
+    const out = await response.json();
+    return out;
   }
 
   async #fetch<T>(
     url: string,
-    body?: object,
+    body?: string,
   ): Promise<T> {
     let lastError: unknown = null;
     for (let i = 1; i < 5; i++) {
@@ -98,9 +108,7 @@ export class RunpodServerlessBackend implements AbstractBackend {
         if (lastError != null) {
           await delay(1000 * i * i);
         }
-        return await this.#fetcher(url, {
-          "Authorization": "Bearer " + this.#apiToken,
-        }, body);
+        return await this.#fetchNoRetry(url, body);
       } catch (e) {
         lastError = e;
       }
@@ -166,12 +174,12 @@ export class RunpodServerlessBackend implements AbstractBackend {
       RunSyncResponse
     >(
       this.#url + "/runsync",
-      {
+      JSON.stringify({
         input: {
           endpoint: "generate_thread",
           parameters: data,
         },
-      },
+      }),
     );
     if (out?.status === "COMPLETED") {
       this.#handleStream(out.output, callbacks);
