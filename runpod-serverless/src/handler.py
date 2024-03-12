@@ -11,13 +11,18 @@ from pydantic import BaseModel
 import numpy as np
 from huggingface_hub import snapshot_download
 import os
+import json
 
 model_downloaded = False
+REPO_ID = os.environ.get("REPO_ID", "TheBloke/Mistral-7B-Instruct-v0.2-AWQ")
 
 try:
-    with open("/model_path.txt", "r") as f:
-        model_path = f.read()
-        if os.path.exists(model_path):
+    with open("/model_path.json", "r") as f:
+        data = json.loads(f.read())
+        model_path = data["model_path"]
+        saved_repo_id = data["repo_id"]
+
+        if os.path.exists(model_path) and saved_repo_id == REPO_ID:
             model_downloaded = True
             print(f"Model found at {model_path}")
 except:
@@ -25,10 +30,17 @@ except:
 
 if not model_downloaded:
     print("Downloading model...")
-    repo_id = os.environ.get("REPO_ID", "TheBloke/Mistral-7B-Instruct-v0.2-AWQ")
-    model_path = snapshot_download(repo_id=repo_id)
-    with open("/model_path.txt", "w") as f:
-        f.write(model_path)
+    model_path = snapshot_download(repo_id=REPO_ID)
+    with open("/model_path.json", "w") as f:
+        f.write(
+            json.dumps(
+                {
+                    "model_path": model_path,
+                    "repo_id": REPO_ID,
+                }
+            )
+        )
+
     print(f"Model downloaded to {model_path}")
 
 SGLANG_PORT, additional_ports = handle_port_init(30000, None, 1)
@@ -36,7 +48,9 @@ RUNTIME = sgl.Runtime(
     model_path=model_path,
     port=SGLANG_PORT,
     additional_ports=additional_ports,
-    model_mode=[] if os.environ.get("DISABLE_FLASH_INFER") == "yes" else ["flashinfer"],
+    model_mode=(
+        [] if os.environ.get("DISABLE_FLASH_INFER", "no") == "yes" else ["flashinfer"]
+    ),
 )
 print(f"Initialized SGLang runtime: {RUNTIME.url}")
 

@@ -22,6 +22,9 @@ RUN pip install "triton>=2.2.0"
 # Replace with the following line to install the latest nightly version, required for even older gpus
 # RUN python3.11 -m pip install -U --index-url https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/Triton-Nightly/pypi/simple/ triton-nightly
 
+COPY builder/download_model.py /download_model.py
+RUN python3.11 /download_model.py
+
 ADD src .
 
 ADD start-docker.sh /start-docker.sh
