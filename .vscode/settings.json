@@ -7,7 +7,8 @@
     "lmscript",
     "logprob",
     "runpod",
-    "sglang"
+    "sglang",
+    "Vllm"
   ],
   "deno.enable": true,
   "python.analysis.typeCheckingMode": "basic"

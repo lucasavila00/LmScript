@@ -24,7 +24,7 @@ There are more complete examples in the
 
 ## Projects
 
-| Project                                                                                                | Description                                                                                                          |
-| ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
-| [Typescript Client](https://github.com/lucasavila00/LmScript/tree/main/client)                         | Dependency-free client that can communicate with different [SGLang](https://github.com/sgl-project/sglang) backends. |
-| [Runpod Serverless Docker Image](https://github.com/lucasavila00/LmScript/tree/main/runpod-serverless) | Docker image that runs SGLang on [Runpod Serverless](https://www.runpod.io/serverless-gpu).                          |
+| Project                                                                                                       | Description                                                                                                          |
+| ------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| [Typescript Client](https://github.com/lucasavila00/LmScript/tree/main/client)                                | Dependency-free client that can communicate with different [SGLang](https://github.com/sgl-project/sglang) backends. |
+| [Runpod Serverless Docker Image](https://github.com/lucasavila00/LmScript/tree/main/runpod-serverless-sglang) | Docker image that runs SGLang on [Runpod Serverless](https://www.runpod.io/serverless-gpu).                          |

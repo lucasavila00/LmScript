@@ -1,5 +1,5 @@
 import { LmScript } from "../src/mod.ts";
-import { RunpodServerlessBackend } from "../src/backends/runpod-serverless.ts";
+import { RunpodServerlessBackend } from "../src/backends/runpod-serverless-sglang.ts";
 import { kitchenSink } from "./kitchen-sink.ts";
 
 const getEnvVarOrThrow = (name: string): string => {

@@ -96,11 +96,11 @@ const client = new LmScript(backend, {
 ### Runpod Serverless Backend
 
 Use it LmScript's
-[Runpod Serverless Docker Image](https://github.com/lucasavila00/LmScript/tree/main/runpod-serverless).
+[Runpod Serverless Docker Image](https://github.com/lucasavila00/LmScript/tree/main/runpod-serverless-sglang).
 
 ```ts
 import { LmScript } from "@lmscript/client";
-import { RunpodServerlessBackend } from "@lmscript/client/backends/runpod-serverless";
+import { RunpodServerlessBackend } from "@lmscript/client/backends/runpod-serverless-sglang";
 
 const backend = new RunpodServerlessBackend(
   getEnvVarOrThrow("RUNPOD_URL"),

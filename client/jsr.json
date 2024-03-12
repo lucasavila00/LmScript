@@ -5,6 +5,7 @@
     ".": "./src/mod.ts",
     "./backends/abstract": "./src/backends/abstract.ts",
     "./backends/sglang": "./src/backends/sglang.ts",
-    "./backends/runpod-serverless": "./src/backends/runpod-serverless.ts"
+    "./backends/vllm": "./src/backends/vllm.ts",
+    "./backends/runpod-serverless-sglang": "./src/backends/runpod-serverless-sglang.ts"
   }
 }

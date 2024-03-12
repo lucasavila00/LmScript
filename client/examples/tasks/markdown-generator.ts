@@ -36,6 +36,9 @@ ${content}
   const acc: string[] = [];
 
   while (true) {
+    if (acc.length > 4) {
+      return acc;
+    }
     const {
       captured: { list_item, list_item_content },
       state: ai,
