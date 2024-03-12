@@ -4,7 +4,7 @@ import runpod
 import sglang
 
 sglang.__file__ = "/sglang/python/sglang/srt"
-import sglang.api as sgl
+from sglang.srt.server import Runtime
 from sglang.srt.utils import handle_port_init
 import os
 from pydantic import BaseModel
@@ -16,6 +16,7 @@ import json
 model_downloaded = False
 REPO_ID = os.environ.get("REPO_ID", "TheBloke/Mistral-7B-Instruct-v0.2-AWQ")
 
+model_path = None
 try:
     with open("/model_path.json", "r") as f:
         data = json.loads(f.read())
@@ -44,12 +45,12 @@ if not model_downloaded:
     print(f"Model downloaded to {model_path}")
 
 SGLANG_PORT, additional_ports = handle_port_init(30000, None, 1)
-RUNTIME = sgl.Runtime(
+RUNTIME = Runtime(
     model_path=model_path,
     port=SGLANG_PORT,
     additional_ports=additional_ports,
-    model_mode=(
-        [] if os.environ.get("DISABLE_FLASH_INFER", "no") == "yes" else ["flashinfer"]
+    enable_flashinfer=(
+        False if os.environ.get("DISABLE_FLASH_INFER", "no") == "yes" else True
     ),
 )
 print(f"Initialized SGLang runtime: {RUNTIME.url}")
