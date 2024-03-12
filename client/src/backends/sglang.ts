@@ -64,7 +64,6 @@ class SglServerExecutor {
   readonly #sampling_params: FetcherSamplingParams;
   readonly #callbacks: ExecutionCallbacks;
   readonly #reportUsage: ReportUsage;
-  readonly #fetcher: typeof fetch;
 
   constructor(
     url: string,
@@ -72,21 +71,19 @@ class SglServerExecutor {
     state: ClientState,
     callbacks: ExecutionCallbacks,
     reportUsage: ReportUsage,
-    fetcher: typeof fetch,
   ) {
     this.#state = JSON.parse(JSON.stringify(state));
     this.#url = url;
     this.#sampling_params = sampling_params;
     this.#callbacks = callbacks;
     this.#reportUsage = reportUsage;
-    this.#fetcher = fetcher;
   }
 
   async #httpRequestNoRetry<T>(data: object): Promise<T> {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 60_000);
     try {
-      const response = await this.#fetcher(this.#url + "/generate", {
+      const response = await fetch(this.#url + "/generate", {
         headers: {
           "Content-Type": "application/json",
         },
@@ -256,14 +253,11 @@ class SglServerExecutor {
 export class SGLangBackend implements AbstractBackend {
   readonly #url: string;
   readonly #reportUsage: ReportUsage;
-  readonly #fetcher: typeof fetch;
   constructor(url: string, options?: {
     reportUsage?: ReportUsage;
-    fetcher?: typeof fetch;
   }) {
     this.#url = url;
     this.#reportUsage = options?.reportUsage ?? NOOP;
-    this.#fetcher = options?.fetcher ?? ((input, init) => fetch(input, init));
   }
   async executeJSON(
     data: GenerationThread,
@@ -275,7 +269,6 @@ export class SGLangBackend implements AbstractBackend {
       data.initial_state,
       callbacks,
       this.#reportUsage,
-      this.#fetcher,
     );
     for (const task of data.tasks) {
       await executor.runTask(task);
