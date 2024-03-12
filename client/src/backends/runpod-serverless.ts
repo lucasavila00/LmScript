@@ -68,21 +68,26 @@ export class RunpodServerlessBackend implements AbstractBackend {
   #url: string;
   #apiToken: string;
   #reportUsage: ReportUsage;
+  #fetcher: typeof fetch;
   constructor(
     url: string,
     apiToken: string,
-    callbacks?: { reportUsage: ReportUsage },
+    options?: {
+      reportUsage: ReportUsage;
+      fetcher?: typeof fetch;
+    },
   ) {
     this.#url = url;
     this.#apiToken = apiToken;
-    this.#reportUsage = callbacks?.reportUsage ?? NOOP;
+    this.#reportUsage = options?.reportUsage ?? NOOP;
+    this.#fetcher = options?.fetcher ?? ((input, init) => fetch(input, init));
   }
 
   async #fetchNoRetry<T>(
     url: string,
     body?: string,
   ): Promise<T> {
-    const response = await fetch(url, {
+    const response = await this.#fetcher(url, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${this.#apiToken}`,

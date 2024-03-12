@@ -1,6 +1,6 @@
 {
   "name": "@lmscript/client",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "exports": {
     ".": "./src/mod.ts",
     "./backends/sglang": "./src/backends/sglang.ts",
