@@ -56,7 +56,14 @@ export function Editor() {
 
   return (
     <>
-      <EditorMetaProvider>
+      <EditorMetaProvider
+        initialState={{
+          "the uuid": {
+            tag: "generate",
+            name: "the name",
+          },
+        }}
+      >
         <BlockNoteView editor={editor}>
           {/* Adds a mentions menu which opens with the "@" key */}
           <SuggestionMenuController
