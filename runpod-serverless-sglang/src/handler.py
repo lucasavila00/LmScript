@@ -1,9 +1,6 @@
 from typing import List, Literal, Optional, Union
 import httpx
 import runpod
-import sglang
-
-sglang.__file__ = "/sglang/python/sglang/srt"
 from sglang.srt.server import Runtime
 from sglang.srt.utils import handle_port_init
 import os

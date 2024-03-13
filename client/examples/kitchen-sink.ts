@@ -47,9 +47,9 @@ const multiTurnQuestion = (
   model
     .system((m) => m.push("You are a helpful assistant."))
     .user((m) => m.push(question1))
-    .assistant((m) => m.gen("answer1", { maxTokens: 256 }))
+    .assistant((m) => m.gen("answer1", { maxTokens: 64 }))
     .user((m) => m.push(question2))
-    .assistant((m) => m.gen("answer2", { maxTokens: 1025 }))
+    .assistant((m) => m.gen("answer2", { maxTokens: 64 }))
     .run();
 
 // const characterRegex = `\\{

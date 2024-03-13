@@ -16,7 +16,7 @@ COPY builder/download_model.py /download_model.py
 RUN python3.11 /download_model.py
 
 RUN git clone https://github.com/sgl-project/sglang.git && cd sglang && \
-    git checkout ad1dd74673a2e918a39d869865c1830fb634d150 && pip install -e "python[all]"
+    git checkout ed3157997153fdbbe142bf4ef995ecaaae62fc34 && pip install -e "python[all]"
 
 RUN pip install https://github.com/flashinfer-ai/flashinfer/releases/download/v0.0.3/flashinfer-0.0.3+cu121torch2.1-cp311-cp311-linux_x86_64.whl
 

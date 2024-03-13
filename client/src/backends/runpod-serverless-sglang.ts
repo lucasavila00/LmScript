@@ -76,7 +76,7 @@ class RunpodServerlessSingleExecutor {
     this.#callbacks = callbacks;
   }
 
-  async #fetchNoRetry<T>(
+  async #fetch<T>(
     url: string,
     body?: string,
   ): Promise<T> {
@@ -95,24 +95,6 @@ class RunpodServerlessSingleExecutor {
     }
     const out = await response.json();
     return out;
-  }
-
-  async #fetch<T>(
-    url: string,
-    body?: string,
-  ): Promise<T> {
-    let lastError: unknown = null;
-    for (let i = 1; i < 5; i++) {
-      try {
-        if (lastError != null) {
-          await delay(1000 * i * i);
-        }
-        return await this.#fetchNoRetry(url, body);
-      } catch (e) {
-        lastError = e;
-      }
-    }
-    throw new Error(`HTTP request failed: ${lastError}`);
   }
 
   async #monitorProgress(
@@ -215,7 +197,7 @@ export class RunpodServerlessBackend implements AbstractBackend {
     this.#reportUsage = callbacks?.reportUsage ?? NOOP;
   }
 
-  executeJSON(
+  async executeJSON(
     data: GenerationThread,
     callbacks: ExecutionCallbacks,
   ): Promise<TasksOutput> {
@@ -224,6 +206,18 @@ export class RunpodServerlessBackend implements AbstractBackend {
       this.#apiToken,
       { ...callbacks, reportUsage: this.#reportUsage },
     );
-    return executor.executeJSON(data);
+
+    let lastError: unknown = null;
+    for (let i = 1; i < 5; i++) {
+      try {
+        if (lastError != null) {
+          await delay(1000 * i * i);
+        }
+        return await executor.executeJSON(data);
+      } catch (e) {
+        lastError = e;
+      }
+    }
+    throw new Error(`HTTP request failed: ${lastError}`);
   }
 }

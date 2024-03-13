@@ -1,6 +1,7 @@
 import { LmScript } from "../src/mod.ts";
 import { RunpodServerlessBackend } from "../src/backends/runpod-serverless-sglang.ts";
 import { kitchenSink } from "./kitchen-sink.ts";
+import { delay } from "../src/utils.ts";
 
 const getEnvVarOrThrow = (name: string): string => {
   const value = Deno.env.get(name);
@@ -28,13 +29,17 @@ const bench = async () => {
       temperature: 0.1,
     },
   );
+  let errors = 0;
   const MAX_JOBS = 100;
   const batch = Array.from(
     { length: MAX_JOBS },
-    (_, _i) =>
-      kitchenSink(model).catch((e) => {
+    async (_, _i) => {
+      await delay(Math.random() * 1000);
+      return kitchenSink(model).catch((e) => {
+        errors++;
         console.error(e);
-      }),
+      });
+    },
   );
 
   const start = Date.now();
@@ -43,6 +48,10 @@ const bench = async () => {
   console.log(`Duration: ${duration}ms`);
   console.log(`Prompt tokens: ${promptTokens}`);
   console.log(`Completion tokens: ${completionTokens}`);
+
+  if (errors > 0) {
+    console.error(`Errors: ${errors}`);
+  }
 };
 
 bench().catch(console.error);
