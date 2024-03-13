@@ -38,19 +38,16 @@ type OutputStream = Array<
 type RunpodCompletedResponse = {
   status: "COMPLETED";
   output: TasksOutput;
-  id: string;
   stream: OutputStream;
 };
 
 type RunpodInQueueResponse = {
   status: "IN_QUEUE";
-  id: string;
   stream?: OutputStream;
 };
 
 type RunpodInProgressResponse = {
   status: "IN_PROGRESS";
-  id: string;
   stream?: OutputStream;
 };
 type RunSyncResponse = {
@@ -61,21 +58,22 @@ type RunSyncResponse = {
   output: OutputItems[];
 };
 
-/**
- * Backend for the Runpod serverless API.
- */
-export class RunpodServerlessBackend implements AbstractBackend {
+class RunpodServerlessSingleExecutor {
   #url: string;
   #apiToken: string;
   #reportUsage: ReportUsage;
+  #callbacks: ExecutionCallbacks;
+  #stream: OutputItems[] = [];
+
   constructor(
     url: string,
     apiToken: string,
-    callbacks?: { reportUsage: ReportUsage },
+    callbacks: { reportUsage: ReportUsage } & ExecutionCallbacks,
   ) {
     this.#url = url;
     this.#apiToken = apiToken;
-    this.#reportUsage = callbacks?.reportUsage ?? NOOP;
+    this.#reportUsage = callbacks.reportUsage;
+    this.#callbacks = callbacks;
   }
 
   async #fetchNoRetry<T>(
@@ -91,6 +89,7 @@ export class RunpodServerlessBackend implements AbstractBackend {
       body,
     });
     if (!response.ok) {
+      console.log("request failed", url, body);
       console.error((await response.text()).slice(0, 500));
       throw new Error("HTTP error " + response.status);
     }
@@ -119,31 +118,31 @@ export class RunpodServerlessBackend implements AbstractBackend {
   async #monitorProgress(
     id: string,
     retries: number,
-    callbacks: ExecutionCallbacks,
   ): Promise<TasksOutput> {
     await delay(1000 * retries * retries);
     const out = await this.#fetch<RunpodStreamResponse>(
       this.#url + "/stream/" + id,
     );
-    return this.#handleRunpodStreamResponse(out, retries + 1, callbacks);
+    return this.#handleRunpodStreamResponse(id, out, retries + 1);
   }
-  #handleStream(stream: OutputItems[], callbacks: ExecutionCallbacks) {
+  #handleStream(stream: OutputItems[]) {
+    this.#stream.push(...stream);
     for (const message of stream) {
       if (message.tag === "Capture") {
-        callbacks.onCapture({ name: message.name, value: message.value });
+        this.#callbacks.onCapture({ name: message.name, value: message.value });
       }
     }
   }
   #handleRunpodStreamResponse(
+    id: string,
     out: RunpodStreamResponse,
     retries: number,
-    callbacks: ExecutionCallbacks,
   ): Promise<TasksOutput> {
-    this.#handleStream((out.stream ?? []).map((it) => it.output), callbacks);
+    this.#handleStream((out.stream ?? []).map((it) => it.output));
     switch (out.status) {
       case "COMPLETED": {
-        const finished = out.stream.find((x) => x.output.tag === "Finished")
-          ?.output;
+        const finished = this.#stream.find((x) => x.tag === "Finished");
+
         if (finished == null || finished.tag != "Finished") {
           throw new Error("INTERNAL ERROR: no finished tag");
         }
@@ -158,7 +157,7 @@ export class RunpodServerlessBackend implements AbstractBackend {
       }
       case "IN_QUEUE":
       case "IN_PROGRESS": {
-        return this.#monitorProgress(out.id, retries, callbacks);
+        return this.#monitorProgress(id, retries);
       }
       default: {
         throw new Error("Runpod error: " + JSON.stringify(out));
@@ -168,12 +167,11 @@ export class RunpodServerlessBackend implements AbstractBackend {
 
   async executeJSON(
     data: GenerationThread,
-    callbacks: ExecutionCallbacks,
   ): Promise<TasksOutput> {
     const out = await this.#fetch<
       RunSyncResponse
     >(
-      this.#url + "/runsync",
+      this.#url + "/run",
       JSON.stringify({
         input: {
           endpoint: "generate_thread",
@@ -182,7 +180,7 @@ export class RunpodServerlessBackend implements AbstractBackend {
       }),
     );
     if (out?.status === "COMPLETED") {
-      this.#handleStream(out.output, callbacks);
+      this.#handleStream(out.output);
       const finished = out.output.find((x) => x.tag === "Finished");
       if (finished == null || finished.tag != "Finished") {
         throw new Error("INTERNAL ERROR: no finished tag");
@@ -196,6 +194,36 @@ export class RunpodServerlessBackend implements AbstractBackend {
         text: finished.text,
       });
     }
-    return this.#monitorProgress(out.id, 1, callbacks);
+    return this.#monitorProgress(out.id, 1);
+  }
+}
+
+/**
+ * Backend for the Runpod serverless API.
+ */
+export class RunpodServerlessBackend implements AbstractBackend {
+  #url: string;
+  #apiToken: string;
+  #reportUsage: ReportUsage;
+  constructor(
+    url: string,
+    apiToken: string,
+    callbacks?: { reportUsage: ReportUsage },
+  ) {
+    this.#url = url;
+    this.#apiToken = apiToken;
+    this.#reportUsage = callbacks?.reportUsage ?? NOOP;
+  }
+
+  executeJSON(
+    data: GenerationThread,
+    callbacks: ExecutionCallbacks,
+  ): Promise<TasksOutput> {
+    const executor = new RunpodServerlessSingleExecutor(
+      this.#url,
+      this.#apiToken,
+      { ...callbacks, reportUsage: this.#reportUsage },
+    );
+    return executor.executeJSON(data);
   }
 }
