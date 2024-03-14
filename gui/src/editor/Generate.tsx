@@ -6,6 +6,8 @@ import { Modal } from "./Modal";
 import {
   EditorMetaContext,
   GenerateNodeData,
+  OpenedContext,
+  ToggleOpenedContext,
   UpdateEditorMetaContext,
 } from "./Context";
 import CreatableSelect from "react-select/creatable";
@@ -56,6 +58,7 @@ const GenerateComponentModal: FC<{
       <form
         onSubmit={(ev) => {
           ev.preventDefault();
+          // ev.stopPropagation();
           onClose();
         }}
       >
@@ -126,7 +129,10 @@ const LoadedGenerateComponent: FC<{
 }> = ({ uuid, data }) => {
   const setMeta = useContext(UpdateEditorMetaContext);
 
-  const [isOpen, setIsOpen_] = useState(false);
+  const isOpenAll = useContext(OpenedContext);
+  const isOpen = isOpenAll[uuid] ?? false;
+
+  const openToggler = useContext(ToggleOpenedContext);
 
   const name = data.name;
   const [editableName, setEditableName] = useState(name);
@@ -143,7 +149,7 @@ const LoadedGenerateComponent: FC<{
         stop: stop,
       }));
     }
-    setIsOpen_(isOpen);
+    openToggler(uuid, isOpen);
   };
   return (
     <>
@@ -191,10 +197,12 @@ export const Generate = createReactInlineContentSpec(
     content: "none",
   },
   {
-    render: (props) => (
-      <>
-        <GenerateComponent uuid={props.inlineContent.props.uuid} />
-      </>
-    ),
+    render: (props) => {
+      return (
+        <>
+          <GenerateComponent uuid={props.inlineContent.props.uuid} />
+        </>
+      );
+    },
   }
 );
