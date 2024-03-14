@@ -5,3 +5,7 @@
 body {
   @apply bg-white dark:bg-zinc-800;
 }
+
+.no-ring-in-children > input {
+  --tw-ring-color: transparent !important;
+}

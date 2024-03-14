@@ -1,96 +1,95 @@
-import { BlockNoteSchema, defaultInlineContentSpecs } from "@blocknote/core";
+import {
+  BlockNoteSchema,
+  PartialBlock,
+  defaultInlineContentSpecs,
+  filterSuggestionItems,
+} from "@blocknote/core";
 import "@blocknote/core/fonts/inter.css";
 import {
   BlockNoteView,
+  DefaultReactSuggestionItem,
+  DragHandleMenu,
+  RemoveBlockItem,
+  SideMenu,
+  SideMenuController,
   SuggestionMenuController,
+  getDefaultReactSlashMenuItems,
   useCreateBlockNote,
 } from "@blocknote/react";
 import "@blocknote/react/style.css";
 import { Generate } from "./Generate";
-import { EditorMetaProvider } from "./Context";
+import { HiOutlineGlobeAlt } from "react-icons/hi";
+import { FC } from "react";
 
-// Our schema with inline content specs, which contain the configs and
-// implementations for inline content  that we want our editor to use.
 const schema = BlockNoteSchema.create({
   inlineContentSpecs: {
-    // Adds all default inline content.
     ...defaultInlineContentSpecs,
-    // Adds the mention tag.
     generate: Generate,
   },
 });
 
-export function Editor() {
+const getCustomSlashMenuItems = (
+  editor: typeof schema.BlockNoteEditor
+): DefaultReactSuggestionItem[] => [
+  ...getDefaultReactSlashMenuItems(editor).filter((it) => {
+    const deny = ["Image", "Table"];
+    return !deny.includes(it.title);
+  }),
+  {
+    title: "Generate",
+    aliases: ["gen"],
+    group: "AI",
+    icon: <HiOutlineGlobeAlt size={18} />,
+    subtext: "The AI generates some text",
+    onItemClick: () => {
+      editor.insertInlineContent([
+        {
+          type: "generate",
+          props: {
+            uuid: window.crypto.randomUUID(),
+          },
+        },
+        " ", // add a space after the generation
+      ]);
+    },
+  },
+];
+
+type BSchema = (typeof schema)["blockSchema"];
+type ISchema = (typeof schema)["inlineContentSchema"];
+type SSchema = (typeof schema)["styleSchema"];
+export const Editor: FC<{
+  initialContent: PartialBlock<BSchema, ISchema, SSchema>[];
+}> = ({ initialContent }) => {
   const editor = useCreateBlockNote({
     schema,
-    initialContent: [
-      {
-        type: "paragraph",
-        content: "Welcome to this demo!",
-      },
-      {
-        type: "paragraph",
-        content: [
-          {
-            type: "generate",
-            props: {
-              uuid: "the uuid",
-            },
-          },
-          {
-            type: "text",
-            text: " <- This is an example mention",
-            styles: {},
-          },
-        ],
-      },
-      {
-        type: "paragraph",
-        content: "Press the '@' key to open the mentions menu and add another",
-      },
-      {
-        type: "paragraph",
-      },
-    ],
+    initialContent,
   });
 
   return (
     <>
-      <EditorMetaProvider
-        initialState={{
-          "the uuid": {
-            tag: "generate",
-            name: "the name",
-          },
-        }}
-      >
-        <BlockNoteView editor={editor}>
-          {/* Adds a mentions menu which opens with the "@" key */}
-          <SuggestionMenuController
-            triggerCharacter={"@"}
-            getItems={async (_query) => {
-              return [
-                {
-                  title: "Generate",
-                  onItemClick: () => {
-                    editor.insertInlineContent([
-                      {
-                        type: "generate",
-                        props: {
-                          uuid: window.crypto.randomUUID(),
-                        },
-                      },
-                      " ", // add a space after the generation
-                    ]);
-                  },
-                },
-              ];
-            }}
-          />
-        </BlockNoteView>
-      </EditorMetaProvider>
+      <BlockNoteView editor={editor} sideMenu={false} slashMenu={false}>
+        <SideMenuController
+          sideMenu={(props) => (
+            <SideMenu
+              {...props}
+              dragHandleMenu={(props) => (
+                <DragHandleMenu {...props}>
+                  <RemoveBlockItem {...props}>Delete</RemoveBlockItem>
+                </DragHandleMenu>
+              )}
+            />
+          )}
+        />
+        <SuggestionMenuController
+          triggerCharacter={"/"}
+          getItems={async (query) =>
+            filterSuggestionItems(getCustomSlashMenuItems(editor), query)
+          }
+        />
+      </BlockNoteView>
     </>
   );
-}
+};
 
 export default Editor;

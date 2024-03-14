@@ -3,6 +3,8 @@ import { FC, createContext, useCallback, useState } from "react";
 export type GenerateNodeData = {
   tag: "generate";
   name: string;
+  stop: string[];
+  max_tokens: number;
 };
 
 type NodeData = {

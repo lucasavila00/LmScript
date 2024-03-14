@@ -10,5 +10,6 @@
     "sglang",
     "Vllm"
   ],
-  "python.analysis.typeCheckingMode": "basic"
+  "python.analysis.typeCheckingMode": "basic",
+  "deno.enablePaths": ["./client"]
 }
