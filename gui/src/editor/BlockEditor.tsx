@@ -3,9 +3,10 @@ import { useBlockEditor } from "./hooks/useBlockEditor";
 import "./styles/index.css";
 import { ContentItemMenu } from "./components/ContentItemMenu";
 import { useRef } from "react";
+import { LmGeneratorMenu } from "./components/LmGeneratorMenu";
 
 export const BlockEditor = () => {
-  const { editor, characterCount: _ } = useBlockEditor();
+  const { editor } = useBlockEditor();
   const menuContainerRef = useRef(null);
 
   if (editor == null) {
@@ -26,13 +27,7 @@ export const BlockEditor = () => {
     /> */}
         <EditorContent editor={editor} className="flex-1 overflow-y-auto" />
         <ContentItemMenu editor={editor} />
-        {/* 
-    <LinkMenu editor={editor} appendTo={menuContainerRef} />
-    <TextMenu editor={editor} />
-    <ColumnsMenu editor={editor} appendTo={menuContainerRef} />
-    <TableRowMenu editor={editor} appendTo={menuContainerRef} />
-    <TableColumnMenu editor={editor} appendTo={menuContainerRef} />
-    <ImageBlockMenu editor={editor} appendTo={menuContainerRef} /> */}
+        <LmGeneratorMenu editor={editor} appendTo={menuContainerRef} />
       </div>
     </div>
   );

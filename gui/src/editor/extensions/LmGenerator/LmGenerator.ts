@@ -1,79 +1,31 @@
 import { mergeAttributes, Node } from "@tiptap/core";
-import { DOMOutputSpec, Node as ProseMirrorNode } from "@tiptap/pm/model";
 import { PluginKey } from "@tiptap/pm/state";
-export type MentionOptions = {
-  renderText: (
-    props: { options: MentionOptions; node: ProseMirrorNode },
-  ) => string;
-  renderHTML: (
-    props: { options: MentionOptions; node: ProseMirrorNode },
-  ) => DOMOutputSpec;
-};
+import { newUuid } from "../../../lib/utils";
+// export type LmGeneratorOptions = {};
 
-export const MentionPluginKey = new PluginKey("mention");
+export const LmGeneratorPluginKey = new PluginKey("lmGenerator");
 
-export const Mention = Node.create<MentionOptions>({
-  name: "mention",
+declare module "@tiptap/core" {
+  interface Commands<ReturnType> {
+    lmGenerator: {
+      createNewLmGenerator: () => ReturnType;
+      updateLmGenerator: (value: string) => ReturnType;
+    };
+  }
+}
+
+export const LmGenerator = Node.create({
+  name: "lmGenerator",
 
   addOptions() {
-    return {
-      //   HTMLAttributes: {},
-      renderText({ options, node }) {
-        return `@${node.attrs.label ?? node.attrs.id}`;
-      },
-      renderHTML({ options, node }) {
-        return [
-          "span",
-          {},
-          `@${node.attrs.label ?? node.attrs.id}`,
-        ];
-      },
-      //   suggestion: {
-      //     char: "@",
-      //     pluginKey: MentionPluginKey,
-      //     command: ({ editor, range, props }) => {
-      //       // increase range.to by one when the next node is of type "text"
-      //       // and starts with a space character
-      //       const nodeAfter = editor.view.state.selection.$to.nodeAfter;
-      //       const overrideSpace = nodeAfter?.text?.startsWith(" ");
-
-      //       if (overrideSpace) {
-      //         range.to += 1;
-      //       }
-
-      //       editor
-      //         .chain()
-      //         .focus()
-      //         .insertContentAt(range, [
-      //           {
-      //             type: this.name,
-      //             attrs: props,
-      //           },
-      //           {
-      //             type: "text",
-      //             text: " ",
-      //           },
-      //         ])
-      //         .run();
-
-      //       window.getSelection()?.collapseToEnd();
-      //     },
-      //     allow: ({ state, range }) => {
-      //       const $from = state.doc.resolve(range.from);
-      //       const type = state.schema.nodes[this.name];
-      //       const allow = !!$from.parent.type.contentMatch.matchType(type);
-
-      //       return allow;
-      //     },
-      //   },
-    };
+    return {};
   },
 
   group: "inline",
 
   inline: true,
 
-  selectable: false,
+  selectable: true,
 
   atom: true,
 
@@ -81,7 +33,7 @@ export const Mention = Node.create<MentionOptions>({
     return {
       id: {
         default: null,
-        parseHTML: (element) => element.getAttribute("data-id"),
+        parseHTML: (_element) => newUuid(),
         renderHTML: (attributes) => {
           if (!attributes.id) {
             return {};
@@ -92,23 +44,50 @@ export const Mention = Node.create<MentionOptions>({
           };
         },
       },
+    };
+  },
+  addCommands() {
+    return {
+      createNewLmGenerator: () => ({ chain, tr }) => {
+        return chain().insertContent({
+          type: this.name,
+          attrs: {
+            id: newUuid(),
+          },
+        })
+          .setNodeSelection(tr.selection.to - 1)
+          .run();
+      },
+      updateLmGenerator: (value) => ({ chain, state }) => {
+        const activeNodePosition = state.selection.$from.pos;
 
-      label: {
-        default: null,
-        parseHTML: (element) => element.getAttribute("data-label"),
-        renderHTML: (attributes) => {
-          if (!attributes.label) {
-            return {};
-          }
+        const activeNode = state.doc.nodeAt(activeNodePosition);
 
-          return {
-            "data-label": attributes.label,
-          };
-        },
+        if (activeNode == null) {
+          return false;
+        }
+
+        if (activeNode.type.name !== "lmGenerator") {
+          return false;
+        }
+        return chain()
+          .insertContentAt(
+            {
+              from: activeNodePosition,
+              to: activeNodePosition + activeNode.nodeSize,
+            },
+            {
+              type: "lmGenerator",
+              attrs: {
+                id: value,
+              },
+            },
+          )
+          .setNodeSelection(activeNodePosition)
+          .run();
       },
     };
   },
-
   parseHTML() {
     return [
       {
@@ -118,37 +97,27 @@ export const Mention = Node.create<MentionOptions>({
   },
 
   renderHTML({ node, HTMLAttributes }) {
-    const html = this.options.renderHTML({
-      options: this.options,
-      node,
-    });
-
-    if (typeof html === "string") {
-      return [
-        "span",
-        mergeAttributes(
-          { "data-type": this.name },
-          {},
-          HTMLAttributes,
-        ),
-        html,
-      ];
-    }
-    return html;
+    return [
+      "span",
+      mergeAttributes(
+        {
+          "data-type": this.name,
+        },
+        HTMLAttributes,
+      ),
+      `@${node.attrs.id}`,
+    ];
   },
 
   renderText({ node }) {
-    return this.options.renderText({
-      options: this.options,
-      node,
-    });
+    return `@${node.attrs.id}`;
   },
 
   addKeyboardShortcuts() {
     return {
       Backspace: () =>
         this.editor.commands.command(({ tr, state }) => {
-          let isMention = false;
+          let isLmGenerator = false;
           const { selection } = state;
           const { empty, anchor } = selection;
 
@@ -158,7 +127,7 @@ export const Mention = Node.create<MentionOptions>({
 
           state.doc.nodesBetween(anchor - 1, anchor, (node, pos) => {
             if (node.type.name === this.name) {
-              isMention = true;
+              isLmGenerator = true;
               tr.insertText(
                 "@",
                 pos,
@@ -169,17 +138,12 @@ export const Mention = Node.create<MentionOptions>({
             }
           });
 
-          return isMention;
+          return isLmGenerator;
         }),
     };
   },
 
   addProseMirrorPlugins() {
-    return [
-      //   Suggestion({
-      //     editor: this.editor,
-      //     ...this.options.suggestion,
-      //   }),
-    ];
+    return [];
   },
 });

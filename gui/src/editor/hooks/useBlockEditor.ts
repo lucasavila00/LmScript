@@ -1,4 +1,4 @@
-import { Editor, useEditor } from "@tiptap/react";
+import { useEditor } from "@tiptap/react";
 import { Document as TiptapDocument } from "@tiptap/extension-document";
 import { Heading } from "../extensions/Heading";
 import { Dropcursor } from "@tiptap/extension-dropcursor";
@@ -8,9 +8,7 @@ import { HorizontalRule } from "../extensions/HorizontalRule";
 import { SlashCommand } from "../extensions/SlashCommand";
 import StarterKit from "@tiptap/starter-kit";
 import { Selection } from "../extensions/Selection";
-import { Mention } from "../extensions/LmGenerator/LmGenerator";
-// import { LmGenerator } from "../extensions/LmGenerator";
-// import { TrailingNode } from "../extensions/TrailingNode";
+import { LmGenerator } from "../extensions/LmGenerator/LmGenerator";
 
 export const initialContent = {
   type: "doc",
@@ -21,21 +19,14 @@ export const initialContent = {
         type: "text",
         text: "test",
       }, {
-        type: "mention",
+        type: "lmGenerator",
         attrs: {
           id: "123",
-          label: "test",
         },
       }],
     },
   ],
 };
-
-declare global {
-  interface Window {
-    editor: Editor | null;
-  }
-}
 
 export const useBlockEditor = () => {
   const editor = useEditor(
@@ -81,9 +72,7 @@ export const useBlockEditor = () => {
         HorizontalRule,
         SlashCommand,
         Selection,
-        Mention.configure({}),
-        // Highlight,
-        // TrailingNode,
+        LmGenerator,
       ],
       editorProps: {
         attributes: {
@@ -97,10 +86,5 @@ export const useBlockEditor = () => {
     [],
   );
 
-  console.log(editor?.getJSON());
-
-  const characterCount = editor?.storage.characterCount ||
-    { characters: () => 0, words: () => 0 };
-
-  return { editor, characterCount };
+  return { editor };
 };
