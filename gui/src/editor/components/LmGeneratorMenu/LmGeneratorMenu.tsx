@@ -38,8 +38,8 @@ export const LmGeneratorMenu = ({
     return isActive;
   }, [editor]);
 
-  const data = editor.getAttributes("lmGenerator");
-  console.log(data);
+  // const data = editor.getAttributes("lmGenerator");
+  // console.log(data);
 
   const onSetNewId = useCallback(() => {
     editor.commands.updateLmGenerator(newUuid());

@@ -9,21 +9,31 @@ import { SlashCommand } from "../extensions/SlashCommand";
 import StarterKit from "@tiptap/starter-kit";
 import { Selection } from "../extensions/Selection";
 import { LmGenerator } from "../extensions/LmGenerator/LmGenerator";
+import { AuthorSelect } from "../extensions/AuthorSelect/AuthorSelect";
 
 export const initialContent = {
   type: "doc",
   content: [
     {
       type: "paragraph",
-      content: [{
-        type: "text",
-        text: "test",
-      }, {
-        type: "lmGenerator",
-        attrs: {
-          id: "123",
+      content: [
+        {
+          type: "text",
+          text: "test",
         },
-      }],
+        {
+          type: "lmGenerator",
+          attrs: {
+            id: "123",
+          },
+        },
+      ],
+    },
+    {
+      type: "reactComponent",
+      attrs: {
+        count: 3,
+      },
     },
   ],
 };
@@ -73,6 +83,7 @@ export const useBlockEditor = () => {
         SlashCommand,
         Selection,
         LmGenerator,
+        AuthorSelect,
       ],
       editorProps: {
         attributes: {

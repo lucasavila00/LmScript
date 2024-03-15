@@ -71,18 +71,7 @@ export const LmGenerator = Node.create({
           return false;
         }
         return chain()
-          .insertContentAt(
-            {
-              from: activeNodePosition,
-              to: activeNodePosition + activeNode.nodeSize,
-            },
-            {
-              type: "lmGenerator",
-              attrs: {
-                id: value,
-              },
-            },
-          )
+          .updateAttributes("lmGenerator", { id: value })
           .setNodeSelection(activeNodePosition)
           .run();
       },
