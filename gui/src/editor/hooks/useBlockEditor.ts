@@ -1,12 +1,13 @@
 import { Editor, useEditor } from "@tiptap/react";
 import { Document as TiptapDocument } from "@tiptap/extension-document";
-import { Text } from "@tiptap/extension-text";
-import { Paragraph } from "@tiptap/extension-paragraph";
 import { Heading } from "../extensions";
-import { BulletList } from "@tiptap/extension-bullet-list";
-import { OrderedList } from "@tiptap/extension-ordered-list";
-import { ListItem } from "@tiptap/extension-list-item";
 import { Dropcursor } from "@tiptap/extension-dropcursor";
+import { Placeholder } from "@tiptap/extension-placeholder";
+import { FocusClasses as Focus } from "@tiptap/extension-focus";
+import { HorizontalRule } from "../extensions/HorizontalRule";
+import { SlashCommand } from "../extensions/SlashCommand";
+import StarterKit from "@tiptap/starter-kit";
+import { Selection } from "../extensions/Selection";
 // import { TrailingNode } from "../extensions/TrailingNode";
 
 export const initialContent = {
@@ -34,14 +35,44 @@ export const useBlockEditor = () => {
       autofocus: true,
       content: initialContent,
       extensions: [
+        StarterKit.configure({
+          document: false,
+          dropcursor: false,
+          heading: false,
+          horizontalRule: false,
+          blockquote: false,
+          codeBlock: false,
+          bold: false,
+          code: false,
+          gapcursor: false,
+          strike: false,
+          italic: false,
+          // hard break??
+          hardBreak: undefined,
+
+          // these use default
+          history: undefined,
+          listItem: undefined,
+          orderedList: undefined,
+          paragraph: undefined,
+          text: undefined,
+          bulletList: undefined,
+        }),
         TiptapDocument,
-        Text,
-        Paragraph,
         Heading,
-        BulletList,
-        OrderedList,
-        ListItem,
-        Dropcursor,
+        Dropcursor.configure({
+          width: 2,
+          class: "ProseMirror-dropcursor border-black",
+        }),
+        Placeholder.configure({
+          includeChildren: true,
+          showOnlyCurrent: false,
+          placeholder: () => "",
+        }),
+        Focus,
+        HorizontalRule,
+        SlashCommand,
+        Selection,
         // TrailingNode,
       ],
       editorProps: {
