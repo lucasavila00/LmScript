@@ -10,3 +10,6 @@ export function cn(...inputs: ClassValue[]) {
 // }
 
 export const newUuid = () => crypto.randomUUID();
+export const assertIsNever = (x: never): never => {
+  throw new Error(`Unexpected: ${x}`);
+};

@@ -1,9 +1,11 @@
 import { Content } from "@tiptap/react";
 import { NamedVariable } from "../context/variables";
+import { SamplingParams } from "./useSamplingParams";
 
 type InitialContent = {
   doc: Content;
   variables: NamedVariable[];
+  samplingParams: SamplingParams;
 };
 export const initialContent: InitialContent = {
   variables: [
@@ -140,4 +142,5 @@ export const initialContent: InitialContent = {
       },
     ],
   },
+  samplingParams: { temperature: 0.1 },
 };

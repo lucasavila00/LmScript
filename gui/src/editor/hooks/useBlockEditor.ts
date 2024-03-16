@@ -15,15 +15,18 @@ import { initialContent } from "./init";
 import { useVariables } from "./useVariables";
 import { VariableSelect } from "../extensions/VariableSelect/VariableSelect";
 import { LmGenerator } from "../extensions/LmGenerator/LmGenerator";
+import { useSamplingParams } from "./useSamplingParams";
 
 const Doc = TiptapDocument.extend({
   content: "authorSelect block*",
 });
 
 export const useBlockEditor = () => {
-  const leftSidebar = useSidebar();
+  const rightSidebar = useSidebar(true);
+  const leftSidebar = useSidebar(false);
 
   const variablesHook = useVariables(initialContent.variables);
+  const samplingParamsHook = useSamplingParams(initialContent.samplingParams);
 
   const editor = useEditor(
     {
@@ -86,5 +89,11 @@ export const useBlockEditor = () => {
     [],
   );
 
-  return { editor, leftSidebar, variablesHook };
+  return {
+    editor,
+    rightSidebar,
+    variablesHook,
+    leftSidebar,
+    samplingParamsHook,
+  };
 };

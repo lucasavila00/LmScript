@@ -7,8 +7,8 @@ export type SidebarState = {
   toggle: () => void;
 };
 
-export const useSidebar = (): SidebarState => {
-  const [isOpen, setIsOpen] = useState(true);
+export const useSidebar = (initialState: boolean): SidebarState => {
+  const [isOpen, setIsOpen] = useState(initialState);
 
   const open = useCallback(() => {
     setIsOpen(true);
