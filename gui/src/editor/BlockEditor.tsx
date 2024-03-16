@@ -7,6 +7,7 @@ import { EditorHeader } from "./components/EditorHeader";
 import { VariablesContext } from "./context/variables";
 import "./styles/index.css";
 import { EditorContext } from "./context/editor";
+import { TextMenu } from "./components/TextMenu";
 
 export const BlockEditor = () => {
   const { editor, leftSidebar, variablesHook } = useBlockEditor();
@@ -32,6 +33,7 @@ export const BlockEditor = () => {
                 className="flex-1 overflow-y-auto"
               />
               <ContentItemMenu editor={editor} />
+              <TextMenu editor={editor} />
             </div>
           </EditorContext.Provider>
         </VariablesContext.Provider>

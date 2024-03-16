@@ -58,8 +58,7 @@ const getClassNames = <
         classNames?.multiValue?.(e),
       ),
     input: (e) => cn("text-sm overflow-x-hidden", classNames?.input?.(e)),
-    valueContainer: (e) =>
-      cn("flex !flex-nowrap gap-1", classNames?.valueContainer?.(e)),
+    valueContainer: (e) => cn("flex gap-1", classNames?.valueContainer?.(e)),
   };
 };
 const getStyles = <

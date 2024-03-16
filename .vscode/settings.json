@@ -12,6 +12,7 @@
     "logprob",
     "runpod",
     "sglang",
+    "Textmenu",
     "Tiptap",
     "Vllm"
   ],

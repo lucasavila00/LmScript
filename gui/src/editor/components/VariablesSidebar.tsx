@@ -50,7 +50,7 @@ export const VariablesSidebar: FC<{
           );
         })}
       </div>
-      <Button className="w-full" onClick={addVariable}>
+      <Button className="w-full" onClick={addVariable} variant="outline">
         New Variable
       </Button>
     </>
