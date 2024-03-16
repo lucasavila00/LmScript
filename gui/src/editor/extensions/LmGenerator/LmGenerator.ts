@@ -1,19 +1,20 @@
 import { mergeAttributes, Node } from "@tiptap/core";
 import { PluginKey } from "@tiptap/pm/state";
-import { newUuid } from "../../../lib/utils";
-// export type LmGeneratorOptions = {};
 
 export const LmGeneratorPluginKey = new PluginKey("lmGenerator");
 
+export type GeneratorAttributes = {
+  name: string;
+  stop: string[];
+  max_tokens: number;
+};
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     lmGenerator: {
       createNewLmGenerator: () => ReturnType;
-      updateLmGenerator: (value: string) => ReturnType;
     };
   }
 }
-
 export const LmGenerator = Node.create({
   name: "lmGenerator",
 
@@ -31,16 +32,39 @@ export const LmGenerator = Node.create({
 
   addAttributes() {
     return {
-      id: {
-        default: null,
-        parseHTML: (_element) => newUuid(),
+      name: {
+        default: "Unnamed",
+        parseHTML: (element) => {
+          return element.getAttribute("data-name");
+        },
         renderHTML: (attributes) => {
-          if (!attributes.id) {
-            return {};
-          }
-
           return {
-            "data-id": attributes.id,
+            "data-name": attributes.name,
+          };
+        },
+      },
+      stop: {
+        default: [],
+        parseHTML: (element) => {
+          return (element.getAttribute("data-stop") ?? "").split(",");
+        },
+        renderHTML: (attributes) => {
+          console.log(attributes);
+          return {
+            "data-stop": attributes.stop.join(","),
+          };
+        },
+      },
+      max_tokens: {
+        default: 16,
+        parseHTML: (element) => {
+          return parseInt(
+            element.getAttribute("data-max_tokens") ?? "16",
+          );
+        },
+        renderHTML: (attributes) => {
+          return {
+            "data-max_tokens": attributes.max_tokens,
           };
         },
       },
@@ -52,27 +76,12 @@ export const LmGenerator = Node.create({
         return chain().insertContent({
           type: this.name,
           attrs: {
-            id: newUuid(),
+            name: "Unnamed",
+            stop: [],
+            max_tokens: 16,
           },
         })
           .setNodeSelection(tr.selection.to - 1)
-          .run();
-      },
-      updateLmGenerator: (value) => ({ chain, state }) => {
-        const activeNodePosition = state.selection.$from.pos;
-
-        const activeNode = state.doc.nodeAt(activeNodePosition);
-
-        if (activeNode == null) {
-          return false;
-        }
-
-        if (activeNode.type.name !== "lmGenerator") {
-          return false;
-        }
-        return chain()
-          .updateAttributes("lmGenerator", { id: value })
-          .setNodeSelection(activeNodePosition)
           .run();
       },
     };
@@ -91,15 +100,16 @@ export const LmGenerator = Node.create({
       mergeAttributes(
         {
           "data-type": this.name,
+          "class": "px-2 py-1 rounded-md bg-zinc-200 dark:bg-zinc-800",
         },
         HTMLAttributes,
       ),
-      `@${node.attrs.id}`,
+      `${node.attrs.name}`,
     ];
   },
 
   renderText({ node }) {
-    return `@${node.attrs.id}`;
+    return `${node.attrs.name}`;
   },
 
   addKeyboardShortcuts() {
@@ -118,7 +128,7 @@ export const LmGenerator = Node.create({
             if (node.type.name === this.name) {
               isLmGenerator = true;
               tr.insertText(
-                "@",
+                "",
                 pos,
                 pos + node.nodeSize,
               );

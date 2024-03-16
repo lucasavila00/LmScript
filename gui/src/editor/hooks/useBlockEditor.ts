@@ -32,6 +32,9 @@ export const initialContent = {
           type: "lmGenerator",
           attrs: {
             id: "123",
+            name: "test",
+            stop: [],
+            max_tokens: 16,
           },
         },
       ],
