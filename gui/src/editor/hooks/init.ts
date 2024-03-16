@@ -12,6 +12,8 @@ export const initialContent: InitialContent = {
       value:
         'Question: "What is the person doing?" Answer: "The person is happy"',
     },
+    { name: "PERSON_ILLUSTRATOR", value: "A person." },
+    { name: "OBJECT_ILLUSTRATOR", value: "An object." },
   ],
   doc: {
     type: "doc",
@@ -31,7 +33,14 @@ export const initialContent: InitialContent = {
         attrs: { level: 3 },
         content: [{ type: "text", text: "Content" }],
       },
-      { type: "paragraph", content: [{ type: "text", text: '"{content}"' }] },
+      {
+        type: "paragraph",
+        content: [
+          { type: "text", text: '"' },
+          { type: "variableSelect", attrs: { name: "content" } },
+          { type: "text", text: '"' },
+        ],
+      },
       {
         type: "heading",
         attrs: { level: 3 },
@@ -42,8 +51,12 @@ export const initialContent: InitialContent = {
         content: [
           {
             type: "text",
-            text: 'First explain why you\'re choosing the best subject for the illustration, then choose the best subject for the illustration, either a person or an object. Answer with just "{PERSON_ILLUSTRATOR}" or "{OBJECT_ILLUSTRATOR}".',
+            text: "First explain why you're choosing the best subject for the illustration, then choose the best subject for the illustration, either a person or an object. Answer with just \"",
           },
+          { type: "variableSelect", attrs: { name: "PERSON_ILLUSTRATOR" } },
+          { type: "text", text: '" or "' },
+          { type: "variableSelect", attrs: { name: "OBJECT_ILLUSTRATOR" } },
+          { type: "text", text: '".' },
         ],
       },
       { type: "paragraph", content: [{ type: "text", text: "For example:" }] },

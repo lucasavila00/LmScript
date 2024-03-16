@@ -14,6 +14,7 @@ import { TrailingNode } from "../extensions/TrailingNode";
 import { useSidebar } from "./useSidebar";
 import { initialContent } from "./init";
 import { useVariables } from "./useVariables";
+import { VariableSelect } from "../extensions/VariableSelect/VariableSelect";
 
 const Doc = TiptapDocument.extend({
   content: "authorSelect block*",
@@ -71,6 +72,7 @@ export const useBlockEditor = () => {
         LmGenerator,
         AuthorSelect,
         TrailingNode,
+        VariableSelect,
       ],
       editorProps: {
         attributes: {

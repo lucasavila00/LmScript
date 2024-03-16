@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import { memo } from "react";
 import { Editor } from "@tiptap/react";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { VariablesSidebar } from "./VariablesSidebar";
 import { useVariables } from "../hooks/useVariables";

@@ -12,13 +12,15 @@
     "tsw": "tsc --noEmit --watch",
     "prettier": "prettier --check .",
     "prettier-fix": "prettier --write .",
-    "lint-fix": "eslint . --ext ts,tsx --fix"
+    "lint-fix": "eslint . --ext ts,tsx --fix",
+    "static": "npm run prettier && npm run lint && npm run ts"
   },
   "dependencies": {
     "@fontsource/inter": "^5.0.17",
     "@headlessui/react": "^1.7.18",
     "@heroicons/react": "^2.1.1",
     "@radix-ui/react-avatar": "^1.0.4",
+    "@radix-ui/react-dialog": "^1.0.5",
     "@radix-ui/react-icons": "^1.3.0",
     "@radix-ui/react-label": "^2.0.2",
     "@radix-ui/react-popover": "^1.0.7",
@@ -40,6 +42,7 @@
     "cal-sans": "^1.0.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
+    "cmdk": "^1.0.0",
     "lucide-react": "^0.358.0",
     "prettier": "^3.2.5",
     "react": "^18.2.0",

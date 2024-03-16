@@ -25,6 +25,16 @@ export const GROUPS: Group[] = [
           return editor.chain().focus().createNewAuthorSelect().run();
         },
       },
+      {
+        name: "variableSelect",
+        label: "Variable",
+        iconName: "Variable",
+        description: "Select a variable",
+        aliases: ["var"],
+        action: (editor) => {
+          return editor.chain().focus().createNewVariableSelect().run();
+        },
+      },
     ],
   },
   {
