@@ -7,6 +7,7 @@ import { Sidebar } from "./components/Sidebar";
 import { EditorHeader } from "./components/EditorHeader";
 import { VariablesContext } from "./context/variables";
 import "./styles/index.css";
+import { EditorContext } from "./context/editor";
 
 export const BlockEditor = () => {
   const { editor, leftSidebar, variablesHook } = useBlockEditor();
@@ -21,15 +22,20 @@ export const BlockEditor = () => {
     <>
       <div className="flex h-full w-full" ref={menuContainerRef}>
         <VariablesContext.Provider value={variablesHook.variables}>
-          <div className="relative flex flex-col flex-1 h-full overflow-hidden">
-            <EditorHeader
-              isSidebarOpen={leftSidebar.isOpen}
-              toggleSidebar={leftSidebar.toggle}
-            />
-            <EditorContent editor={editor} className="flex-1 overflow-y-auto" />
-            <ContentItemMenu editor={editor} />
-            <LmGeneratorMenu editor={editor} appendTo={menuContainerRef} />
-          </div>
+          <EditorContext.Provider value={editor}>
+            <div className="relative flex flex-col flex-1 h-full overflow-hidden">
+              <EditorHeader
+                isSidebarOpen={leftSidebar.isOpen}
+                toggleSidebar={leftSidebar.toggle}
+              />
+              <EditorContent
+                editor={editor}
+                className="flex-1 overflow-y-auto"
+              />
+              <ContentItemMenu editor={editor} />
+              <LmGeneratorMenu editor={editor} appendTo={menuContainerRef} />
+            </div>
+          </EditorContext.Provider>
         </VariablesContext.Provider>
         <Sidebar
           isOpen={leftSidebar.isOpen}

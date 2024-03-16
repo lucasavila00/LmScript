@@ -13,7 +13,7 @@ export const LmChoices = Node.create({
   name: "lmChoices",
 
   group: "inline",
-
+  // content: "inline*",
   atom: true,
   selectable: false,
   inline: true,
@@ -29,6 +29,17 @@ export const LmChoices = Node.create({
         renderHTML: (attributes) => {
           return {
             "data-choices": JSON.stringify(attributes.choices),
+          };
+        },
+      },
+      name: {
+        default: "Unnamed",
+        parseHTML: (element) => {
+          return element.getAttribute("data-name");
+        },
+        renderHTML: (attributes) => {
+          return {
+            "data-name": attributes.name,
           };
         },
       },

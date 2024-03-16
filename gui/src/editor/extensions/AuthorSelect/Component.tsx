@@ -34,32 +34,36 @@ export const Component: FC<{
   updateAttributes: (attrs: { readonly [attr: string]: unknown }) => void;
 }> = (props) => {
   return (
-    <NodeViewWrapper className="author-select select-none flex gap-2 items-center">
-      <Avatar>
-        <AvatarFallback>{avatarLabel(props.node.attrs.author)}</AvatarFallback>
-      </Avatar>
-      <StyledReactSelect
-        value={{
-          value: props.node.attrs.author,
-          label: fullLabel(props.node.attrs.author),
-        }}
-        options={AUTHOR_OPTIONS.map((it) => ({
-          label: fullLabel(it),
-          value: it,
-        }))}
-        onChange={(selected) => {
-          if (selected != null) {
-            props.updateAttributes({
-              ...props.node.attrs,
-              author: selected.value,
-            });
-          }
-        }}
-        classNames={{
-          container: () => "!min-h-8",
-          control: () => "!min-h-8 w-32",
-        }}
-      />
+    <NodeViewWrapper className="flex justify-center">
+      <div className="select-none flex gap-2 items-center min-w-0 mx-auto">
+        <Avatar>
+          <AvatarFallback>
+            {avatarLabel(props.node.attrs.author)}
+          </AvatarFallback>
+        </Avatar>
+        <StyledReactSelect
+          value={{
+            value: props.node.attrs.author,
+            label: fullLabel(props.node.attrs.author),
+          }}
+          options={AUTHOR_OPTIONS.map((it) => ({
+            label: fullLabel(it),
+            value: it,
+          }))}
+          onChange={(selected) => {
+            if (selected != null) {
+              props.updateAttributes({
+                ...props.node.attrs,
+                author: selected.value,
+              });
+            }
+          }}
+          classNames={{
+            container: () => "!min-h-8",
+            control: () => "!min-h-8",
+          }}
+        />
+      </div>
     </NodeViewWrapper>
   );
 };

@@ -120,6 +120,7 @@ export const initialContent: InitialContent = {
           {
             type: "lmChoices",
             attrs: {
+              name: "illustrator",
               choices: [
                 { tag: "variable", value: "PERSON_ILLUSTRATOR" },
                 { tag: "variable", value: "OBJECT_ILLUSTRATOR" },

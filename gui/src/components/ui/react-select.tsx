@@ -1,5 +1,14 @@
 import { cn } from "@/lib/utils";
-import ReactSelect, { ClassNamesConfig, GroupBase } from "react-select";
+import { ChevronDown } from "lucide-react";
+import { ReactNode, createContext, useContext } from "react";
+import ReactSelect, {
+  ClassNamesConfig,
+  ControlProps,
+  GroupBase,
+  SelectComponentsConfig,
+  StylesConfig,
+  components as reactSelectComponents,
+} from "react-select";
 import CreatableSelect from "react-select/creatable";
 
 const getClassNames = <
@@ -14,14 +23,9 @@ const getClassNames = <
     control: (e) =>
       cn(
         `rounded-md border`,
-        `border-input px-1 py-1 text-sm`,
+        `border-input px-1 pl-2 pr-1 text-sm bg-background shadow-sm`,
         e.isFocused ? "ring-1 ring-ring" : "",
         classNames?.control?.(e),
-      ),
-    indicatorSeparator: (e) =>
-      cn(
-        "bg-gray-100 dark:bg-zinc-800 mr-1 !ml-0",
-        classNames?.indicatorSeparator?.(e),
       ),
     dropdownIndicator: (e) =>
       cn(
@@ -57,13 +61,66 @@ const getClassNames = <
     container: (p) => cn(classNames?.container?.(p)),
   };
 };
+const getStyles = <
+  Option,
+  IsMulti extends boolean,
+  Group extends GroupBase<Option>,
+>(
+  styles: StylesConfig<Option, IsMulti, Group> | undefined,
+): StylesConfig<Option, IsMulti, Group> => ({
+  ...styles,
+  menu: ({ width, ...css }) => ({
+    ...styles?.menu,
+    ...css,
+    width: "max-content",
+    minWidth: "100%",
+  }),
+});
+
+export const ControlLabelContext = createContext<ReactNode>("");
+
+function CustomControl<
+  Option,
+  IsMulti extends boolean,
+  Group extends GroupBase<Option>,
+>({ children, ...rest }: ControlProps<Option, IsMulti, Group>) {
+  const label = useContext(ControlLabelContext);
+  return (
+    <>
+      <reactSelectComponents.Control {...rest}>
+        {label}
+        {children}
+      </reactSelectComponents.Control>
+    </>
+  );
+}
+const getComponents = <
+  Option,
+  IsMulti extends boolean,
+  Group extends GroupBase<Option>,
+>(
+  components: SelectComponentsConfig<Option, IsMulti, Group> | undefined,
+): SelectComponentsConfig<Option, IsMulti, Group> => {
+  return {
+    ...components,
+    IndicatorSeparator: () => <></>,
+    DropdownIndicator: () => (
+      <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
+    ),
+    Control: CustomControl,
+  };
+};
+
 export const StyledCreatableReactSelect: typeof CreatableSelect = (props) => {
   return (
     <CreatableSelect
-      //   styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
+      // styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
       //   menuPortalTarget={document.body}
       {...props}
       classNames={getClassNames(props.classNames)}
+      styles={getStyles(props.styles)}
+      components={getComponents(props.components)}
+      blurInputOnSelect={true}
       unstyled={true}
     />
   );
@@ -76,6 +133,9 @@ export const StyledReactSelect: typeof ReactSelect = (props) => {
       //   menuPortalTarget={document.body}
       {...props}
       classNames={getClassNames(props.classNames)}
+      styles={getStyles(props.styles)}
+      components={getComponents(props.components)}
+      blurInputOnSelect={true}
       unstyled={true}
     />
   );
