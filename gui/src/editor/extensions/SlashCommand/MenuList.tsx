@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Command, MenuListProps } from "./types";
 import { DropdownButton } from "../../../ui/Dropdown";
-import { Icon } from "../../../ui/Icon";
+import { Icon } from "../../../components/ui/Icon";
 import { Surface } from "../../../ui/Surface";
 
 export const MenuList = React.forwardRef((props: MenuListProps, ref) => {

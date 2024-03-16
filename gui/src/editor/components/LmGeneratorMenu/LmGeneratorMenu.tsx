@@ -222,15 +222,15 @@ export const LmGeneratorMenu = ({
       shouldShow={shouldShow}
       updateDelay={0}
       tippyOptions={{
-        placement: "bottom",
-        popperOptions: {
-          strategy: "fixed",
-          modifiers: [],
-        },
+        // placement: "bottom",
+        // popperOptions: {
+        //   strategy: "fixed",
+        //   modifiers: [],
+        // },
         appendTo: () => {
           return appendTo?.current;
         },
-        onHidden: () => {},
+        // onHidden: () => {},
       }}
       className="z-50 w-96 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none"
     >

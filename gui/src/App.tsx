@@ -13,9 +13,9 @@ import "@fontsource/inter/700.css";
 import { createPortal } from "react-dom";
 import { BlockEditor } from "./editor/BlockEditor";
 import { useState, useEffect, useCallback } from "react";
-import { Icon } from "./ui/Icon";
+import { Icon } from "./components/ui/Icon";
 import { Surface } from "./ui/Surface";
-import { ToolbarButton } from "./ui/Toolbar";
+import { ToolbarButton } from "./components/ui/Toolbar";
 
 const useDarkmode = () => {
   const [isDarkMode, setIsDarkMode] = useState<boolean>(
@@ -67,9 +67,7 @@ export default function App() {
   return (
     <>
       {DarkModeSwitcher}
-      <div className="mx-auto max-w-5xl flex h-full">
-        <BlockEditor />
-      </div>
+      <BlockEditor />
     </>
   );
 }

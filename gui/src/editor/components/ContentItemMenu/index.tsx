@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { useData } from "./hooks/useData";
 import useContentItemActions from "./hooks/useContentItemActions";
 import * as Popover from "@radix-ui/react-popover";
-import { ToolbarButton, ToolbarDivider } from "../../../ui/Toolbar";
-import { Icon } from "../../../ui/Icon";
+import { ToolbarButton, ToolbarDivider } from "../../../components/ui/Toolbar";
+import { Icon } from "../../../components/ui/Icon";
 import { Surface } from "../../../ui/Surface";
 import { DropdownButton } from "../../../ui/Dropdown";
 
