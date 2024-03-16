@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 import { useData } from "./hooks/useData";
 import useContentItemActions from "./hooks/useContentItemActions";
 import * as Popover from "@radix-ui/react-popover";
-import { ToolbarButton, ToolbarDivider } from "../../../components/ui/Toolbar";
-import { Icon } from "../../../components/ui/Icon";
-import { Surface } from "../../../ui/Surface";
-import { DropdownButton } from "../../../ui/Dropdown";
+import { ToolbarButton, ToolbarDivider } from "@/components/ui/Toolbar";
+import { Icon } from "@/components/ui/Icon";
+import { Surface } from "@/components/ui/Surface";
+import { DropdownButton } from "@/components/ui/Dropdown";
 
 export type ContentItemMenuProps = {
   editor: Editor;

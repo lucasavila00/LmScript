@@ -14,7 +14,7 @@ import { createPortal } from "react-dom";
 import { BlockEditor } from "./editor/BlockEditor";
 import { useState, useEffect, useCallback } from "react";
 import { Icon } from "./components/ui/Icon";
-import { Surface } from "./ui/Surface";
+import { Surface } from "./components/ui/Surface";
 import { ToolbarButton } from "./components/ui/Toolbar";
 
 const useDarkmode = () => {
