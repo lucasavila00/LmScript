@@ -49,7 +49,6 @@ export const LmGenerator = Node.create({
           return (element.getAttribute("data-stop") ?? "").split(",");
         },
         renderHTML: (attributes) => {
-          console.log(attributes);
           return {
             "data-stop": attributes.stop.join(","),
           };
@@ -75,11 +74,7 @@ export const LmGenerator = Node.create({
       createNewLmGenerator: () => ({ chain, tr }) => {
         return chain().insertContent({
           type: this.name,
-          attrs: {
-            name: "Unnamed",
-            stop: [],
-            max_tokens: 16,
-          },
+          attrs: {},
         })
           .setNodeSelection(tr.selection.to - 1)
           .run();
