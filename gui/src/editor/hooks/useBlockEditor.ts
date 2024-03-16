@@ -8,14 +8,13 @@ import { HorizontalRule } from "../extensions/HorizontalRule";
 import { SlashCommand } from "../extensions/SlashCommand";
 import StarterKit from "@tiptap/starter-kit";
 import { Selection } from "../extensions/Selection";
-import { LmGenerator } from "../extensions/LmGenerator/LmGenerator";
 import { AuthorSelect } from "../extensions/AuthorSelect/AuthorSelect";
 import { TrailingNode } from "../extensions/TrailingNode";
 import { useSidebar } from "./useSidebar";
 import { initialContent } from "./init";
 import { useVariables } from "./useVariables";
 import { VariableSelect } from "../extensions/VariableSelect/VariableSelect";
-import { LmChoices } from "../extensions/LmChoices/LmChoices";
+import { LmGenerator } from "../extensions/LmGenerator/LmGenerator";
 
 const Doc = TiptapDocument.extend({
   content: "authorSelect block*",
@@ -70,11 +69,10 @@ export const useBlockEditor = () => {
         HorizontalRule,
         SlashCommand,
         Selection,
-        LmGenerator,
         AuthorSelect,
         TrailingNode,
         VariableSelect,
-        LmChoices,
+        LmGenerator,
       ],
       editorProps: {
         attributes: {

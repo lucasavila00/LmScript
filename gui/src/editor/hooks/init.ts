@@ -12,8 +12,8 @@ export const initialContent: InitialContent = {
       value:
         'Question: "What is the person doing?" Answer: "The person is happy"',
     },
-    { name: "PERSON_ILLUSTRATOR", value: "A person." },
-    { name: "OBJECT_ILLUSTRATOR", value: "An object." },
+    { name: "PERSON", value: "A person." },
+    { name: "OBJECT", value: "An object." },
   ],
   doc: {
     type: "doc",
@@ -53,9 +53,9 @@ export const initialContent: InitialContent = {
             type: "text",
             text: "First explain why you're choosing the best subject for the illustration, then choose the best subject for the illustration, either a person or an object. Answer with just \"",
           },
-          { type: "variableSelect", attrs: { name: "PERSON_ILLUSTRATOR" } },
+          { type: "variableSelect", attrs: { name: "PERSON" } },
           { type: "text", text: '" or "' },
-          { type: "variableSelect", attrs: { name: "OBJECT_ILLUSTRATOR" } },
+          { type: "variableSelect", attrs: { name: "OBJECT" } },
           { type: "text", text: '".' },
         ],
       },
@@ -78,7 +78,7 @@ export const initialContent: InitialContent = {
         type: "paragraph",
         content: [
           { type: "text", text: "Illustrate: " },
-          { type: "variableSelect", attrs: { name: "PERSON_ILLUSTRATOR" } },
+          { type: "variableSelect", attrs: { name: "PERSON" } },
         ],
       },
       {
@@ -99,7 +99,7 @@ export const initialContent: InitialContent = {
         type: "paragraph",
         content: [
           { type: "text", text: "Illustrate: " },
-          { type: "variableSelect", attrs: { name: "OBJECT_ILLUSTRATOR" } },
+          { type: "variableSelect", attrs: { name: "OBJECT" } },
         ],
       },
       { type: "authorSelect", attrs: { author: "assistant" } },
@@ -109,7 +109,13 @@ export const initialContent: InitialContent = {
           { type: "text", text: "Explanation: " },
           {
             type: "lmGenerator",
-            attrs: { name: "_explanation", stop: ["\n"], max_tokens: 256 },
+            attrs: {
+              choices: [],
+              type: "generation",
+              max_tokens: 256,
+              name: "_explanation",
+              stop: ["\n"],
+            },
           },
         ],
       },
@@ -118,13 +124,16 @@ export const initialContent: InitialContent = {
         content: [
           { type: "text", text: "Illustrate: " },
           {
-            type: "lmChoices",
+            type: "lmGenerator",
             attrs: {
-              name: "illustrator",
               choices: [
-                { tag: "variable", value: "PERSON_ILLUSTRATOR" },
-                { tag: "variable", value: "OBJECT_ILLUSTRATOR" },
+                { label: "{PERSON}", value: "PERSON", tag: "variable" },
+                { label: "{OBJECT}", value: "OBJECT", tag: "variable" },
               ],
+              type: "selection",
+              max_tokens: 16,
+              name: "illustrator",
+              stop: [],
             },
           },
         ],

@@ -3,31 +3,14 @@ import { ReactNodeViewRenderer } from "@tiptap/react";
 import { Component } from "./Component";
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
-    lmChoices: {
-      createNewLmChoices: () => ReturnType;
+    lmGenerator: {
+      createNewLmGenerator: () => ReturnType;
     };
   }
 }
 
-export type StoredChoice =
-  | {
-      tag: "variable";
-      value: string;
-    }
-  | {
-      tag: "typed";
-      value: string;
-    };
-
-export type ChoicesNodeAttrs = {
-  choices: StoredChoice[];
-  type: "generation" | "selection" | "regex";
-  name: string;
-  max_tokens: number;
-};
-
-export const LmChoices = Node.create({
-  name: "lmChoices",
+export const LmGenerator = Node.create({
+  name: "lmGenerator",
 
   group: "inline",
   // content: "inline*",
@@ -82,6 +65,17 @@ export const LmChoices = Node.create({
           };
         },
       },
+      stop: {
+        default: [],
+        parseHTML: (element) => {
+          return JSON.parse(element.getAttribute("data-stop") ?? "[]");
+        },
+        renderHTML: (attributes) => {
+          return {
+            "data-stop": JSON.stringify(attributes.stop),
+          };
+        },
+      },
     };
   },
   addCommands() {
@@ -99,13 +93,13 @@ export const LmChoices = Node.create({
   parseHTML() {
     return [
       {
-        tag: "lm-choices",
+        tag: "lm-generator",
       },
     ];
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ["lm-choices", mergeAttributes(HTMLAttributes)];
+    return ["lm-generator", mergeAttributes(HTMLAttributes)];
   },
 
   addNodeView() {
