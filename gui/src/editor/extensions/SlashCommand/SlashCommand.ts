@@ -104,20 +104,21 @@ export const SlashCommand = Extension.create({
 
                 if (item.aliases) {
                   const aliases = item.aliases.map((alias) =>
-                    alias.toLowerCase().trim()
+                    alias.toLowerCase().trim(),
                   );
 
-                  return labelNormalized.includes(queryNormalized) ||
-                    aliases.includes(queryNormalized);
+                  return (
+                    labelNormalized.includes(queryNormalized) ||
+                    aliases.includes(queryNormalized)
+                  );
                 }
 
                 return labelNormalized.includes(queryNormalized);
               })
-              .filter((
-                command,
-              ) => (command.shouldBeHidden
-                ? !command.shouldBeHidden(this.editor)
-                : true)
+              .filter((command) =>
+                command.shouldBeHidden
+                  ? !command.shouldBeHidden(this.editor)
+                  : true,
               ),
           }));
 
@@ -170,10 +171,13 @@ export const SlashCommand = Extension.create({
 
                 if (
                   rect.top + component.element.offsetHeight + 40 >
-                    window.innerHeight
+                  window.innerHeight
                 ) {
-                  const diff = rect.top + component.element.offsetHeight -
-                    window.innerHeight + 40;
+                  const diff =
+                    rect.top +
+                    component.element.offsetHeight -
+                    window.innerHeight +
+                    40;
                   yPos = rect.y - diff;
                 }
 
@@ -233,13 +237,13 @@ export const SlashCommand = Extension.create({
               props.editor.storage[extensionName].rect = props.clientRect
                 ? getReferenceClientRect()
                 : {
-                  width: 0,
-                  height: 0,
-                  left: 0,
-                  top: 0,
-                  right: 0,
-                  bottom: 0,
-                };
+                    width: 0,
+                    height: 0,
+                    left: 0,
+                    top: 0,
+                    right: 0,
+                    bottom: 0,
+                  };
               popup?.[0].setProps({
                 getReferenceClientRect,
               });

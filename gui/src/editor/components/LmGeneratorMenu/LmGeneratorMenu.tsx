@@ -68,7 +68,7 @@ const LmGeneratorMenuContent: FC<{
   onClose: (attributes: GeneratorAttributes, from: number, to: number) => void;
 }> = ({ activeNode, onClose }) => {
   const [attributes, setAttributes] = useState<GeneratorAttributes>(
-    activeNode.data as any
+    activeNode.data as any,
   );
 
   const onCloseRef = useRef(onClose);
@@ -85,7 +85,7 @@ const LmGeneratorMenuContent: FC<{
       onCloseRef.current(
         attributesRef.current,
         activeNodeRef.current.from,
-        activeNodeRef.current.to
+        activeNodeRef.current.to,
       );
     };
   }, []);
@@ -106,7 +106,7 @@ const LmGeneratorMenuContent: FC<{
           onCloseRef.current(
             attributesRef.current,
             activeNodeRef.current.from,
-            activeNodeRef.current.to
+            activeNodeRef.current.to,
           );
         }}
       >
@@ -152,7 +152,7 @@ const LmGeneratorMenuContent: FC<{
                 cn(
                   `rounded-md border`,
                   `border-input px-1 py-1 text-sm !min-h-8`,
-                  e.isFocused ? "ring-1 ring-ring" : ""
+                  e.isFocused ? "ring-1 ring-ring" : "",
                 ),
               indicatorSeparator: () => "bg-gray-100 dark:bg-zinc-800 mx-2",
               dropdownIndicator: () => "text-gray-400 dark:text-gray-400",
@@ -160,14 +160,14 @@ const LmGeneratorMenuContent: FC<{
               menu: () =>
                 cn(
                   "absolute top-0 mt-1 text-sm z-10 w-full",
-                  "rounded-md border bg-popover shadow-md overflow-x-hidden"
+                  "rounded-md border bg-popover shadow-md overflow-x-hidden",
                 ),
               placeholder: () => "text-muted-foreground pl-2",
               option: () =>
                 cn(
                   "cursor-default",
                   "rounded-sm py-1.5 m-1 px-2 text-sm outline-none",
-                  "focus:bg-gray-200 dark:focus:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-800 w-auto"
+                  "focus:bg-gray-200 dark:focus:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-800 w-auto",
                 ),
               noOptionsMessage: () => "p-5",
               multiValue: () =>
@@ -250,7 +250,7 @@ export const LmGeneratorMenu = ({
                   {
                     type: "lmGenerator",
                     attrs,
-                  }
+                  },
                 )
                 .focus()
                 .run();

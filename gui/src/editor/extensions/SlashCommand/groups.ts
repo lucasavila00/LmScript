@@ -12,9 +12,7 @@ export const GROUPS: Group[] = [
         description: "Generate some text",
         aliases: ["gen"],
         action: (editor) => {
-          return editor.chain().focus()
-            .createNewLmGenerator()
-            .run();
+          return editor.chain().focus().createNewLmGenerator().run();
         },
       },
       {
@@ -24,9 +22,7 @@ export const GROUPS: Group[] = [
         description: "Select an author",
         aliases: ["auth"],
         action: (editor) => {
-          return editor.chain().focus()
-            .createNewAuthorSelect()
-            .run();
+          return editor.chain().focus().createNewAuthorSelect().run();
         },
       },
     ],

@@ -164,7 +164,7 @@ export const useBlockEditor = () => {
         },
       },
     },
-    []
+    [],
   );
 
   return { editor, leftSidebar };

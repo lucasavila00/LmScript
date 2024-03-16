@@ -6,7 +6,7 @@ import { useCallback } from "react";
 const useContentItemActions = (
   editor: Editor,
   currentNode: Node | null,
-  currentNodePos: number
+  currentNodePos: number,
 ) => {
   const resetTextFormatting = useCallback(() => {
     const chain = editor.chain();
@@ -32,7 +32,7 @@ const useContentItemActions = (
       .setMeta("hideDragHandle", true)
       .insertContentAt(
         currentNodePos + (currentNode?.nodeSize || 0),
-        selectedNode.toJSON()
+        selectedNode.toJSON(),
       )
       .run();
   }, [editor, currentNodePos, currentNode?.nodeSize]);
@@ -78,7 +78,7 @@ const useContentItemActions = (
                 insertPos,
                 state.schema.nodes.paragraph.create(null, [
                   state.schema.text("/"),
-                ])
+                ]),
               );
             }
 

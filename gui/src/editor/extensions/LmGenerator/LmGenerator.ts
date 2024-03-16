@@ -57,9 +57,7 @@ export const LmGenerator = Node.create({
       max_tokens: {
         default: 16,
         parseHTML: (element) => {
-          return parseInt(
-            element.getAttribute("data-max_tokens") ?? "16",
-          );
+          return parseInt(element.getAttribute("data-max_tokens") ?? "16");
         },
         renderHTML: (attributes) => {
           return {
@@ -71,14 +69,17 @@ export const LmGenerator = Node.create({
   },
   addCommands() {
     return {
-      createNewLmGenerator: () => ({ chain, tr }) => {
-        return chain().insertContent({
-          type: this.name,
-          attrs: {},
-        })
-          .setNodeSelection(tr.selection.to - 1)
-          .run();
-      },
+      createNewLmGenerator:
+        () =>
+        ({ chain, tr }) => {
+          return chain()
+            .insertContent({
+              type: this.name,
+              attrs: {},
+            })
+            .setNodeSelection(tr.selection.to - 1)
+            .run();
+        },
     };
   },
   parseHTML() {
@@ -95,7 +96,7 @@ export const LmGenerator = Node.create({
       mergeAttributes(
         {
           "data-type": this.name,
-          "class": "px-2 py-1 rounded-md bg-zinc-200 dark:bg-zinc-800",
+          class: "px-2 py-1 rounded-md bg-zinc-200 dark:bg-zinc-800",
         },
         HTMLAttributes,
       ),
@@ -122,11 +123,7 @@ export const LmGenerator = Node.create({
           state.doc.nodesBetween(anchor - 1, anchor, (node, pos) => {
             if (node.type.name === this.name) {
               isLmGenerator = true;
-              tr.insertText(
-                "",
-                pos,
-                pos + node.nodeSize,
-              );
+              tr.insertText("", pos, pos + node.nodeSize);
 
               return false;
             }

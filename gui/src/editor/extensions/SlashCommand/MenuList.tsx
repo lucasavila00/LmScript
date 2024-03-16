@@ -22,7 +22,7 @@ export const MenuList = React.forwardRef((props: MenuListProps, ref) => {
       const command = props.items[groupIndex].commands[commandIndex];
       props.command(command);
     },
-    [props]
+    [props],
   );
 
   React.useImperativeHandle(ref, () => ({
@@ -110,7 +110,7 @@ export const MenuList = React.forwardRef((props: MenuListProps, ref) => {
         selectItem(groupIndex, commandIndex);
       };
     },
-    [selectItem]
+    [selectItem],
   );
 
   if (!props.items.length) {

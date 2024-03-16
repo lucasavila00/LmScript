@@ -55,7 +55,7 @@ export const Tooltip = ({
         )}
       </span>
     ),
-    [shortcut, title]
+    [shortcut, title],
   );
 
   if (enabled) {

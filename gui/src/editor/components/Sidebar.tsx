@@ -10,7 +10,7 @@ export const Sidebar = memo(
       "absolute top-0 right-0 bg-white lg:bg-white/30 lg:backdrop-blur-xl h-full lg:h-auto lg:relative z-[999] w-0 duration-300 transition-all",
       "dark:bg-black lg:dark:bg-black/30",
       !isOpen && "border-l-transparent",
-      isOpen && "w-80 border-l border-l-neutral-200 dark:border-l-neutral-800"
+      isOpen && "w-80 border-l border-l-neutral-200 dark:border-l-neutral-800",
     );
 
     return (
@@ -42,7 +42,7 @@ export const Sidebar = memo(
         </div>
       </div>
     );
-  }
+  },
 );
 
 Sidebar.displayName = "TableOfContentSidepanel";

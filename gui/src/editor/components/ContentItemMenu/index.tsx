@@ -19,7 +19,7 @@ export const ContentItemMenu = ({ editor }: ContentItemMenuProps) => {
   const actions = useContentItemActions(
     editor,
     data.currentNode,
-    data.currentNodePos
+    data.currentNodePos,
   );
 
   useEffect(() => {

@@ -21,7 +21,7 @@ const useDarkmode = () => {
   const [isDarkMode, setIsDarkMode] = useState<boolean>(
     typeof window !== "undefined"
       ? window.matchMedia("(prefers-color-scheme: dark)").matches
-      : false
+      : false,
   );
 
   useEffect(() => {
@@ -37,7 +37,7 @@ const useDarkmode = () => {
 
   const toggleDarkMode = useCallback(
     () => setIsDarkMode((isDark) => !isDark),
-    []
+    [],
   );
   const lightMode = useCallback(() => setIsDarkMode(false), []);
   const darkMode = useCallback(() => setIsDarkMode(true), []);
@@ -61,7 +61,7 @@ export default function App() {
         <Icon name="Moon" />
       </ToolbarButton>
     </Surface>,
-    document.body
+    document.body,
   );
 
   return (

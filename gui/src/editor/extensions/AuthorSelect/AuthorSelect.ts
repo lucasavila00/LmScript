@@ -37,14 +37,16 @@ export const AuthorSelect = Node.create({
   },
   addCommands() {
     return {
-      createNewAuthorSelect: () => ({ commands }) => {
-        return commands.insertContent({
-          type: this.name,
-          attrs: {
-            author: "user",
-          },
-        });
-      },
+      createNewAuthorSelect:
+        () =>
+        ({ commands }) => {
+          return commands.insertContent({
+            type: this.name,
+            attrs: {
+              author: "user",
+            },
+          });
+        },
     };
   },
   parseHTML() {

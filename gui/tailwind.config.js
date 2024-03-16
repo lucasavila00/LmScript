@@ -1,12 +1,17 @@
-import defaultTheme from 'tailwindcss/defaultTheme'
-import animate from 'tailwindcss-animate'
-import typography from '@tailwindcss/typography'
+import defaultTheme from "tailwindcss/defaultTheme";
+import animate from "tailwindcss-animate";
+import typography from "@tailwindcss/typography";
 
 /** @type {import('tailwindcss').Config} */
 export default {
-  darkMode: ['class'],
-  content: ['./pages/**/*.{ts,tsx}', './components/**/*.{ts,tsx}', './app/**/*.{ts,tsx}', './src/**/*.{ts,tsx}'],
-  safelist: ['ProseMirror'],
+  darkMode: ["class"],
+  content: [
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
+  ],
+  safelist: ["ProseMirror"],
   theme: {
     container: {
       center: true,
@@ -57,7 +62,7 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ['Inter', ...defaultTheme.fontFamily.sans],
+        sans: ["Inter", ...defaultTheme.fontFamily.sans],
       },
       keyframes: {
         "accordion-down": {
@@ -83,4 +88,4 @@ export default {
   //   },
   // },
   plugins: [animate, typography],
-}
+};

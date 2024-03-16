@@ -35,7 +35,7 @@ export const DropdownButton = ({
       !disabled &&
       "bg-neutral-100 text-neutral-800 dark:bg-neutral-900 dark:text-neutral-200",
     disabled && "text-neutral-400 cursor-not-allowed dark:text-neutral-600",
-    className
+    className,
   );
 
   return (
