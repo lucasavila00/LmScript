@@ -9,7 +9,7 @@ import { VariablesContext } from "./context/variables";
 import "./styles/index.css";
 
 export const BlockEditor = () => {
-  const { editor, leftSidebar } = useBlockEditor();
+  const { editor, leftSidebar, variables, setVariables } = useBlockEditor();
   const menuContainerRef = useRef(null);
 
   if (editor == null) {
@@ -19,7 +19,7 @@ export const BlockEditor = () => {
 
   return (
     <>
-      <VariablesContext.Provider value={["test"]}>
+      <VariablesContext.Provider value={variables}>
         <div className="flex h-full w-full" ref={menuContainerRef}>
           <div className="relative flex flex-col flex-1 h-full overflow-hidden">
             <EditorHeader
@@ -30,7 +30,12 @@ export const BlockEditor = () => {
             <ContentItemMenu editor={editor} />
             <LmGeneratorMenu editor={editor} appendTo={menuContainerRef} />
           </div>
-          <Sidebar isOpen={leftSidebar.isOpen} editor={editor} />
+          <Sidebar
+            isOpen={leftSidebar.isOpen}
+            editor={editor}
+            variables={variables}
+            setVariables={setVariables}
+          />
         </div>
       </VariablesContext.Provider>
     </>

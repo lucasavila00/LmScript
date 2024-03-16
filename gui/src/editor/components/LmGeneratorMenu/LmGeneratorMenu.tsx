@@ -102,7 +102,6 @@ const LmGeneratorMenuContent: FC<{
         className="flex flex-col gap-2"
         onSubmit={(ev) => {
           ev.preventDefault();
-          console.log(ev);
           onCloseRef.current(
             attributesRef.current,
             activeNodeRef.current.from,

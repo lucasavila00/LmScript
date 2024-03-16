@@ -12,6 +12,8 @@ import { LmGenerator } from "../extensions/LmGenerator/LmGenerator";
 import { AuthorSelect } from "../extensions/AuthorSelect/AuthorSelect";
 import { TrailingNode } from "../extensions/TrailingNode";
 import { useSidebar } from "./useSidebar";
+import { useState } from "react";
+import { NamedVariable } from "../context/variables";
 
 export const initialContent = {
   type: "doc",
@@ -107,6 +109,8 @@ const Doc = TiptapDocument.extend({
 export const useBlockEditor = () => {
   const leftSidebar = useSidebar();
 
+  const [variables, setVariables] = useState<NamedVariable[]>([]);
+
   const editor = useEditor(
     {
       autofocus: true,
@@ -167,5 +171,5 @@ export const useBlockEditor = () => {
     [],
   );
 
-  return { editor, leftSidebar };
+  return { editor, leftSidebar, variables, setVariables };
 };
