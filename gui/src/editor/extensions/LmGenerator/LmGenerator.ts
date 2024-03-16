@@ -1,7 +1,6 @@
 import { mergeAttributes, Node } from "@tiptap/core";
-import { PluginKey } from "@tiptap/pm/state";
-
-export const LmGeneratorPluginKey = new PluginKey("lmGenerator");
+import { ReactNodeViewRenderer } from "@tiptap/react";
+import { Component } from "./Component";
 
 export type GeneratorAttributes = {
   name: string;
@@ -18,15 +17,11 @@ declare module "@tiptap/core" {
 export const LmGenerator = Node.create({
   name: "lmGenerator",
 
-  addOptions() {
-    return {};
-  },
-
   group: "inline",
 
   inline: true,
 
-  selectable: true,
+  selectable: false,
 
   atom: true,
 
@@ -82,59 +77,20 @@ export const LmGenerator = Node.create({
         },
     };
   },
+
   parseHTML() {
     return [
       {
-        tag: `span[data-type="${this.name}"]`,
+        tag: "lm-choices",
       },
     ];
   },
 
-  renderHTML({ node, HTMLAttributes }) {
-    return [
-      "span",
-      mergeAttributes(
-        {
-          "data-type": this.name,
-          class: "px-2 py-1 rounded-md bg-zinc-200 dark:bg-zinc-800",
-        },
-        HTMLAttributes,
-      ),
-      `${node.attrs.name}`,
-    ];
+  renderHTML({ HTMLAttributes }) {
+    return ["lm-choices", mergeAttributes(HTMLAttributes)];
   },
 
-  renderText({ node }) {
-    return `${node.attrs.name}`;
-  },
-
-  addKeyboardShortcuts() {
-    return {
-      Backspace: () =>
-        this.editor.commands.command(({ tr, state }) => {
-          let isLmGenerator = false;
-          const { selection } = state;
-          const { empty, anchor } = selection;
-
-          if (!empty) {
-            return false;
-          }
-
-          state.doc.nodesBetween(anchor - 1, anchor, (node, pos) => {
-            if (node.type.name === this.name) {
-              isLmGenerator = true;
-              tr.insertText("", pos, pos + node.nodeSize);
-
-              return false;
-            }
-          });
-
-          return isLmGenerator;
-        }),
-    };
-  },
-
-  addProseMirrorPlugins() {
-    return [];
+  addNodeView() {
+    return ReactNodeViewRenderer(Component);
   },
 });

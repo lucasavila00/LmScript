@@ -9,6 +9,23 @@ declare module "@tiptap/core" {
   }
 }
 
+export type StoredChoice =
+  | {
+      tag: "variable";
+      value: string;
+    }
+  | {
+      tag: "typed";
+      value: string;
+    };
+
+export type ChoicesNodeAttrs = {
+  choices: StoredChoice[];
+  type: "generation" | "selection" | "regex";
+  name: string;
+  max_tokens: number;
+};
+
 export const LmChoices = Node.create({
   name: "lmChoices",
 
@@ -29,6 +46,28 @@ export const LmChoices = Node.create({
         renderHTML: (attributes) => {
           return {
             "data-choices": JSON.stringify(attributes.choices),
+          };
+        },
+      },
+      type: {
+        default: "generation",
+        parseHTML: (element) => {
+          return element.getAttribute("data-type");
+        },
+        renderHTML: (attributes) => {
+          return {
+            "data-type": attributes.type,
+          };
+        },
+      },
+      max_tokens: {
+        default: 16,
+        parseHTML: (element) => {
+          return parseInt(element.getAttribute("data-max_tokens") ?? "16");
+        },
+        renderHTML: (attributes) => {
+          return {
+            "data-max_tokens": attributes.max_tokens,
           };
         },
       },

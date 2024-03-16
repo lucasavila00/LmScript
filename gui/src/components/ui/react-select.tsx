@@ -20,9 +20,10 @@ const getClassNames = <
 ): ClassNamesConfig<Option, IsMulti, Group> => {
   return {
     ...classNames,
+    container: (p) => cn("!min-h-8", classNames?.container?.(p)),
     control: (e) =>
       cn(
-        `rounded-md border`,
+        `rounded-md border !min-h-8`,
         `border-input px-1 pl-2 pr-1 text-sm bg-background shadow-sm`,
         e.isFocused ? "ring-1 ring-ring" : "",
         classNames?.control?.(e),
@@ -53,12 +54,12 @@ const getClassNames = <
     multiValue: (e) =>
       cn(
         "bg-gray-200 dark:bg-zinc-800 px-1 py-0.5 rounded",
+        // ""
         classNames?.multiValue?.(e),
       ),
     input: (e) => cn("text-sm overflow-x-hidden", classNames?.input?.(e)),
     valueContainer: (e) =>
-      cn("flex flex-wrap gap-1", classNames?.valueContainer?.(e)),
-    container: (p) => cn(classNames?.container?.(p)),
+      cn("flex !flex-nowrap gap-1", classNames?.valueContainer?.(e)),
   };
 };
 const getStyles = <

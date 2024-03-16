@@ -2,7 +2,6 @@ import { EditorContent } from "@tiptap/react";
 import { useBlockEditor } from "./hooks/useBlockEditor";
 import { ContentItemMenu } from "./components/ContentItemMenu";
 import { useRef } from "react";
-import { LmGeneratorMenu } from "./components/LmGeneratorMenu";
 import { Sidebar } from "./components/Sidebar";
 import { EditorHeader } from "./components/EditorHeader";
 import { VariablesContext } from "./context/variables";
@@ -33,7 +32,6 @@ export const BlockEditor = () => {
                 className="flex-1 overflow-y-auto"
               />
               <ContentItemMenu editor={editor} />
-              <LmGeneratorMenu editor={editor} appendTo={menuContainerRef} />
             </div>
           </EditorContext.Provider>
         </VariablesContext.Provider>

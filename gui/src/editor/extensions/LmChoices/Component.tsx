@@ -1,20 +1,13 @@
-import { Button } from "@/components/ui/button";
 import {
-  ControlLabelContext,
   StyledCreatableReactSelect,
+  StyledReactSelect,
 } from "@/components/ui/react-select";
 import { VariablesContext } from "@/editor/context/variables";
 import { Node } from "@tiptap/pm/model";
 import { NodeViewWrapper } from "@tiptap/react";
-import { FC, useContext, useState } from "react";
-import { Input } from "@/components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Pencil1Icon } from "@radix-ui/react-icons";
-import { EditorContext } from "@/editor/context/editor";
+import { FC, useContext } from "react";
+import { PopoverNameEditor } from "@/editor/components/PopoverNameEditor";
+import { ChoicesNodeAttrs, StoredChoice } from "./LmChoices";
 
 type Option = {
   label: string;
@@ -22,17 +15,7 @@ type Option = {
   tag: "variable" | "typed";
 };
 
-type StoredChoice =
-  | {
-      tag: "variable";
-      value: string;
-    }
-  | {
-      tag: "typed";
-      value: string;
-    };
-
-const ComponentTyped: FC<{
+const ChoicesEditor: FC<{
   choices: StoredChoice[];
   onChange: (choices: readonly StoredChoice[]) => void;
 }> = ({ choices, onChange }) => {
@@ -41,8 +24,8 @@ const ComponentTyped: FC<{
   return (
     <StyledCreatableReactSelect
       classNames={{
-        container: () => "inline-block !min-h-8",
-        control: () => "!min-h-8 rounded-none rounded-l-md",
+        container: () => "inline-block",
+        control: () => "rounded-none",
       }}
       isMulti={true}
       value={choices.map((it): Option => {
@@ -76,78 +59,56 @@ const ComponentTyped: FC<{
     />
   );
 };
-
-const PopoverNameEditor: FC<{
-  name: string;
-  onChangeName: (name: string) => void;
-}> = ({ name, onChangeName }) => {
-  const [editableName, setEditableName] = useState(name);
-  const [isEditing, setIsEditing_] = useState(false);
-  const editor = useContext(EditorContext);
-  const setIsEditing = (isOpen: boolean) => {
-    setIsEditing_(isOpen);
-    if (!isOpen) {
-      onChangeName(editableName);
-      setTimeout(() => {
-        editor?.commands.focus();
-      }, 1);
+const InnerGenerator: FC<{
+  attrs: ChoicesNodeAttrs;
+  updateAttributes: (attrs: { readonly [attr: string]: unknown }) => void;
+}> = ({ attrs, updateAttributes }) => {
+  switch (attrs.type) {
+    case "generation":
+      return <></>;
+    case "selection":
+      return (
+        <>
+          <ChoicesEditor
+            choices={attrs.choices}
+            onChange={(choices) =>
+              updateAttributes({
+                ...attrs,
+                choices,
+              })
+            }
+          />
+        </>
+      );
+    case "regex":
+      return <></>;
+    default: {
+      throw new Error("Invalid type");
     }
-  };
-  return (
-    <Popover open={isEditing} onOpenChange={setIsEditing}>
-      <PopoverTrigger asChild>
-        <Button
-          size="sm"
-          className="rounded-none rounded-r-md items-center border-0 border-r border-y"
-          variant="outline"
-        >
-          As: {name}
-          <Pencil1Icon className="h-4 w-4 shrink-0" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-80">
-        <form
-          onSubmit={(ev) => {
-            ev.preventDefault();
-            setIsEditing(false);
-          }}
-        >
-          <div className="grid gap-4">
-            <div className="space-y-2">
-              <h4 className="font-medium leading-none">Name</h4>
-              <p className="text-sm text-muted-foreground">Set the name</p>
-            </div>
-            <input type="submit" hidden />
-            <Input
-              value={editableName}
-              onChange={(e) => {
-                setEditableName(e.target.value);
-              }}
-              className="h-8"
-            />
-          </div>
-        </form>
-      </PopoverContent>
-    </Popover>
-  );
+  }
 };
+
 export const Component: FC<{
   node: Node;
   updateAttributes: (attrs: { readonly [attr: string]: unknown }) => void;
 }> = (props) => {
   return (
     <NodeViewWrapper as="span" className="inline-flex items-center">
-      <ControlLabelContext.Provider value={<>One of:{"\u00A0"}</>}>
-        <ComponentTyped
-          choices={props.node.attrs.choices}
-          onChange={(choices) =>
-            props.updateAttributes({
-              ...props.node.attrs,
-              choices,
-            })
-          }
-        />
-      </ControlLabelContext.Provider>
+      <StyledReactSelect
+        value={{
+          label: "One of",
+          value: "one_of",
+        }}
+        classNames={{
+          container: () => "inline-block shrink-0",
+          control: () => "rounded-none rounded-l border-0 border-y border-l",
+        }}
+      />
+      <InnerGenerator
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        attrs={props.node.attrs as any}
+        updateAttributes={props.updateAttributes}
+      />
       <PopoverNameEditor
         name={props.node.attrs.name}
         onChangeName={(name) =>

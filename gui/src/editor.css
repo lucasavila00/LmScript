@@ -1,3 +1,6 @@
+/* .ProseMirror * {
+  max-width: 64rem !important;
+} */
 .ProseMirror {
   .is-empty::before {
     @apply text-neutral-500 dark:text-neutral-400;
