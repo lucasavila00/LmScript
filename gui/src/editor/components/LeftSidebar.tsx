@@ -127,6 +127,7 @@ export const LeftSidebar = memo<{
     <div className={windowClassName}>
       <div className="w-full h-full overflow-hidden">
         <div className="w-full h-full p-6 overflow-auto">
+          TODO backend label
           <StyledReactSelect
             value={
               backendTag == null

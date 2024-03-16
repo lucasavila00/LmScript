@@ -1,7 +1,4 @@
 import { createContext } from "react";
+import { NamedVariable } from "../lib/types";
 
-export type NamedVariable = {
-  name: string;
-  value: string;
-};
 export const VariablesContext = createContext<NamedVariable[]>([]);

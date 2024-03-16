@@ -1,5 +1,6 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { StyledReactSelect } from "@/components/ui/react-select";
+import { AUTHOR_OPTIONS } from "@/editor/lib/types";
 import { Node } from "@tiptap/pm/model";
 import { NodeViewWrapper } from "@tiptap/react";
 import { FC } from "react";
@@ -28,7 +29,6 @@ const fullLabel = (author: string) => {
       return "Unknown";
   }
 };
-const AUTHOR_OPTIONS = ["system", "user", "assistant"] as const;
 export const Component: FC<{
   node: Node;
   updateAttributes: (attrs: { readonly [attr: string]: unknown }) => void;

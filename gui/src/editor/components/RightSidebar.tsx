@@ -17,7 +17,8 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
-import { SamplingParams, useSamplingParams } from "../hooks/useSamplingParams";
+import { useSamplingParams } from "../hooks/useSamplingParams";
+import { SamplingParams } from "../lib/types";
 
 const SamplingParamsForm: FC<{
   samplingParamsHook: ReturnType<typeof useSamplingParams>;

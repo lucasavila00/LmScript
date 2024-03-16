@@ -1,13 +1,6 @@
-import { Content } from "@tiptap/react";
-import { NamedVariable } from "../context/variables";
-import { SamplingParams } from "./useSamplingParams";
+import { EditorState } from "../lib/types";
 
-type InitialContent = {
-  doc: Content;
-  variables: NamedVariable[];
-  samplingParams: SamplingParams;
-};
-export const initialContent: InitialContent = {
+export const initialContent: EditorState = {
   variables: [
     {
       name: "content",
@@ -112,6 +105,7 @@ export const initialContent: InitialContent = {
           {
             type: "lmGenerator",
             attrs: {
+              id: "720ddbc0-12e6-4583-83b6-d0229a60445b",
               choices: [],
               type: "generation",
               max_tokens: 256,
@@ -128,6 +122,7 @@ export const initialContent: InitialContent = {
           {
             type: "lmGenerator",
             attrs: {
+              id: "id9100e156-5a1c-4ae5-bcf9-bc531a659220",
               choices: [
                 { label: "{PERSON}", value: "PERSON", tag: "variable" },
                 { label: "{OBJECT}", value: "OBJECT", tag: "variable" },

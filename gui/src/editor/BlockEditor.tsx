@@ -10,6 +10,7 @@ import { EditorContext } from "./context/editor";
 import { TextMenu } from "./components/TextMenu";
 import { LeftSidebar } from "./components/LeftSidebar";
 import { useRunner } from "./hooks/useRunner";
+import { Play } from "./components/Play/Play";
 
 export const BlockEditor = () => {
   const {
@@ -48,7 +49,16 @@ export const BlockEditor = () => {
                 {runnerHook.backend == null ? (
                   <>TODO: select a backend msg</>
                 ) : (
-                  <></>
+                  <>
+                    <Play
+                      backend={runnerHook.backend}
+                      editorState={{
+                        doc: editor.getJSON(),
+                        variables: variablesHook.variables,
+                        samplingParams: samplingParamsHook.samplingParams,
+                      }}
+                    />
+                  </>
                 )}
               </div>
             </div>

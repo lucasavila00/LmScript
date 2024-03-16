@@ -1,6 +1,7 @@
 import { mergeAttributes, Node } from "@tiptap/core";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 import { Component } from "./Component";
+import { newUuid } from "@/lib/utils";
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     lmGenerator: {
@@ -20,6 +21,18 @@ export const LmGenerator = Node.create({
 
   addAttributes() {
     return {
+      id: {
+        default: "~uuid~",
+        parseHTML: (_element) => {
+          return newUuid();
+        },
+
+        renderHTML: (attributes) => {
+          return {
+            "data-choices": JSON.stringify(attributes.choices),
+          };
+        },
+      },
       choices: {
         default: [],
         parseHTML: (element) => {
@@ -85,7 +98,9 @@ export const LmGenerator = Node.create({
         ({ commands }) => {
           return commands.insertContent({
             type: this.name,
-            attrs: {},
+            attrs: {
+              id: newUuid(),
+            },
           });
         },
     };

@@ -54,7 +54,6 @@ export const SlashCommand = Extension.create({
           const isParagraph = $from.parent.type.name === "paragraph";
           // const isStartOfNode = $from.parent.textContent?.charAt(0) === "/";
           const isStartOfNode = true;
-          // TODO
           const isInColumn = this.editor.isActive("column");
 
           const afterContent = $from.parent.textContent?.substring(

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NamedVariable } from "../context/variables";
+import { NamedVariable } from "../lib/types";
 
 export const useVariables = (initialVariables: NamedVariable[]) => {
   const [variables, setVariables] = useState<NamedVariable[]>(initialVariables);
