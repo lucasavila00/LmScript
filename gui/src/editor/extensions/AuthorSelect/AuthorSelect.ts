@@ -1,33 +1,62 @@
 import { mergeAttributes, Node } from "@tiptap/core";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 import { Component } from "./Component";
+declare module "@tiptap/core" {
+  interface Commands<ReturnType> {
+    authorSelect: {
+      createNewAuthorSelect: () => ReturnType;
+    };
+  }
+}
 
 export const AuthorSelect = Node.create({
-  name: "reactComponent",
+  name: "authorSelect",
 
   group: "block",
 
   atom: true,
-  selectable: true,
+  selectable: false,
 
   addAttributes() {
     return {
-      count: {
-        default: 0,
+      author: {
+        default: "system",
+        parseHTML: (element) => {
+          return {
+            author: element.getAttribute("data-author"),
+          };
+        },
+
+        renderHTML: (attributes) => {
+          return {
+            "data-author": attributes.author,
+          };
+        },
       },
     };
   },
-
+  addCommands() {
+    return {
+      createNewAuthorSelect: () => ({ commands }) => {
+        return commands.insertContent({
+          type: this.name,
+          attrs: {
+            author: "user",
+          },
+        });
+      },
+    };
+  },
   parseHTML() {
     return [
       {
-        tag: "react-component",
+        tag: "author-select",
       },
     ];
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ["react-component", mergeAttributes(HTMLAttributes)];
+    return ["author-select", mergeAttributes(HTMLAttributes)];
   },
 
   addNodeView() {

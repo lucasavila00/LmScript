@@ -10,10 +10,17 @@ import StarterKit from "@tiptap/starter-kit";
 import { Selection } from "../extensions/Selection";
 import { LmGenerator } from "../extensions/LmGenerator/LmGenerator";
 import { AuthorSelect } from "../extensions/AuthorSelect/AuthorSelect";
+import { TrailingNode } from "../extensions/TrailingNode";
 
 export const initialContent = {
   type: "doc",
   content: [
+    {
+      type: "authorSelect",
+      attrs: {
+        author: "system",
+      },
+    },
     {
       type: "paragraph",
       content: [
@@ -29,14 +36,11 @@ export const initialContent = {
         },
       ],
     },
-    {
-      type: "reactComponent",
-      attrs: {
-        count: 3,
-      },
-    },
   ],
 };
+const Doc = TiptapDocument.extend({
+  content: "authorSelect block*",
+});
 
 export const useBlockEditor = () => {
   const editor = useEditor(
@@ -67,7 +71,8 @@ export const useBlockEditor = () => {
           text: undefined,
           bulletList: undefined,
         }),
-        TiptapDocument,
+        // TiptapDocument,
+        Doc,
         Heading,
         Dropcursor.configure({
           width: 2,
@@ -84,6 +89,7 @@ export const useBlockEditor = () => {
         Selection,
         LmGenerator,
         AuthorSelect,
+        TrailingNode,
       ],
       editorProps: {
         attributes: {

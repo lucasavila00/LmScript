@@ -17,6 +17,18 @@ export const GROUPS: Group[] = [
             .run();
         },
       },
+      {
+        name: "authorSelect",
+        label: "Author",
+        iconName: "User",
+        description: "Select an author",
+        aliases: ["auth"],
+        action: (editor) => {
+          return editor.chain().focus()
+            .createNewAuthorSelect()
+            .run();
+        },
+      },
     ],
   },
   {
