@@ -22,9 +22,7 @@ export const AuthorSelect = Node.create({
       author: {
         default: "system",
         parseHTML: (element) => {
-          return {
-            author: element.getAttribute("data-author"),
-          };
+          return element.getAttribute("data-author");
         },
 
         renderHTML: (attributes) => {

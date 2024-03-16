@@ -17,7 +17,7 @@ export const VariablesSidebar: FC<{
   } = variablesHook;
   return (
     <>
-      <div className="flex flex-col gap-4 my-4">
+      <div className="flex flex-col gap-8 my-8">
         {variables.map((item, idx) => {
           return (
             <Fragment key={idx}>

@@ -76,7 +76,10 @@ export const initialContent: InitialContent = {
       },
       {
         type: "paragraph",
-        content: [{ type: "text", text: "Illustrate: {PERSON_ILLUSTRATOR}" }],
+        content: [
+          { type: "text", text: "Illustrate: " },
+          { type: "variableSelect", attrs: { name: "PERSON_ILLUSTRATOR" } },
+        ],
       },
       {
         type: "heading",
@@ -94,7 +97,10 @@ export const initialContent: InitialContent = {
       },
       {
         type: "paragraph",
-        content: [{ type: "text", text: "Illustrate: {OBJECT_ILLUSTRATOR}" }],
+        content: [
+          { type: "text", text: "Illustrate: " },
+          { type: "variableSelect", attrs: { name: "OBJECT_ILLUSTRATOR" } },
+        ],
       },
       { type: "authorSelect", attrs: { author: "assistant" } },
       {

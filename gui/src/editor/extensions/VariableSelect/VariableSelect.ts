@@ -23,9 +23,7 @@ export const VariableSelect = Node.create({
       name: {
         default: "",
         parseHTML: (element) => {
-          return {
-            name: element.getAttribute("data-name"),
-          };
+          return element.getAttribute("data-name");
         },
 
         renderHTML: (attributes) => {
