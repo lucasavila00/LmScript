@@ -5,8 +5,7 @@ import { MenuProps } from "../types";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { GeneratorAttributes } from "@/editor/extensions/LmGenerator/LmGenerator";
-import { cn } from "@/lib/utils";
-import ReactSelect from "react-select";
+import { StyledReactSelect } from "@/components/ui/react-select";
 const getActiveNode = (editor: MenuProps["editor"]) => {
   const { state } = editor;
   const activeNodePosition = state.selection.$from.pos;
@@ -126,10 +125,9 @@ const LmGeneratorMenuContent: FC<{
         </div>
         <div className="grid grid-cols-3 items-center gap-4">
           <Label htmlFor="stop">Stop</Label>
-          <ReactSelect
+          <StyledReactSelect
             name={"stop"}
             isMulti={true}
-            unstyled={true}
             isSearchable={true}
             hideSelectedOptions={true}
             value={attributes.stop.map((stop) => ({
@@ -143,37 +141,10 @@ const LmGeneratorMenuContent: FC<{
                 stop: selected.map((s) => s.value),
               });
             }}
-            styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
-            menuPortalTarget={document.body}
             placeholder={"Select..."}
             classNames={{
-              control: (e) =>
-                cn(
-                  `rounded-md border`,
-                  `border-input px-1 py-1 text-sm !min-h-8`,
-                  e.isFocused ? "ring-1 ring-ring" : "",
-                ),
-              indicatorSeparator: () => "bg-gray-100 dark:bg-zinc-800 mx-2",
-              dropdownIndicator: () => "text-gray-400 dark:text-gray-400",
-              clearIndicator: () => "text-gray-400 dark:text-gray-400",
-              menu: () =>
-                cn(
-                  "absolute top-0 mt-1 text-sm z-10 w-full",
-                  "rounded-md border bg-popover shadow-md overflow-x-hidden",
-                ),
-              placeholder: () => "text-muted-foreground pl-2",
-              option: () =>
-                cn(
-                  "cursor-default",
-                  "rounded-sm py-1.5 m-1 px-2 text-sm outline-none",
-                  "focus:bg-gray-200 dark:focus:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-800 w-auto",
-                ),
-              noOptionsMessage: () => "p-5",
-              multiValue: () =>
-                "bg-gray-200 dark:bg-zinc-800 px-2 p-0.5 rounded",
-              input: () => "text-sm overflow-x-hidden",
-              valueContainer: () => "flex flex-wrap gap-1",
               container: () => "col-span-2 !min-h-8",
+              control: () => "!min-h-8",
             }}
             options={STOP_AT_OPTIONS}
           />

@@ -46,11 +46,11 @@ export const LmGenerator = Node.create({
       stop: {
         default: [],
         parseHTML: (element) => {
-          return (element.getAttribute("data-stop") ?? "").split(",");
+          return JSON.parse(element.getAttribute("data-stop") ?? "[]");
         },
         renderHTML: (attributes) => {
           return {
-            "data-stop": attributes.stop.join(","),
+            "data-stop": JSON.stringify(attributes.stop),
           };
         },
       },

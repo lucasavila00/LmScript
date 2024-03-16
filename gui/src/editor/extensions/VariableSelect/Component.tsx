@@ -1,7 +1,7 @@
 import { Node } from "@tiptap/pm/model";
 import { NodeViewWrapper } from "@tiptap/react";
 import { FC, useContext, useState } from "react";
-import { CheckIcon } from "@radix-ui/react-icons";
+import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,11 +33,12 @@ export const Component: FC<{
           <Button
             role="combobox"
             aria-expanded={open}
-            variant="tertiary"
-            className="justify-between items-center inline-flex py-1 px-1"
+            variant="outline"
+            className="items-center inline-flex h-8 px-1"
           >
+            {/* <ComponentPlaceholderIcon className="mr-0.5 h-4 w-4 shrink-0 opacity-50" /> */}
             {selectedName != "" ? `{${selectedName}}` : "Select a variable..."}
-            {/* <CaretSortIcon className="h-4 w-4 shrink-0 opacity-50" /> */}
+            <CaretSortIcon className="ml-0.5 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-[200px] p-0">

@@ -15,6 +15,7 @@ import { useSidebar } from "./useSidebar";
 import { initialContent } from "./init";
 import { useVariables } from "./useVariables";
 import { VariableSelect } from "../extensions/VariableSelect/VariableSelect";
+import { LmChoices } from "../extensions/LmChoices/LmChoices";
 
 const Doc = TiptapDocument.extend({
   content: "authorSelect block*",
@@ -73,6 +74,7 @@ export const useBlockEditor = () => {
         AuthorSelect,
         TrailingNode,
         VariableSelect,
+        LmChoices,
       ],
       editorProps: {
         attributes: {

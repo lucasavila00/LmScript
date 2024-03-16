@@ -1,11 +1,5 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-  SelectTrigger,
-  Select,
-  SelectValue,
-  SelectItem,
-  SelectContent,
-} from "@/components/ui/select";
+import { StyledReactSelect } from "@/components/ui/react-select";
 import { Node } from "@tiptap/pm/model";
 import { NodeViewWrapper } from "@tiptap/react";
 import { FC } from "react";
@@ -22,6 +16,19 @@ const avatarLabel = (author: string) => {
       return "Unk";
   }
 };
+const fullLabel = (author: string) => {
+  switch (author) {
+    case "system":
+      return "System";
+    case "user":
+      return "User";
+    case "assistant":
+      return "Assistant";
+    default:
+      return "Unknown";
+  }
+};
+const AUTHOR_OPTIONS = ["system", "user", "assistant"] as const;
 export const Component: FC<{
   node: Node;
   updateAttributes: (attrs: { readonly [attr: string]: unknown }) => void;
@@ -31,23 +38,28 @@ export const Component: FC<{
       <Avatar>
         <AvatarFallback>{avatarLabel(props.node.attrs.author)}</AvatarFallback>
       </Avatar>
-      <Select
-        value={props.node.attrs.author}
-        onValueChange={(v) => {
-          props.updateAttributes({
-            author: v,
-          });
+      <StyledReactSelect
+        value={{
+          value: props.node.attrs.author,
+          label: fullLabel(props.node.attrs.author),
         }}
-      >
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Message Author" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="system">System</SelectItem>
-          <SelectItem value="user">User</SelectItem>
-          <SelectItem value="assistant">Assistant</SelectItem>
-        </SelectContent>
-      </Select>
+        options={AUTHOR_OPTIONS.map((it) => ({
+          label: fullLabel(it),
+          value: it,
+        }))}
+        onChange={(selected) => {
+          if (selected != null) {
+            props.updateAttributes({
+              ...props.node.attrs,
+              author: selected.value,
+            });
+          }
+        }}
+        classNames={{
+          container: () => "!min-h-8",
+          control: () => "!min-h-8 w-32",
+        }}
+      />
     </NodeViewWrapper>
   );
 };

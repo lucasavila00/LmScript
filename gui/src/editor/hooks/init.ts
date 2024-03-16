@@ -115,7 +115,18 @@ export const initialContent: InitialContent = {
       },
       {
         type: "paragraph",
-        content: [{ type: "text", text: "Illustrate: {illustrator|select}" }],
+        content: [
+          { type: "text", text: "Illustrate: " },
+          {
+            type: "lmChoices",
+            attrs: {
+              choices: [
+                { tag: "variable", value: "PERSON_ILLUSTRATOR" },
+                { tag: "variable", value: "OBJECT_ILLUSTRATOR" },
+              ],
+            },
+          },
+        ],
       },
     ],
   },
