@@ -17,7 +17,7 @@
     "test": "vitest",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "tw": "postcss ./out/tailwind.css -o ./out/tailwind.css"
+    "tw": "tailwindcss ./src/globals.css -o ./out/tailwind.css && postcss --config postcss.config.js ./out/tailwind.css -o ./out/tailwind.css"
   },
   "dependencies": {
     "@fontsource/inter": "^5.0.17",
