@@ -8,15 +8,24 @@ const PlayStream: FC<{
   captures: Record<string, string>;
 }> = ({ editorState }) => {
   const msgs = getMessagesOfAuthor(editorState);
+  if (msgs.tag === "success") {
+    return (
+      <>
+        {msgs.value.map((msg, i) => {
+          return (
+            <div key={i}>
+              <pre>{JSON.stringify(msg, null, 2)}</pre>
+            </div>
+          );
+        })}
+      </>
+    );
+  }
+
   return (
     <>
-      {msgs.map((msg, i) => {
-        return (
-          <div key={i}>
-            <pre>{JSON.stringify(msg, null, 2)}</pre>
-          </div>
-        );
-      })}
+      ERROR!!!!!!
+      <pre>{JSON.stringify(msgs, null, 2)}</pre>
     </>
   );
 };

@@ -8,11 +8,11 @@ import { NodeViewWrapper } from "@tiptap/react";
 import { FC, useContext } from "react";
 import { PopoverNameEditor } from "@/editor/components/PopoverNameEditor";
 import {
-  ALL_GENERATION_NODE_TYPES,
+  StoredChoice,
   GenerationNodeAttrs,
   GenerationNodeTypeLabels,
-  StoredChoice,
-} from "./types";
+  ALL_GENERATION_NODE_TYPES,
+} from "@/editor/lib/types";
 
 type ChoicesOption = {
   label: string;

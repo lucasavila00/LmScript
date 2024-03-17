@@ -11,16 +11,22 @@ export type Role = "assistant" | "system" | "user";
  */
 export type Eos =
   "%%%%%%%%%HACK_TYPE_FOR_EOS_DO_NOT_USE_THIS_STRING_DIRECTLY%%%%%%%%%%";
+
+/**
+ * List of all supported chat templates.
+ */
+export const ALL_CHAT_TEMPLATES = [
+  "llama-2-chat",
+  "default",
+  "claude",
+  "chatml",
+  "chatml-llava",
+  "vicuna_v1.1",
+] as const;
 /**
  * Supported chat templates.
  */
-export type ChatTemplate =
-  | "llama-2-chat"
-  | "default"
-  | "claude"
-  | "chatml"
-  | "chatml-llava"
-  | "vicuna_v1.1";
+export type ChatTemplate = (typeof ALL_CHAT_TEMPLATES)[number];
 /**
  * The definition of a chat template.
  * There are a handful of commonly used templates, and each model uses a different one.

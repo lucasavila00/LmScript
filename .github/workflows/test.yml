@@ -15,5 +15,6 @@ jobs:
       - run: cd client && deno lint
       - run: cd client && deno check src/**/*.ts
       - run: npm config set "@tiptap-pro:registry" https://registry.tiptap.dev/
+      - run: npm config set "@jsr:registry" https://npm.jsr.io
       - run: npm config set "//registry.tiptap.dev/:_authToken" ${{ secrets.TIPTAP_TOKEN }}
       - run: cd gui && npm ci && npm run static

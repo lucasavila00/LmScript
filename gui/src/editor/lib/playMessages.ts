@@ -1,27 +1,45 @@
 import { JSONContent } from "@tiptap/react";
-import { Author, EditorState } from "./types";
+import { Author, EditorState, GenerationNodeAttrs } from "./types";
 
-type MessagePartText = {
+export type MessagePartText = {
   tag: "text";
   text: string;
 };
 
-type MessagePartCapture = {
-  tag: "capture";
-  id: string;
+export type MessagePartGenerate = {
+  tag: "lmGenerate";
+  nodeAttrs: GenerationNodeAttrs;
 };
 
-type MessagePart = MessagePartText | MessagePartCapture;
+export type MessagePart = MessagePartText | MessagePartGenerate;
 
-type MessageOfAuthor = {
+export type MessageOfAuthor = {
   author: Author;
   parts: MessagePart[];
 };
+
+export type Error = {
+  tag: "variable-not-found";
+  variableId: string;
+};
+
+export type TransformSuccess = {
+  tag: "success";
+  value: MessageOfAuthor[];
+};
+
+export type TransformError = {
+  tag: "error";
+  value: Error[];
+};
+
+export type TransformResult = TransformSuccess | TransformError;
 
 class MessageOfAuthorGetter {
   private currentAuthor: Author;
   private messageParts: MessagePart[] = [];
   private acc: MessageOfAuthor[] = [];
+  private errors: Error[] = [];
   private readonly root: JSONContent;
   constructor(private readonly editorState: EditorState) {
     const root = this.editorState.doc;
@@ -43,21 +61,49 @@ class MessageOfAuthorGetter {
     this.currentAuthor = content.attrs?.author;
   }
 
-  private handleHeading(content: JSONContent) {
-    const level = Number(content.attrs?.level ?? 0);
-    const children = this.handleSecondLevel(content.content ?? []);
-    this.messageParts.push({
-      tag: "text",
-      text: `${"#".repeat(level)} ${children}\n`,
-    });
+  private pushText(text: string) {
+    const last = this.messageParts[this.messageParts.length - 1];
+    if (last?.tag === "text") {
+      last.text += text;
+      return;
+    }
+    this.messageParts.push({ tag: "text", text });
   }
 
-  private handleSecondLevel(arr: JSONContent[]): string {
-    let acc = "";
+  private handleHeading(content: JSONContent) {
+    const level = Number(content.attrs?.level ?? 0);
+    this.pushText("#".repeat(level));
+    this.handleSecondLevel(content.content ?? []);
+    this.pushText("\n\n");
+  }
+
+  private handleSecondLevel(arr: JSONContent[]) {
     for (const content of arr) {
       switch (content.type) {
         case "text": {
-          acc += content.text;
+          this.pushText(content.text ?? "");
+          break;
+        }
+        case "variableSelect": {
+          const variableName = content.attrs?.name;
+          const fromVariables = this.editorState.variables.find(
+            (v) => v.name === variableName,
+          );
+          if (fromVariables?.value == null) {
+            this.errors.push({
+              tag: "variable-not-found",
+              variableId: variableName,
+            });
+          } else {
+            this.pushText(fromVariables.value);
+          }
+          break;
+        }
+        case "lmGenerator": {
+          this.messageParts.push({
+            tag: "lmGenerate",
+            nodeAttrs: content.attrs as GenerationNodeAttrs,
+          });
           break;
         }
         default: {
@@ -65,15 +111,14 @@ class MessageOfAuthorGetter {
         }
       }
     }
-    return acc;
   }
 
   private handleParagraph(content: JSONContent) {
-    const children = this.handleSecondLevel(content.content ?? []);
-    this.messageParts.push({ tag: "text", text: `${children}\n` });
+    this.handleSecondLevel(content.content ?? []);
+    this.pushText("\n\n");
   }
 
-  handleTopLevel(): MessageOfAuthor[] {
+  handleTopLevel() {
     for (const content of (this.root.content ?? []).slice(1)) {
       switch (content.type) {
         case "authorSelect": {
@@ -94,12 +139,27 @@ class MessageOfAuthorGetter {
       }
     }
 
+    this.acc.push({ author: this.currentAuthor, parts: this.messageParts });
+  }
+
+  getErrors(): Error[] {
+    return this.errors;
+  }
+  getAcc(): MessageOfAuthor[] {
     return this.acc;
   }
 }
 
 export const getMessagesOfAuthor = (
   editorState: EditorState,
-): MessageOfAuthor[] => {
-  return new MessageOfAuthorGetter(editorState).handleTopLevel();
+): TransformResult => {
+  const state = new MessageOfAuthorGetter(editorState);
+  state.handleTopLevel();
+
+  const errors = state.getErrors();
+  if (errors.length > 0) {
+    return { tag: "error", value: errors };
+  }
+  const acc = state.getAcc();
+  return { tag: "success", value: acc };
 };
