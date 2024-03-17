@@ -1,4 +1,5 @@
 import "./globals.css";
+import "./editor/styles/index.css";
 
 import "cal-sans";
 

@@ -5,7 +5,6 @@ import { useRef } from "react";
 import { RightSidebar } from "./components/RightSidebar";
 import { EditorHeader } from "./components/EditorHeader";
 import { VariablesContext } from "./context/variables";
-import "./styles/index.css";
 import { EditorContext } from "./context/editor";
 import { TextMenu } from "./components/TextMenu";
 import { LeftSidebar } from "./components/LeftSidebar";

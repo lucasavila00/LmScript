@@ -1,34 +1,11 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { StyledReactSelect } from "@/components/ui/react-select";
+import { avatarLabel, avatarFullLabel } from "@/editor/lib/avatar";
 import { AUTHOR_OPTIONS } from "@/editor/lib/types";
 import { Node } from "@tiptap/pm/model";
 import { NodeViewWrapper } from "@tiptap/react";
 import { FC } from "react";
 
-const avatarLabel = (author: string) => {
-  switch (author) {
-    case "system":
-      return "Sys";
-    case "user":
-      return "Usr";
-    case "assistant":
-      return "Ast";
-    default:
-      return "Unk";
-  }
-};
-const fullLabel = (author: string) => {
-  switch (author) {
-    case "system":
-      return "System";
-    case "user":
-      return "User";
-    case "assistant":
-      return "Assistant";
-    default:
-      return "Unknown";
-  }
-};
 export const Component: FC<{
   node: Node;
   updateAttributes: (attrs: { readonly [attr: string]: unknown }) => void;
@@ -44,10 +21,10 @@ export const Component: FC<{
         <StyledReactSelect
           value={{
             value: props.node.attrs.author,
-            label: fullLabel(props.node.attrs.author),
+            label: avatarFullLabel(props.node.attrs.author),
           }}
           options={AUTHOR_OPTIONS.map((it) => ({
-            label: fullLabel(it),
+            label: avatarFullLabel(it),
             value: it,
           }))}
           onChange={(selected) => {

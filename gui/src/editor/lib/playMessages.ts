@@ -41,7 +41,9 @@ class MessageOfAuthorGetter {
   private acc: MessageOfAuthor[] = [];
   private errors: Error[] = [];
   private readonly root: JSONContent;
-  constructor(private readonly editorState: EditorState) {
+  constructor(
+    private readonly editorState: Pick<EditorState, "doc" | "variables">,
+  ) {
     const root = this.editorState.doc;
     if (root.type !== "doc") {
       throw new Error("Expected doc as root");
