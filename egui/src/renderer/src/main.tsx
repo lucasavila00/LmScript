@@ -2,10 +2,20 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import { RecoilRoot } from "recoil";
-import { getBackendInstance } from "gui/src/lib/get-lmscript-backend";
+import { GetBackendInstance, AbstractBackend } from "gui/src/lib/get-lmscript-backend";
 
+const GetBackendInstanceElectron: GetBackendInstance = (backendConfig) => {
+  const backend: AbstractBackend = {
+    executeJSON: async (data, callbacks) => {
+      window.capture.onCapture(callbacks.onCapture);
+      const out = await window.electron.ipcRenderer.invoke("executeJSON", backendConfig, data);
+      return out;
+    },
+  };
+  return backend;
+};
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-(window as any).getBackendInstance = getBackendInstance;
+(window as any).getBackendInstance = GetBackendInstanceElectron;
 
 import "gui/out/tailwind.css";
 

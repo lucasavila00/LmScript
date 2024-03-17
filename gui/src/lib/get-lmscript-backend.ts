@@ -2,11 +2,12 @@ import { SGLangBackend } from "@lmscript/client/backends/sglang";
 import { AbstractBackend } from "@lmscript/client/backends/abstract";
 import { VllmBackend } from "@lmscript/client/backends/vllm";
 import { RunpodServerlessBackend } from "@lmscript/client/backends/runpod-serverless-sglang";
-import { Backend } from "../editor/hooks/useRunner";
+import { Backend } from "../editor/hooks/useBackendConfig";
 import { assertIsNever } from "./utils";
 
 export type GetBackendInstance = (backend: Backend) => AbstractBackend;
 
+// MAKE SURE ELECTRON COPY MATCHES
 export const getBackendInstance = (backend: Backend): AbstractBackend => {
   switch (backend.tag) {
     case "runpod-serverless-sglang": {
@@ -27,3 +28,4 @@ export const getBackendInstance = (backend: Backend): AbstractBackend => {
     }
   }
 };
+export type { AbstractBackend };

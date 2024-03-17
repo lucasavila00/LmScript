@@ -6,8 +6,8 @@ import {
   Backend,
   BackendLabels,
   BackendTag,
-  useRunner,
-} from "../hooks/useRunner";
+  useBackendConfig,
+} from "../hooks/useBackendConfig";
 import { StyledReactSelect } from "../../components/ui/react-select";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -134,7 +134,7 @@ const BackendConfig: FC<{
 export const LeftSidebar = memo<{
   editor: Editor;
   isOpen: boolean;
-  runnerHook: ReturnType<typeof useRunner>;
+  runnerHook: ReturnType<typeof useBackendConfig>;
 }>(({ isOpen, runnerHook }) => {
   const windowClassName = cn(
     "absolute top-0 left-0 bg-white lg:bg-white/30 lg:backdrop-blur-xl h-full lg:h-auto lg:relative z-[999] w-0 duration-300 transition-all",

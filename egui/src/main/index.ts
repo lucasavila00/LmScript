@@ -2,8 +2,39 @@ import { app, shell, BrowserWindow, ipcMain } from "electron";
 import { join } from "path";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
 import icon from "../../resources/icon.png?asset";
+import { SGLangBackend } from "@lmscript/client/backends/sglang";
+import { AbstractBackend } from "@lmscript/client/backends/abstract";
+import { VllmBackend } from "@lmscript/client/backends/vllm";
+import { RunpodServerlessBackend } from "@lmscript/client/backends/runpod-serverless-sglang";
+import type { Backend } from "gui/src/editor/hooks/useBackendConfig";
 
-function createWindow(): void {
+const assertIsNever = (x: never): never => {
+  throw new Error(`Unexpected: ${x}`);
+};
+
+// MAKE SURE ELECTRON COPY MATCHES
+const getBackendInstance = (backend: Backend): AbstractBackend => {
+  switch (backend.tag) {
+    case "runpod-serverless-sglang": {
+      return new RunpodServerlessBackend(backend.url, backend.token);
+    }
+    case "runpod-serverless-vllm": {
+      return new VllmBackend({
+        url: backend.url,
+        auth: backend.token,
+        model: backend.model,
+      });
+    }
+    case "sglang": {
+      return new SGLangBackend(backend.url);
+    }
+    default: {
+      return assertIsNever(backend);
+    }
+  }
+};
+
+function createWindow(): BrowserWindow {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 900,
@@ -12,7 +43,7 @@ function createWindow(): void {
     autoHideMenuBar: true,
     ...(process.platform === "linux" ? { icon } : {}),
     webPreferences: {
-      preload: join(__dirname, "../preload/index.js"),
+      preload: join(__dirname, "../preload/index.mjs"),
       sandbox: false,
     },
   });
@@ -33,6 +64,7 @@ function createWindow(): void {
   } else {
     mainWindow.loadFile(join(__dirname, "../renderer/index.html"));
   }
+  return mainWindow;
 }
 
 // This method will be called when Electron has finished
@@ -52,7 +84,16 @@ app.whenReady().then(() => {
   // IPC test
   ipcMain.on("ping", () => console.log("pong"));
 
-  createWindow();
+  const mainWindow = createWindow();
+
+  ipcMain.handle("executeJSON", async (_, config, data) => {
+    const backend = getBackendInstance(config);
+    return backend.executeJSON(data, {
+      onCapture: (captured) => {
+        mainWindow.webContents.send("onCapture", captured);
+      },
+    });
+  });
 
   app.on("activate", function () {
     // On macOS it's common to re-create a window in the app when the

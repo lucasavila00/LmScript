@@ -17,7 +17,12 @@
     "test": "vitest",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "tw": "tailwindcss ./src/globals.css -o ./out/tailwind.css && postcss --config postcss.config.js ./out/tailwind.css -o ./out/tailwind.css"
+    "tailwind": "tailwindcss -i ./src/globals.css -o ./out/tw.css",
+    "post-tailwind": "postcss --config postcss.config.js ./out/tw.css -o ./out/tailwind.css",
+    "tw": "npm run tailwind && npm run post-tailwind",
+    "tailwind-watch": "npm run tailwind -- --watch",
+    "post-watch": "onchange './out/tw.css' -- npm run post-tailwind",
+    "tww": "concurrently npm:tailwind-watch npm:post-watch"
   },
   "dependencies": {
     "@fontsource/inter": "^5.0.17",
@@ -47,7 +52,9 @@
     "cal-sans": "^1.0.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
+    "concurrently": "^8.2.2",
     "lucide-react": "^0.358.0",
+    "onchange": "^7.1.0",
     "prettier": "^3.2.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

@@ -2,7 +2,7 @@
   "name": "egui",
   "version": "1.0.0",
   "description": "An Electron application with React and TypeScript",
-  "main": "./out/main/index.js",
+  "main": "./out/main/index.mjs",
   "author": "example.com",
   "homepage": "https://electron-vite.org",
   "scripts": {
@@ -26,6 +26,7 @@
     "@electron-toolkit/preload": "^3.0.0",
     "@electron-toolkit/utils": "^3.0.0",
     "@fontsource/inter": "^5.0.17",
+    "@lmscript/client": "npm:@jsr/lmscript__client@^0.0.22",
     "cal-sans": "^1.0.1",
     "gui": "file:../gui",
     "recoil": "^0.7.7"

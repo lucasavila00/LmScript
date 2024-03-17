@@ -8,7 +8,7 @@ import { VariablesContext } from "./context/variables";
 import { EditorContext } from "./context/editor";
 import { TextMenu } from "./components/TextMenu";
 import { LeftSidebar } from "./components/LeftSidebar";
-import { useRunner } from "./hooks/useRunner";
+import { useBackendConfig } from "./hooks/useBackendConfig";
 import { Play } from "./components/Play/Play";
 
 export const BlockEditor = () => {
@@ -20,7 +20,7 @@ export const BlockEditor = () => {
     samplingParamsHook,
   } = useBlockEditor();
   const menuContainerRef = useRef(null);
-  const runnerHook = useRunner();
+  const runnerHook = useBackendConfig();
 
   if (editor == null) {
     // throw new Error("Editor is null");

@@ -1,4 +1,4 @@
-import { Backend } from "../../../editor/hooks/useRunner";
+import { Backend } from "../../hooks/useBackendConfig";
 import {
   MessageOfAuthor,
   getMessagesOfAuthor,
