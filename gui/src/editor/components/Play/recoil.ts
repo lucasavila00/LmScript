@@ -5,34 +5,11 @@ import {
   SamplingParams,
   UiGenerationData,
 } from "../../../editor/lib/types";
-import { assertIsNever } from "../../../lib/utils";
-import { atomFamily } from "recoil";
-import { SGLangBackend } from "@lmscript/client/backends/sglang";
-import { AbstractBackend } from "@lmscript/client/backends/abstract";
 import { messagesToTasks } from "../../../editor/lib/messageToTasks";
-import { VllmBackend } from "@lmscript/client/backends/vllm";
-import { RunpodServerlessBackend } from "@lmscript/client/backends/runpod-serverless-sglang";
-
-const getBackendInstance = (backend: Backend): AbstractBackend => {
-  switch (backend.tag) {
-    case "runpod-serverless-sglang": {
-      return new RunpodServerlessBackend(backend.url, backend.token);
-    }
-    case "runpod-serverless-vllm": {
-      return new VllmBackend({
-        url: backend.url,
-        auth: backend.token,
-        model: backend.model,
-      });
-    }
-    case "sglang": {
-      return new SGLangBackend(backend.url);
-    }
-    default: {
-      return assertIsNever(backend);
-    }
-  }
-};
+import { atomFamily } from "recoil";
+import {
+  GetBackendInstance,
+} from "../../../lib/get-lmscript-backend";
 
 export const generateAsyncAtom = atomFamily<
   UiGenerationData,
@@ -53,7 +30,9 @@ export const generateAsyncAtom = atomFamily<
   },
   effects: (param) => [
     (opts) => {
-      const instance = getBackendInstance(param.backend);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const getter = (window as any).getBackendInstance as GetBackendInstance;
+      const instance = getter(param.backend);
       const tasks = messagesToTasks(
         param.messages,
         param.backend.template,
