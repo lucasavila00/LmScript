@@ -53,6 +53,7 @@
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.51.0",
     "react-select": "^5.8.0",
+    "recoil": "^0.7.7",
     "tailwind-merge": "^2.2.1",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^3.22.4"

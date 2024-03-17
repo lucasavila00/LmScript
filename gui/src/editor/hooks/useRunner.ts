@@ -1,3 +1,4 @@
+import { ChatTemplate } from "@lmscript/client/chat-template";
 import { useState } from "react";
 
 export const ALL_BACKENDS_TAGS: BackendTag[] = [
@@ -14,16 +15,24 @@ export const BackendLabels: Record<BackendTag, string> = {
 
 export type SGLangBackend = {
   tag: "sglang";
+  url: string;
+  token: string;
+  template: ChatTemplate;
 };
 
 export type RunpodServerlessSGLangBackend = {
   tag: "runpod-serverless-sglang";
   url: string;
   token: string;
+  template: ChatTemplate;
 };
 
 export type RunpodServerlessVLLMBackend = {
   tag: "runpod-serverless-vllm";
+  url: string;
+  token: string;
+  model: string;
+  template: ChatTemplate;
 };
 
 export type Backend =

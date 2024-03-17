@@ -6,10 +6,10 @@ export type NamedVariable = {
 };
 export const SamplingParams = z.object({
   temperature: z.number(),
-  top_p: z.number().optional().nullable(),
-  top_k: z.number().optional().nullable(),
-  frequency_penalty: z.number().optional().nullable(),
-  presence_penalty: z.number().optional().nullable(),
+  top_p: z.number().optional(),
+  top_k: z.number().optional(),
+  frequency_penalty: z.number().optional(),
+  presence_penalty: z.number().optional(),
 });
 
 export type SamplingParams = z.infer<typeof SamplingParams>;
@@ -47,6 +47,7 @@ export const GenerationNodeTypeLabels: Record<GenerationNodeType, string> = {
 };
 
 export type GenerationNodeAttrs = {
+  id: string;
   choices: StoredChoice[];
   type: GenerationNodeType;
   name: string;

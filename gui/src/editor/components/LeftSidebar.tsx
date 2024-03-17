@@ -23,27 +23,32 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
+import { ALL_CHAT_TEMPLATES } from "@lmscript/client/chat-template";
 const RunpodSglangConfigSchema = z.object({
   url: z.string().min(4),
   token: z.string(),
+  template: z.enum(ALL_CHAT_TEMPLATES),
 });
 
-const RunpodSglangConfig: FC<{
-  setBackend: (tag: Backend) => void;
-}> = ({ setBackend }) => {
+const UrlTokenTemplateConfig: FC<{
+  setBackend: (backend: Backend) => void;
+  tag: "runpod-serverless-sglang" | "sglang";
+}> = ({ setBackend, tag }) => {
   const form = useForm<z.infer<typeof RunpodSglangConfigSchema>>({
     resolver: zodResolver(RunpodSglangConfigSchema),
     defaultValues: {
       url: "http://localhost:8000",
       token: "",
+      template: "llama-2-chat",
     },
   });
 
   function onSubmit(values: z.infer<typeof RunpodSglangConfigSchema>) {
     setBackend({
-      tag: "runpod-serverless-sglang",
+      tag: tag,
       url: values.url,
       token: values.token,
+      template: values.template,
     });
   }
 
@@ -80,6 +85,20 @@ const RunpodSglangConfig: FC<{
             </FormItem>
           )}
         />
+        <FormField
+          control={form.control}
+          name="template"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Template</FormLabel>
+              <FormControl>
+                <Input placeholder="" {...field} />
+              </FormControl>
+              <FormDescription>TODO template desc.</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <Button variant="outline" type="submit" className="w-full">
           Save
         </Button>
@@ -94,13 +113,18 @@ const BackendConfig: FC<{
   if (backendTag == null) return <></>;
   switch (backendTag) {
     case "runpod-serverless-sglang": {
-      return <RunpodSglangConfig setBackend={setBackend} />;
+      return (
+        <UrlTokenTemplateConfig
+          setBackend={setBackend}
+          tag="runpod-serverless-sglang"
+        />
+      );
     }
     case "runpod-serverless-vllm": {
-      return "todo";
+      return <>TODO vllm</>;
     }
     case "sglang": {
-      return "todo";
+      return <UrlTokenTemplateConfig setBackend={setBackend} tag="sglang" />;
     }
     default: {
       return assertIsNever(backendTag);
