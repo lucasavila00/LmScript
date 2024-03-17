@@ -1,14 +1,18 @@
-import { Backend } from "@/editor/hooks/useRunner";
+import { Backend } from "../../../editor/hooks/useRunner";
 import {
   MessageOfAuthor,
   getMessagesOfAuthor,
-} from "@/editor/lib/playMessages";
-import { EditorState, NamedVariable, SamplingParams } from "@/editor/lib/types";
+} from "../../../editor/lib/playMessages";
+import {
+  EditorState,
+  NamedVariable,
+  SamplingParams,
+} from "../../../editor/lib/types";
 import { FC } from "react";
 import { useRecoilValueLoadable } from "recoil";
 import { generateAsyncAtom } from "./recoil";
-import { Loading } from "@/components/ui/loading";
-import { assertIsNever } from "@/lib/utils";
+import { Loading } from "../../../components/ui/loading";
+import { assertIsNever } from "../../../lib/utils";
 import { HtmlPlay } from "./HtmlPlay";
 
 const PlayStream: FC<{

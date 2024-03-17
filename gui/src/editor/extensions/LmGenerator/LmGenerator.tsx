@@ -1,7 +1,7 @@
 import { mergeAttributes, Node } from "@tiptap/core";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 import { Component } from "./Component";
-import { newUuid } from "@/lib/utils";
+import { newUuid } from "../../../lib/utils";
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     lmGenerator: {

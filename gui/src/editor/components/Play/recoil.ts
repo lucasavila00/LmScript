@@ -1,15 +1,15 @@
-import { Backend } from "@/editor/hooks/useRunner";
-import { MessageOfAuthor } from "@/editor/lib/playMessages";
+import { Backend } from "../../../editor/hooks/useRunner";
+import { MessageOfAuthor } from "../../../editor/lib/playMessages";
 import {
   NamedVariable,
   SamplingParams,
   UiGenerationData,
-} from "@/editor/lib/types";
-import { assertIsNever } from "@/lib/utils";
+} from "../../../editor/lib/types";
+import { assertIsNever } from "../../../lib/utils";
 import { atomFamily } from "recoil";
 import { SGLangBackend } from "@lmscript/client/backends/sglang";
 import { AbstractBackend } from "@lmscript/client/backends/abstract";
-import { messagesToTasks } from "@/editor/lib/messageToTasks";
+import { messagesToTasks } from "../../../editor/lib/messageToTasks";
 import { VllmBackend } from "@lmscript/client/backends/vllm";
 import { RunpodServerlessBackend } from "@lmscript/client/backends/runpod-serverless-sglang";
 

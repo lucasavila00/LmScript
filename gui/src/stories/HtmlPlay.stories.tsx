@@ -1,5 +1,5 @@
-import { HtmlPlay } from "@/editor/components/Play/HtmlPlay";
-import { EditorState } from "@/editor/lib/types";
+import { HtmlPlay } from "../editor/components/Play/HtmlPlay";
+import { EditorState } from "../editor/lib/types";
 
 const meta = {
   title: "HtmlPlay",

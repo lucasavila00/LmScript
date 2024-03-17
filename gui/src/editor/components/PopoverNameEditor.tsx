@@ -1,13 +1,13 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "../../components/ui/button";
 import { FC, useContext, useState } from "react";
-import { Input } from "@/components/ui/input";
+import { Input } from "../../components/ui/input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
+} from "../../components/ui/popover";
 import { Pencil1Icon } from "@radix-ui/react-icons";
-import { EditorContext } from "@/editor/context/editor";
+import { EditorContext } from "../../editor/context/editor";
 
 export const PopoverNameEditor: FC<{
   name: string;

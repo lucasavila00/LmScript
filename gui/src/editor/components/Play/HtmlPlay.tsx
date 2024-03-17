@@ -1,11 +1,11 @@
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { avatarLabel, avatarFullLabel } from "@/editor/lib/avatar";
+import { Avatar, AvatarFallback } from "../../../components/ui/avatar";
+import { avatarLabel, avatarFullLabel } from "../../../editor/lib/avatar";
 import {
   EditorState,
   GenerationNodeAttrs,
   UiGenerationData,
-} from "@/editor/lib/types";
-import { assertIsNever } from "@/lib/utils";
+} from "../../../editor/lib/types";
+import { assertIsNever } from "../../../lib/utils";
 import { JSONContent } from "@tiptap/react";
 import { FC, createElement, useEffect, useState } from "react";
 

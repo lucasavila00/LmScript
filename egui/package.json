@@ -7,10 +7,12 @@
   "homepage": "https://electron-vite.org",
   "scripts": {
     "format": "prettier --write .",
+    "format-check": "prettier --check .",
     "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
     "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",
     "typecheck": "npm run typecheck:node && npm run typecheck:web",
+    "static": "npm run format-check && npm run lint && npm run typecheck",
     "start": "electron-vite preview",
     "dev": "electron-vite dev",
     "build": "npm run typecheck && electron-vite build",
@@ -22,7 +24,9 @@
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.0",
-    "@electron-toolkit/utils": "^3.0.0"
+    "@electron-toolkit/utils": "^3.0.0",
+    "gui": "file:../gui",
+    "recoil": "^0.7.7"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^2.0.0",

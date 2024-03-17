@@ -1,8 +1,8 @@
 import { FC, Fragment } from "react";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Icon } from "@/components/ui/Icon";
-import { Input } from "@/components/ui/input";
+import { Button } from "../../components/ui/button";
+import { Textarea } from "../../components/ui/textarea";
+import { Icon } from "../../components/ui/Icon";
+import { Input } from "../../components/ui/input";
 import { useVariables } from "../hooks/useVariables";
 
 export const VariablesSidebar: FC<{

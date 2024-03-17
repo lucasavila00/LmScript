@@ -1,18 +1,18 @@
 import {
   StyledCreatableReactSelect,
   StyledReactSelect,
-} from "@/components/ui/react-select";
-import { VariablesContext } from "@/editor/context/variables";
+} from "../../../components/ui/react-select";
+import { VariablesContext } from "../../../editor/context/variables";
 import { Node } from "@tiptap/pm/model";
 import { NodeViewWrapper } from "@tiptap/react";
 import { FC, useContext } from "react";
-import { PopoverNameEditor } from "@/editor/components/PopoverNameEditor";
+import { PopoverNameEditor } from "../../../editor/components/PopoverNameEditor";
 import {
   StoredChoice,
   GenerationNodeAttrs,
   GenerationNodeTypeLabels,
   ALL_GENERATION_NODE_TYPES,
-} from "@/editor/lib/types";
+} from "../../../editor/lib/types";
 
 type ChoicesOption = {
   label: string;

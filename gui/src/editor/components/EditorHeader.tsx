@@ -1,5 +1,5 @@
-import { Icon } from "@/components/ui/Icon";
-import { ToolbarButton } from "@/components/ui/Toolbar";
+import { Icon } from "../../components/ui/Icon";
+import { ToolbarButton } from "../../components/ui/Toolbar";
 
 export type EditorHeaderProps = {
   isRightSidebarOpen: boolean;

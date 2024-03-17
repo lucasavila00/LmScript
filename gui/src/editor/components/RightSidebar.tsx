@@ -1,8 +1,13 @@
-import { cn } from "@/lib/utils";
+import { cn } from "../../lib/utils";
 import { FC, memo, useEffect, useRef } from "react";
 import { Editor } from "@tiptap/react";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Button } from "../../components/ui/button";
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from "../../components/ui/tabs";
 import { VariablesSidebar } from "./VariablesSidebar";
 import { useVariables } from "../hooks/useVariables";
 import {
@@ -13,10 +18,10 @@ import {
   FormLabel,
   FormMessage,
   Form,
-} from "@/components/ui/form";
+} from "../../components/ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Input } from "@/components/ui/input";
+import { Input } from "../../components/ui/input";
 import { useSamplingParams } from "../hooks/useSamplingParams";
 import { SamplingParams } from "../lib/types";
 

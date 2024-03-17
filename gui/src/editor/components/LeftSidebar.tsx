@@ -1,4 +1,4 @@
-import { assertIsNever, cn } from "@/lib/utils";
+import { assertIsNever, cn } from "../../lib/utils";
 import { FC, memo, useState } from "react";
 import { Editor } from "@tiptap/react";
 import {
@@ -8,7 +8,7 @@ import {
   BackendTag,
   useRunner,
 } from "../hooks/useRunner";
-import { StyledReactSelect } from "@/components/ui/react-select";
+import { StyledReactSelect } from "../../components/ui/react-select";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
@@ -19,9 +19,9 @@ import {
   FormLabel,
   FormMessage,
   Form,
-} from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+} from "../../components/ui/form";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
 import { useForm } from "react-hook-form";
 import { ALL_CHAT_TEMPLATES } from "@lmscript/client/chat-template";
 const RunpodSglangConfigSchema = z.object({

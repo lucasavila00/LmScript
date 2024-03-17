@@ -1,10 +1,10 @@
-import { Icon } from "@/components/ui/Icon";
+import { Icon } from "../../../../components/ui/Icon";
 import { icons } from "lucide-react";
-import { Surface } from "@/components/ui/Surface";
+import { Surface } from "../../../../components/ui/Surface";
 import {
   DropdownButton,
   DropdownCategoryTitle,
-} from "@/components/ui/Dropdown";
+} from "../../../../components/ui/Dropdown";
 
 export type ContentTypePickerOption = {
   label: string;

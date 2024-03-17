@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
 import { getMessagesOfAuthor } from "../src/editor/lib/playMessages";
-import { SamplingParams } from "@/editor/lib/types";
+import { SamplingParams } from "../src/editor/lib/types";
 
 const SAMPLING_PARAMS: SamplingParams = {
   temperature: 0.1,

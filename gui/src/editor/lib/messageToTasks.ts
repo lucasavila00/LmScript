@@ -5,7 +5,7 @@ import {
   ChatTemplate,
 } from "@lmscript/client/chat-template";
 import { MessageOfAuthor, MessagePart } from "./playMessages";
-import { assertIsNever } from "@/lib/utils";
+import { assertIsNever } from "../../lib/utils";
 import { NamedVariable } from "./types";
 
 const messagePartToTasks = (

@@ -1,7 +1,7 @@
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { StyledReactSelect } from "@/components/ui/react-select";
-import { avatarLabel, avatarFullLabel } from "@/editor/lib/avatar";
-import { AUTHOR_OPTIONS } from "@/editor/lib/types";
+import { Avatar, AvatarFallback } from "../../../components/ui/avatar";
+import { StyledReactSelect } from "../../../components/ui/react-select";
+import { avatarLabel, avatarFullLabel } from "../../../editor/lib/avatar";
+import { AUTHOR_OPTIONS } from "../../../editor/lib/types";
 import { Node } from "@tiptap/pm/model";
 import { NodeViewWrapper } from "@tiptap/react";
 import { FC } from "react";

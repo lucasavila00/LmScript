@@ -1,9 +1,9 @@
 import { Node } from "@tiptap/pm/model";
 import { NodeViewWrapper } from "@tiptap/react";
 import { FC, useContext } from "react";
-import { VariablesContext } from "@/editor/context/variables";
-import { StyledReactSelect } from "@/components/ui/react-select";
-import { EditorContext } from "@/editor/context/editor";
+import { VariablesContext } from "../../../editor/context/variables";
+import { StyledReactSelect } from "../../../components/ui/react-select";
+import { EditorContext } from "../../../editor/context/editor";
 
 const ComponentTyped: FC<{
   selectedName: string;
