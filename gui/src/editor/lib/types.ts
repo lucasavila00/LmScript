@@ -54,3 +54,9 @@ export type GenerationNodeAttrs = {
   max_tokens: number;
   stop: string[];
 };
+
+export type UiGenerationData = {
+  state: "loading" | "initialized" | "finished";
+  captures: Record<string, string>;
+  finalText: string | undefined;
+};
