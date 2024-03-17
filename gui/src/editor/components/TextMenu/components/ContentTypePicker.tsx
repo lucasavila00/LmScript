@@ -61,6 +61,7 @@ export const ContentTypePicker = ({ options }: ContentTypePickerProps) => {
             </div>
           );
         }
+        throw new Error("Invalid option type");
       })}
     </Surface>
   );
