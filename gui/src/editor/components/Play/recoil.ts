@@ -7,9 +7,7 @@ import {
 } from "../../../editor/lib/types";
 import { messagesToTasks } from "../../../editor/lib/messageToTasks";
 import { atomFamily } from "recoil";
-import {
-  GetBackendInstance,
-} from "../../../lib/get-lmscript-backend";
+import { GetBackendInstance } from "../../../lib/get-lmscript-backend";
 
 export const generateAsyncAtom = atomFamily<
   UiGenerationData,
