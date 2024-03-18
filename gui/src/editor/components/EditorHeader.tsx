@@ -5,25 +5,25 @@ export type EditorHeaderProps = {
   isRightSidebarOpen: boolean;
   toggleRightSidebar: () => void;
 
-  isLeftSidebarOpen: boolean;
-  toggleLeftSidebar: () => void;
+  isExecuting: boolean;
+  toggleExecuting: () => void;
 };
 
 export const EditorHeader = ({
   isRightSidebarOpen,
   toggleRightSidebar,
-  isLeftSidebarOpen,
-  toggleLeftSidebar,
+  isExecuting,
+  toggleExecuting,
 }: EditorHeaderProps) => {
   return (
     <div className="flex flex-row items-center justify-between flex-none py-2 pl-6 pr-3 text-black bg-white border-b border-neutral-200 dark:bg-black dark:text-white dark:border-neutral-800">
       <div className="flex flex-row gap-x-1.5 items-center">
         <div className="flex items-center gap-x-1.5">
           <ToolbarButton
-            tooltip={isLeftSidebarOpen ? "Close sidebar" : "Open sidebar"}
-            onClick={toggleLeftSidebar}
-            active={isLeftSidebarOpen}
-            className={isLeftSidebarOpen ? "bg-transparent" : ""}
+            tooltip={isExecuting ? "Edit Mode" : "Execute"}
+            onClick={toggleExecuting}
+            active={isExecuting}
+            className={isExecuting ? "bg-transparent" : ""}
           >
             <Icon name={"Play"} />
           </ToolbarButton>

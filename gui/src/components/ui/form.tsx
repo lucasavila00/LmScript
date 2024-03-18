@@ -124,6 +124,19 @@ const FormControl = React.forwardRef<
 });
 FormControl.displayName = "FormControl";
 
+const UnconnectedFormDescription = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, ...props }, ref) => {
+  return (
+    <p
+      ref={ref}
+      className={cn("text-[0.8rem] text-muted-foreground", className)}
+      {...props}
+    />
+  );
+});
+
 const FormDescription = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
@@ -131,12 +144,7 @@ const FormDescription = React.forwardRef<
   const { formDescriptionId } = useFormField();
 
   return (
-    <p
-      ref={ref}
-      id={formDescriptionId}
-      className={cn("text-[0.8rem] text-muted-foreground", className)}
-      {...props}
-    />
+    <UnconnectedFormDescription ref={ref} id={formDescriptionId} {...props} />
   );
 });
 FormDescription.displayName = "FormDescription";
@@ -175,4 +183,5 @@ export {
   FormDescription,
   FormMessage,
   FormField,
+  UnconnectedFormDescription,
 };

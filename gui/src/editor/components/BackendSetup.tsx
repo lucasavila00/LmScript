@@ -1,6 +1,5 @@
-import { assertIsNever, cn } from "../../lib/utils";
+import { assertIsNever } from "../../lib/utils";
 import { FC, memo, useState } from "react";
-import { Editor } from "@tiptap/react";
 import {
   ALL_BACKENDS_TAGS,
   Backend,
@@ -19,11 +18,13 @@ import {
   FormLabel,
   FormMessage,
   Form,
+  UnconnectedFormDescription,
 } from "../../components/ui/form";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { useForm } from "react-hook-form";
 import { ALL_CHAT_TEMPLATES } from "@lmscript/client/chat-template";
+import { Label } from "../../components/ui/label";
 const RunpodSglangConfigSchema = z.object({
   url: z.string().min(4),
   token: z.string(),
@@ -90,9 +91,31 @@ const UrlTokenTemplateConfig: FC<{
           name="template"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Template</FormLabel>
+              <FormLabel>Chat Template</FormLabel>
               <FormControl>
-                <Input placeholder="" {...field} />
+                <StyledReactSelect
+                  value={
+                    field.value == null
+                      ? undefined
+                      : {
+                          value: field.value,
+                          label: field.value,
+                        }
+                  }
+                  onChange={(it) => {
+                    field.onChange(it?.value);
+                  }}
+                  isClearable={false}
+                  placeholder="Select a chat template..."
+                  classNames={{
+                    control: () => "!min-h-9",
+                    container: () => "!min-h-9 mt-2",
+                  }}
+                  options={ALL_CHAT_TEMPLATES.map((template) => ({
+                    value: template,
+                    label: template,
+                  }))}
+                />
               </FormControl>
               <FormDescription>TODO template desc.</FormDescription>
               <FormMessage />
@@ -131,52 +154,46 @@ const BackendConfig: FC<{
     }
   }
 };
-export const LeftSidebar = memo<{
-  editor: Editor;
-  isOpen: boolean;
-  runnerHook: ReturnType<typeof useBackendConfig>;
-}>(({ isOpen, runnerHook }) => {
-  const windowClassName = cn(
-    "absolute top-0 left-0 bg-white lg:bg-white/30 lg:backdrop-blur-xl h-full lg:h-auto lg:relative z-[999] w-0 duration-300 transition-all",
-    "dark:bg-black lg:dark:bg-black/30",
-    !isOpen && "border-r-transparent",
-    isOpen && "w-80 border-r border-r-neutral-200 dark:border-r-neutral-800",
-  );
-
+export const BackendSetup = memo<{
+  backendConfigHook: ReturnType<typeof useBackendConfig>;
+}>(({ backendConfigHook }) => {
   const [backendTag, setBackendTag] = useState<BackendTag | undefined>(
-    runnerHook.backend?.tag,
+    backendConfigHook.backend?.tag,
   );
 
   return (
-    <div className={windowClassName}>
-      <div className="w-full h-full overflow-hidden">
-        <div className="w-full h-full p-6 overflow-auto">
-          TODO backend label
-          <StyledReactSelect
-            value={
-              backendTag == null
-                ? null
-                : {
-                    value: backendTag,
-                    label: BackendLabels[backendTag],
-                  }
-            }
-            options={ALL_BACKENDS_TAGS.map((backend) => ({
-              value: backend,
-              label: BackendLabels[backend],
-            }))}
-            isClearable={false}
-            onChange={(selected) => {
-              setBackendTag(selected?.value);
-            }}
-            placeholder="Select a backend..."
-          />
-          <BackendConfig
-            setBackend={runnerHook.setBackend}
-            backendTag={backendTag}
-          />
-        </div>
-      </div>
-    </div>
+    <>
+      <Label>Backend</Label>
+      <StyledReactSelect
+        value={
+          backendTag == null
+            ? null
+            : {
+                value: backendTag,
+                label: BackendLabels[backendTag],
+              }
+        }
+        options={ALL_BACKENDS_TAGS.map((backend) => ({
+          value: backend,
+          label: BackendLabels[backend],
+        }))}
+        isClearable={false}
+        onChange={(selected) => {
+          setBackendTag(selected?.value);
+        }}
+        placeholder="Select a backend..."
+        classNames={{
+          control: () => "!min-h-9",
+          container: () => "!min-h-9 mt-2",
+        }}
+      />
+      <UnconnectedFormDescription className="mt-2">
+        TODO describe backend
+      </UnconnectedFormDescription>
+      <BackendConfig
+        setBackend={backendConfigHook.setBackend}
+        backendTag={backendTag}
+      />
+    </>
   );
 });

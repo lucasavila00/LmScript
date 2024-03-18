@@ -29,6 +29,7 @@ type SpanLike =
   | {
       tag: "captured";
       text: string;
+      capturedAs: string;
     }
   | { tag: "loading" };
 
@@ -119,6 +120,7 @@ const getDataThrowing = (
             addToLastParagraphLike({
               tag: "captured",
               text: captured,
+              capturedAs: nodeAttrs.name,
             });
           }
           break;
@@ -215,7 +217,11 @@ const RenderSpanLike: FC<{ part: SpanLike }> = ({ part }) => {
       return <SpanLoading />;
     }
     case "captured": {
-      return <span className={GENERATED_CN}>{part.text}</span>;
+      return (
+        <span title={part.capturedAs} className={GENERATED_CN}>
+          {part.text}
+        </span>
+      );
     }
     default: {
       return assertIsNever(part);

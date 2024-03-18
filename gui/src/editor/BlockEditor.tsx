@@ -7,50 +7,48 @@ import { EditorHeader } from "./components/EditorHeader";
 import { VariablesContext } from "./context/variables";
 import { EditorContext } from "./context/editor";
 import { TextMenu } from "./components/TextMenu";
-import { LeftSidebar } from "./components/LeftSidebar";
 import { useBackendConfig } from "./hooks/useBackendConfig";
 import { Play } from "./components/Play/Play";
 
 export const BlockEditor = () => {
   const {
+    isExecuting,
+    toggleExecuting,
     editor,
     rightSidebar,
     variablesHook,
-    leftSidebar,
     samplingParamsHook,
   } = useBlockEditor();
   const menuContainerRef = useRef(null);
-  const runnerHook = useBackendConfig();
+  const backendConfigHook = useBackendConfig();
 
   if (editor == null) {
     // throw new Error("Editor is null");
     return <></>;
   }
+  const header = (
+    <EditorHeader
+      isRightSidebarOpen={rightSidebar.isOpen}
+      toggleRightSidebar={rightSidebar.toggle}
+      isExecuting={isExecuting}
+      toggleExecuting={toggleExecuting}
+    />
+  );
 
   return (
     <>
       <div className="flex h-full w-full" ref={menuContainerRef}>
-        <LeftSidebar
-          runnerHook={runnerHook}
-          editor={editor}
-          isOpen={leftSidebar.isOpen}
-        />
-        {leftSidebar.isOpen ? (
+        {isExecuting ? (
           <>
             <div className="relative flex flex-col flex-1 h-full overflow-hidden">
-              <EditorHeader
-                isRightSidebarOpen={rightSidebar.isOpen}
-                toggleRightSidebar={rightSidebar.toggle}
-                isLeftSidebarOpen={leftSidebar.isOpen}
-                toggleLeftSidebar={leftSidebar.toggle}
-              />
+              {header}
               <div className="flex-1 overflow-y-auto">
-                {runnerHook.backend == null ? (
+                {backendConfigHook.backend == null ? (
                   <>TODO: select a backend msg</>
                 ) : (
                   <>
                     <Play
-                      backend={runnerHook.backend}
+                      backend={backendConfigHook.backend}
                       editorState={{
                         doc: editor.getJSON(),
                         variables: variablesHook.variables,
@@ -67,12 +65,7 @@ export const BlockEditor = () => {
             <VariablesContext.Provider value={variablesHook.variables}>
               <EditorContext.Provider value={editor}>
                 <div className="relative flex flex-col flex-1 h-full overflow-hidden">
-                  <EditorHeader
-                    isRightSidebarOpen={rightSidebar.isOpen}
-                    toggleRightSidebar={rightSidebar.toggle}
-                    isLeftSidebarOpen={leftSidebar.isOpen}
-                    toggleLeftSidebar={leftSidebar.toggle}
-                  />
+                  {header}
                   <EditorContent
                     editor={editor}
                     className="flex-1 overflow-y-auto"
@@ -89,6 +82,8 @@ export const BlockEditor = () => {
           editor={editor}
           variablesHook={variablesHook}
           samplingParamsHook={samplingParamsHook}
+          backendConfigHook={backendConfigHook}
+          isExecuting={isExecuting}
         />
       </div>
     </>

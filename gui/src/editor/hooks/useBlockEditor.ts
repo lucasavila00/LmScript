@@ -10,20 +10,53 @@ import StarterKit from "@tiptap/starter-kit";
 import { Selection } from "../extensions/Selection";
 import { AuthorSelect } from "../extensions/AuthorSelect/AuthorSelect";
 import { TrailingNode } from "../extensions/TrailingNode";
-import { useSidebar } from "./useSidebar";
 import { initialContent } from "./init";
 import { useVariables } from "./useVariables";
 import { VariableSelect } from "../extensions/VariableSelect/VariableSelect";
 import { LmGenerator } from "../extensions/LmGenerator/LmGenerator";
 import { useSamplingParams } from "./useSamplingParams";
+import { useCallback, useState } from "react";
 
 const Doc = TiptapDocument.extend({
   content: "authorSelect block*",
 });
 
+type SidebarState = {
+  isOpen: boolean;
+  open: () => void;
+  close: () => void;
+  toggle: () => void;
+};
+
+const useSidebar = (initialState: boolean): SidebarState => {
+  const [isOpen, setIsOpen] = useState(initialState);
+
+  const open = useCallback(() => {
+    setIsOpen(true);
+  }, []);
+
+  const close = useCallback(() => {
+    setIsOpen(false);
+  }, []);
+
+  const toggle = useCallback(() => {
+    setIsOpen((prev) => !prev);
+  }, []);
+
+  return {
+    isOpen,
+    open,
+    close,
+    toggle,
+  };
+};
+
 export const useBlockEditor = () => {
+  const [isExecuting, setIsExecuting] = useState(false);
+  const toggleExecuting = useCallback(() => {
+    setIsExecuting((prev) => !prev);
+  }, [setIsExecuting]);
   const rightSidebar = useSidebar(true);
-  const leftSidebar = useSidebar(false);
 
   const variablesHook = useVariables(initialContent.variables);
   const samplingParamsHook = useSamplingParams(initialContent.samplingParams);
@@ -93,7 +126,8 @@ export const useBlockEditor = () => {
     editor,
     rightSidebar,
     variablesHook,
-    leftSidebar,
     samplingParamsHook,
+    isExecuting,
+    toggleExecuting,
   };
 };

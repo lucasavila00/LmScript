@@ -24,6 +24,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "../../components/ui/input";
 import { useSamplingParams } from "../hooks/useSamplingParams";
 import { SamplingParams } from "../lib/types";
+import { BackendSetup } from "./BackendSetup";
+import { useBackendConfig } from "../hooks/useBackendConfig";
 
 const SamplingParamsForm: FC<{
   samplingParamsHook: ReturnType<typeof useSamplingParams>;
@@ -178,52 +180,79 @@ const SamplingParamsForm: FC<{
     </Form>
   );
 };
-
+const EditModeSidebar: FC<{
+  editor: Editor;
+  variablesHook: ReturnType<typeof useVariables>;
+  samplingParamsHook: ReturnType<typeof useSamplingParams>;
+}> = ({ editor, variablesHook, samplingParamsHook }) => {
+  return (
+    <Tabs defaultValue="variables">
+      <TabsList className="grid w-full grid-cols-2">
+        <TabsTrigger value="variables">Variables</TabsTrigger>
+        <TabsTrigger value="settings">Sampling</TabsTrigger>
+      </TabsList>
+      <TabsContent value="variables">
+        <VariablesSidebar variablesHook={variablesHook} />
+      </TabsContent>
+      <TabsContent value="settings">
+        <SamplingParamsForm samplingParamsHook={samplingParamsHook} />
+        <Button
+          className="mt-20"
+          onClick={() => {
+            console.log(
+              JSON.stringify({
+                variables: variablesHook.variables,
+                doc: editor.getJSON(),
+                samplingParams: samplingParamsHook.samplingParams,
+              }),
+            );
+          }}
+        >
+          CONSOLE PRINT
+        </Button>
+      </TabsContent>
+    </Tabs>
+  );
+};
 export const RightSidebar = memo<{
   editor: Editor;
   isOpen: boolean;
   variablesHook: ReturnType<typeof useVariables>;
   samplingParamsHook: ReturnType<typeof useSamplingParams>;
-}>(({ editor, isOpen, variablesHook, samplingParamsHook }) => {
-  const windowClassName = cn(
-    "absolute top-0 right-0 bg-white lg:bg-white/30 lg:backdrop-blur-xl h-full lg:h-auto lg:relative z-[999] w-0 duration-300 transition-all",
-    "dark:bg-black lg:dark:bg-black/30",
-    !isOpen && "border-l-transparent",
-    isOpen && "w-80 border-l border-l-neutral-200 dark:border-l-neutral-800",
-  );
+  isExecuting: boolean;
+  backendConfigHook: ReturnType<typeof useBackendConfig>;
+}>(
+  ({
+    backendConfigHook,
+    isExecuting,
+    editor,
+    isOpen,
+    variablesHook,
+    samplingParamsHook,
+  }) => {
+    const windowClassName = cn(
+      "absolute top-0 right-0 bg-white lg:bg-white/30 lg:backdrop-blur-xl h-full lg:h-auto lg:relative z-[999] w-0 duration-300 transition-all",
+      "dark:bg-black lg:dark:bg-black/30",
+      !isOpen && "border-l-transparent",
+      isOpen && "w-80 border-l border-l-neutral-200 dark:border-l-neutral-800",
+    );
 
-  return (
-    <div className={windowClassName}>
-      <div className="w-full h-full overflow-hidden">
-        <div className="w-full h-full p-6 overflow-auto">
-          <Tabs defaultValue="variables">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="variables">Variables</TabsTrigger>
-              <TabsTrigger value="settings">Sampling</TabsTrigger>
-            </TabsList>
-            <TabsContent value="variables">
-              <VariablesSidebar variablesHook={variablesHook} />
-            </TabsContent>
-            <TabsContent value="settings">
-              <SamplingParamsForm samplingParamsHook={samplingParamsHook} />
-              <Button
-                className="mt-20"
-                onClick={() => {
-                  console.log(
-                    JSON.stringify({
-                      variables: variablesHook.variables,
-                      doc: editor.getJSON(),
-                      samplingParams: samplingParamsHook.samplingParams,
-                    }),
-                  );
-                }}
-              >
-                CONSOLE PRINT
-              </Button>
-            </TabsContent>
-          </Tabs>
+    return (
+      <div className={windowClassName}>
+        <div className="w-full h-full overflow-hidden">
+          <div className="w-full h-full p-6 overflow-auto">
+            {isExecuting ? (
+              <BackendSetup backendConfigHook={backendConfigHook} />
+            ) : (
+              <EditModeSidebar
+                editor={editor}
+                variablesHook={variablesHook}
+                samplingParamsHook={samplingParamsHook}
+              />
+            )}
+          </div>
         </div>
       </div>
-    </div>
-  );
-});
+    );
+  },
+);

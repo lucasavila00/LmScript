@@ -3,12 +3,21 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import { RecoilRoot } from "recoil";
 import { GetBackendInstance, AbstractBackend } from "gui/src/lib/get-lmscript-backend";
+import { OnCapture } from "@lmscript/client/backends/abstract";
 
+let onCaptureListeners: OnCapture[] = [];
+
+window.capture.onCapture((data) => {
+  onCaptureListeners.forEach((listener) => listener(data));
+});
 const GetBackendInstanceElectron: GetBackendInstance = (backendConfig) => {
   const backend: AbstractBackend = {
     executeJSON: async (data, callbacks) => {
-      window.capture.onCapture(callbacks.onCapture);
+      onCaptureListeners.push(callbacks.onCapture);
       const out = await window.electron.ipcRenderer.invoke("executeJSON", backendConfig, data);
+      onCaptureListeners = onCaptureListeners.filter(
+        (listener) => listener !== callbacks.onCapture,
+      );
       return out;
     },
   };

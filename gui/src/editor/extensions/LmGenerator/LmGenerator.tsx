@@ -93,7 +93,7 @@ export const LmGenerator = Node.create({
   },
   addCommands() {
     return {
-      createNewVariableSelect:
+      createNewLmGenerator:
         () =>
         ({ commands }) => {
           return commands.insertContent({
