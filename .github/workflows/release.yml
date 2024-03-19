@@ -26,8 +26,8 @@ jobs:
         run: |
           npm config set "@tiptap-pro:registry" https://registry.tiptap.dev/
           npm config set "//registry.tiptap.dev/:_authToken" ${{ secrets.TIPTAP_TOKEN }}
-          (cd gui && npm install && npm run tw)
-          (cd egui && npm install)
+          cd gui && npm install && npm run tw
+          cd ../egui && npm install
 
       - name: build-linux
         if: matrix.os == 'ubuntu-latest'
