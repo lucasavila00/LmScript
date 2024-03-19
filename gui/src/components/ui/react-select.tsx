@@ -24,7 +24,7 @@ const getClassNames = <
     control: (e) =>
       cn(
         `rounded-md border !min-h-8`,
-        `border-input px-1 pl-2 pr-1 text-sm bg-background shadow-sm`,
+        `border-input pl-3 pr-2 text-sm bg-background shadow-sm`,
         e.isFocused ? "ring-1 ring-ring" : "",
         classNames?.control?.(e),
       ),
@@ -46,19 +46,21 @@ const getClassNames = <
     option: (e) =>
       cn(
         "cursor-default",
-        "rounded-sm py-1.5 m-1 px-2 text-sm outline-none",
+        "rounded-sm py-1.5 px-2 text-sm outline-none",
         "focus:bg-gray-200 dark:focus:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-800 w-auto",
         classNames?.option?.(e),
       ),
     noOptionsMessage: (e) => cn("p-5", classNames?.noOptionsMessage?.(e)),
     multiValue: (e) =>
       cn(
-        "bg-gray-200 dark:bg-zinc-800 px-1 py-0.5 rounded",
+        "text-xs font-medium bg-gray-100 dark:bg-zinc-900 px-1 py-0.5 border rounded-md",
         // ""
         classNames?.multiValue?.(e),
       ),
-    input: (e) => cn("text-sm overflow-x-hidden", classNames?.input?.(e)),
-    valueContainer: (e) => cn("flex gap-1", classNames?.valueContainer?.(e)),
+
+    singleValue: (e) => cn("text-xs font-medium", classNames?.singleValue?.(e)),
+    input: (e) => cn("overflow-x-hidden", classNames?.input?.(e)),
+    valueContainer: (e) => cn("flex gap-2", classNames?.valueContainer?.(e)),
   };
 };
 const getStyles = <
@@ -104,8 +106,13 @@ const getComponents = <
   return {
     ...components,
     IndicatorSeparator: () => <></>,
-    DropdownIndicator: () => (
-      <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
+    DropdownIndicator: (e) => (
+      <ChevronDown
+        className={cn(
+          "h-4 w-4 shrink-0 text-muted-foreground",
+          e.isMulti ? "-ml-1" : "ml-1",
+        )}
+      />
     ),
     Control: CustomControl,
   };

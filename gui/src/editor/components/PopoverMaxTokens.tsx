@@ -7,19 +7,19 @@ import {
   PopoverTrigger,
 } from "../../components/ui/popover";
 import { Pencil1Icon } from "@radix-ui/react-icons";
-import { EditorContext } from "../../editor/context/editor";
+import { EditorContext } from "../context/editor";
 
-export const PopoverNameEditor: FC<{
-  name: string;
-  onChangeName: (name: string) => void;
-}> = ({ name, onChangeName }) => {
-  const [editableName, setEditableName] = useState(name);
+export const PopoverMaxTokens: FC<{
+  max: number;
+  onChangeMax: (max: number) => void;
+}> = ({ max, onChangeMax }) => {
+  const [editableMax, setEditableMax] = useState(max);
   const [isEditing, setIsEditing_] = useState(false);
   const editor = useContext(EditorContext);
   const setIsEditing = (isOpen: boolean) => {
     setIsEditing_(isOpen);
     if (!isOpen) {
-      onChangeName(editableName);
+      onChangeMax(editableMax);
       setTimeout(() => {
         editor?.commands.focus();
       }, 1);
@@ -30,10 +30,10 @@ export const PopoverNameEditor: FC<{
       <PopoverTrigger asChild>
         <Button
           size="sm"
-          className="rounded-none rounded-r-md items-center border-0 border-r border-y"
+          className="rounded-none items-center border-0 border-r border-y"
           variant="outline"
         >
-          <span className="text-muted-foreground">As:</span>&nbsp;{name}
+          <span className="text-muted-foreground">Max:</span>&nbsp;{max}
           <Pencil1Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
         </Button>
       </PopoverTrigger>
@@ -46,14 +46,18 @@ export const PopoverNameEditor: FC<{
         >
           <div className="grid gap-4">
             <div className="space-y-2">
-              <h4 className="font-medium leading-none">Name</h4>
-              <p className="text-sm text-muted-foreground">Set the name</p>
+              <h4 className="font-medium leading-none">Max Tokens</h4>
+              <p className="text-sm text-muted-foreground">
+                Set the maximum tokens the model will generate
+              </p>
             </div>
             <input type="submit" hidden />
             <Input
-              value={editableName}
+              value={editableMax}
+              type="number"
+              step="1"
               onChange={(e) => {
-                setEditableName(e.target.value);
+                setEditableMax(Math.floor(Number(e.target.value)));
               }}
               className="h-8"
             />

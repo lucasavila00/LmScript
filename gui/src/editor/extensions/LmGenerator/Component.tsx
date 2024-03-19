@@ -7,6 +7,7 @@ import { Node } from "@tiptap/pm/model";
 import { NodeViewWrapper } from "@tiptap/react";
 import { FC, useContext } from "react";
 import { PopoverNameEditor } from "../../../editor/components/PopoverNameEditor";
+import { PopoverMaxTokens } from "../../../editor/components/PopoverMaxTokens";
 import {
   StoredChoice,
   GenerationNodeAttrs,
@@ -181,6 +182,17 @@ export const Component: FC<{
         }}
       />
       <InnerGenerator attrs={attrs} updateAttributes={props.updateAttributes} />
+      {attrs.type != "selection" && (
+        <PopoverMaxTokens
+          max={attrs.max_tokens}
+          onChangeMax={(max_tokens) =>
+            props.updateAttributes({
+              ...attrs,
+              max_tokens,
+            })
+          }
+        />
+      )}
       <PopoverNameEditor
         name={attrs.name}
         onChangeName={(name) =>

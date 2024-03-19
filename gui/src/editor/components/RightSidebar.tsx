@@ -208,7 +208,7 @@ const EditModeSidebar: FC<{
             );
           }}
         >
-          CONSOLE PRINT
+          TODO CONSOLE PRINT
         </Button>
       </TabsContent>
     </Tabs>
