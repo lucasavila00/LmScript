@@ -12,27 +12,22 @@ const getEnvVarOrThrow = (name: string): string => {
 const bench = async () => {
   let promptTokens = 0;
   let completionTokens = 0;
-  const backend = new VllmBackend(
-    {
-      url: getEnvVarOrThrow("RUNPOD_URL"),
-      auth: getEnvVarOrThrow("RUNPOD_TOKEN"),
-      model:
-        "/runpod-volume/huggingface-cache/hub/models--mistralai--Mistral-7B-Instruct-v0.2/snapshots/cf47bb3e18fe41a5351bc36eef76e9c900847c89",
-      reportUsage: ({ promptTokens: pt, completionTokens: ct }) => {
-        promptTokens += pt;
-        completionTokens += ct;
-      },
+  const backend = new VllmBackend({
+    url: getEnvVarOrThrow("RUNPOD_URL"),
+    auth: getEnvVarOrThrow("RUNPOD_TOKEN"),
+    model:
+      "/runpod-volume/huggingface-cache/hub/models--mistralai--Mistral-7B-Instruct-v0.2/snapshots/cf47bb3e18fe41a5351bc36eef76e9c900847c89",
+    reportUsage: ({ promptTokens: pt, completionTokens: ct }) => {
+      promptTokens += pt;
+      completionTokens += ct;
     },
-  );
-  const model = new LmScript(
-    backend,
-    {
-      template: "llama-2-chat",
-      temperature: 0.1,
-    },
-  );
+  });
+  const model = new LmScript(backend, {
+    template: "llama-2-chat",
+    temperature: 0.1,
+  });
   const batch = Array.from(
-    { length: 100 },
+    { length: 1 },
     (_, _i) =>
       kitchenSink(model).catch((e) => {
         console.error(e);

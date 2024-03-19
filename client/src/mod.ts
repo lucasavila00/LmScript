@@ -71,6 +71,8 @@ export class LmScript<
   readonly #options: CreateClientOptions;
   #state: ClientState;
   readonly #fetcher: AbstractBackend;
+
+  #currentRole: Role | undefined = undefined;
   constructor(backend: AbstractBackend, options?: CreateClientOptions) {
     this.#options = {
       ...(options ?? {}),
@@ -100,15 +102,21 @@ export class LmScript<
    * Most of the time this should not be used directly, use `client.assistant`, `client.system`, or `client.user` instead.
    */
   startRole(role: Role): LmScript<GEN, SEL> {
-    const template = this.#options.template;
+    if (this.#currentRole != null) {
+      throw new Error(ERROR_MESSAGES.cannotNestRoles);
+    }
+    const clone = this.#clone(this.#state, this.#tasks);
+
+    clone.#currentRole = role;
+    const template = clone.#options.template;
     if (template == null) {
       throw new Error(ERROR_MESSAGES.missingTemplate);
     }
     if (typeof template === "string") {
-      return this.push(getRoleStart(template, role));
+      return clone.push(getRoleStart(template, role));
     }
     const [start] = template[role];
-    return this.push(start);
+    return clone.push(start);
   }
   /**
    * Ends a role message in the conversation.
@@ -124,7 +132,10 @@ export class LmScript<
       return this.push(getRoleEnd(template, role));
     }
     const [, end] = template[role];
-    return this.push(end);
+
+    const clone = this.#clone(this.#state, this.#tasks);
+    clone.#currentRole = undefined;
+    return clone.push(end);
   }
   /**
    * Returns the token that represents the end of a message.
@@ -451,13 +462,16 @@ export class LmScript<
 
     const { template: _, ...restCreatorOptions } = this.#options;
     const { onCapture, ...restOptions } = options ?? {};
-    const out = await this.#fetcher.executeJSON({
-      sampling_params: { ...restCreatorOptions, ...restOptions },
-      tasks: this.#tasks,
-      initial_state: this.#state,
-    }, {
-      onCapture: onCapture ?? NOOP,
-    });
+    const out = await this.#fetcher.executeJSON(
+      {
+        sampling_params: { ...restCreatorOptions, ...restOptions },
+        tasks: this.#tasks,
+        initial_state: this.#state,
+      },
+      {
+        onCapture: onCapture ?? NOOP,
+      },
+    );
     const newInstance = this.#clone(out, []);
     return {
       // deno-lint-ignore no-explicit-any

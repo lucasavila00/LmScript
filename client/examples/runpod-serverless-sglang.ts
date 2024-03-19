@@ -30,17 +30,14 @@ const bench = async () => {
     },
   );
   let errors = 0;
-  const MAX_JOBS = 100;
-  const batch = Array.from(
-    { length: MAX_JOBS },
-    async (_, _i) => {
-      await delay(Math.random() * 1000);
-      return kitchenSink(model).catch((e) => {
-        errors++;
-        console.error(e);
-      });
-    },
-  );
+  const MAX_JOBS = 1;
+  const batch = Array.from({ length: MAX_JOBS }, async (_, _i) => {
+    await delay(Math.random() * 1000);
+    return kitchenSink(model).catch((e) => {
+      errors++;
+      console.error(e);
+    });
+  });
 
   const start = Date.now();
   await Promise.all(batch);
