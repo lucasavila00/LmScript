@@ -1,0 +1,59 @@
+name: Build/release Electron app
+
+on:
+  push:
+    tags:
+      - v*.*.*
+
+jobs:
+  release:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install Dependencies
+        - run: npm config set "@tiptap-pro:registry" https://registry.tiptap.dev/
+        - run: npm config set "//registry.tiptap.dev/:_authToken" ${{ secrets.TIPTAP_TOKEN }}
+        - run: cd gui && npm install
+        - run: cd egui && npm install
+
+      - name: build-linux
+        if: matrix.os == 'ubuntu-latest'
+        run: cd egui && npm run build:linux
+
+      - name: build-mac
+        if: matrix.os == 'macos-latest'
+        run: cd egui && npm run build:mac
+
+      - name: build-win
+        if: matrix.os == 'windows-latest'
+        run: cd egui && npm run build:win
+
+      - name: release
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: true
+          files: |
+            egui/dist/*.exe
+            egui/dist/*.zip
+            egui/dist/*.dmg
+            egui/dist/*.AppImage
+            egui/dist/*.snap
+            egui/dist/*.deb
+            egui/dist/*.rpm
+            egui/dist/*.tar.gz
+            egui/dist/*.yml
+            egui/dist/*.blockmap
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
