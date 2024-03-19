@@ -16,8 +16,6 @@ TODO
 
 ## Contributing
 
-## Contributing
-
 Create a free Tiptap account and configure your system to install Tiptap Pro
 dependencies. Read mroe [here](https://cloud.tiptap.dev/pro-extensions).
 

@@ -72,7 +72,7 @@ async def generate(parameters: dict, *, timeout: int):
 
 
 def adjust_concurrency(_current_concurrency):
-    return int(os.environ.get("CONCURRENCY_PER_WORKER", "3"))
+    return int(os.environ.get("CONCURRENCY_PER_WORKER", "50"))
 
 
 class AddTextTask(BaseModel):
