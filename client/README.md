@@ -112,3 +112,9 @@ const client = new LmScript(backend);
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)
+
+## Contributing
+
+Running all examples tests all features of the client.
+
+The examples run in Deno and no dependency setup is required.

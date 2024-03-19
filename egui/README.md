@@ -1,34 +1,31 @@
-# egui
+# Electron GUI
 
-An Electron application with React and TypeScript
+TODO
 
-## Recommended IDE Setup
+## Installation
 
-- [VSCode](https://code.visualstudio.com/) + [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) + [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
+TODO
 
-## Project Setup
+## Usage
 
-### Install
+TODO
 
-```bash
-$ npm install
-```
+## License
 
-### Development
+[MIT](https://choosealicense.com/licenses/mit/)
 
-```bash
-$ npm run dev
-```
+## Contributing
 
-### Build
+## Contributing
 
-```bash
-# For windows
-$ npm run build:win
+Create a free Tiptap account and configure your system to install Tiptap Pro
+dependencies. Read mroe [here](https://cloud.tiptap.dev/pro-extensions).
 
-# For macOS
-$ npm run build:mac
+With Tiptap's registry configured, first install the dependencies of the webapp
+and compile the CSS files.
 
-# For Linux
-$ npm run build:linux
-```
+1. `cd gui && npm ci && npm run tw`
+
+Then execute the electron app in dev mode.
+
+1. `cd egui && npm ci && npm run dev`

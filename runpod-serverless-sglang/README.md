@@ -26,3 +26,11 @@ changes.
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)
+
+## Contributing
+
+Use the `docker-compose.yml` file in this folder to run it locally with
+`docker-compose up`.
+
+There are overrides in `docker-compose.override.yml` to make it run locally
+using a RTX 2070. A newer or more powerful GPU won't have these limitations.
