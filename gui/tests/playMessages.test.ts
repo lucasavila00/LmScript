@@ -137,7 +137,10 @@ test("handles variableSelect", async () => {
           type: "paragraph",
           content: [
             { type: "text", text: '"' },
-            { type: "variableSelect", attrs: { name: "content" } },
+            {
+              type: "variableSelect",
+              attrs: { uuid: "e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e5" },
+            },
             { type: "text", text: '"' },
           ],
         },
@@ -174,7 +177,7 @@ test("handles missing variableSelect", async () => {
         { type: "authorSelect", attrs: { author: "user" } },
         {
           type: "paragraph",
-          content: [{ type: "variableSelect", attrs: { name: "content" } }],
+          content: [{ type: "variableSelect", attrs: { uuid: "content" } }],
         },
       ],
     },
