@@ -110,7 +110,7 @@ const getComponents = <
       <ChevronDown
         className={cn(
           "h-4 w-4 shrink-0 text-muted-foreground",
-          e.isMulti ? "-ml-1" : "ml-1",
+          e.isMulti && e.hasValue ? "-ml-1" : "ml-1",
         )}
       />
     ),

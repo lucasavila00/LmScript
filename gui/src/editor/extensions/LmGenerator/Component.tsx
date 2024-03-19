@@ -14,6 +14,7 @@ import {
   GenerationNodeTypeLabels,
   ALL_GENERATION_NODE_TYPES,
 } from "../../../editor/lib/types";
+import { assertIsNever } from "../../../lib/utils";
 
 type ChoicesOption = {
   label: string;
@@ -26,7 +27,6 @@ const ChoicesEditor: FC<{
   onChange: (choices: readonly StoredChoice[]) => void;
 }> = ({ choices, onChange }) => {
   const availableVariables = useContext(VariablesContext);
-
   return (
     <StyledCreatableReactSelect
       classNames={{
@@ -66,14 +66,32 @@ const ChoicesEditor: FC<{
       onCreateOption={(newOption) => {
         onChange([...choices, { tag: "typed", value: newOption }]);
       }}
-      onChange={onChange}
+      onChange={(vs) => {
+        const validVs = vs.filter((v) => {
+          switch (v.tag) {
+            case "typed": {
+              return true;
+            }
+            case "variable": {
+              const found = availableVariables.find(
+                (av) => av.uuid === v.value,
+              );
+              return found != null;
+            }
+            default: {
+              return assertIsNever(v.tag);
+            }
+          }
+        });
+        onChange(validVs);
+      }}
       placeholder="Type to create..."
       noOptionsMessage={() => "Type to create..."}
       isClearable={false}
       options={availableVariables.map(
         (v): ChoicesOption => ({
           label: `{${v.name}}`,
-          value: v.name,
+          value: v.uuid,
           tag: "variable",
         }),
       )}
