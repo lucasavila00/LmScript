@@ -61,14 +61,6 @@ export const SlashCommand = Extension.create({
           );
           const isValidAfterContent = !afterContent?.endsWith("  ");
 
-          console.log({
-            isValidAfterContent,
-            isInColumn,
-            isParagraph,
-            isRootDepth,
-            isStartOfNode,
-          });
-
           return (
             ((isRootDepth && isParagraph && isStartOfNode) ||
               (isInColumn && isParagraph && isStartOfNode)) &&

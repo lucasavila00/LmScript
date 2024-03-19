@@ -40,7 +40,7 @@ class MessageOfAuthorGetter {
   private messageParts: MessagePart[] = [];
   private acc: MessageOfAuthor[] = [];
   private errors: Error[] = [];
-  private readonly root: JSONContent;
+  private inListItem = false;
   constructor(
     private readonly editorState: Pick<EditorState, "doc" | "variables">,
   ) {
@@ -54,9 +54,15 @@ class MessageOfAuthorGetter {
     }
 
     this.currentAuthor = first.attrs?.author;
-    this.root = root;
-  }
 
+    this.handleTopLevel((root.content ?? []).slice(1));
+  }
+  private addDoubleBreak() {
+    this.pushText("\n\n");
+  }
+  private addSingleBreak() {
+    this.pushText("\n");
+  }
   private handleAuthorSelect(content: JSONContent) {
     this.acc.push({ author: this.currentAuthor, parts: this.messageParts });
     this.messageParts = [];
@@ -76,7 +82,7 @@ class MessageOfAuthorGetter {
     const level = Number(content.attrs?.level ?? 0);
     this.pushText("#".repeat(level));
     this.handleSecondLevel(content.content ?? []);
-    this.pushText("\n\n");
+    this.addDoubleBreak();
   }
 
   private handleSecondLevel(arr: JSONContent[]) {
@@ -124,8 +130,18 @@ class MessageOfAuthorGetter {
           });
           break;
         }
+
+        case "hardBreak": {
+          this.addSingleBreak();
+          if (this.inListItem) {
+            this.pushText(" ".repeat(4));
+          }
+          break;
+        }
         default: {
-          throw new Error(`Unexpected content type: ${content.type}`);
+          throw new Error(
+            `Unexpected second level content type: ${content.type}`,
+          );
         }
       }
     }
@@ -135,9 +151,37 @@ class MessageOfAuthorGetter {
     this.handleSecondLevel(content.content ?? []);
     this.pushText("\n\n");
   }
+  private handleList(bl: JSONContent, numbered: boolean) {
+    const items = bl.content ?? [];
 
-  handleTopLevel() {
-    for (const content of (this.root.content ?? []).slice(1)) {
+    for (const [item, listIdx] of items.map((it, idx) => [it, idx] as const)) {
+      if (item.type !== "listItem") {
+        throw new Error(`Unexpected list item type: ${item.type}`);
+      }
+      this.pushText(numbered ? `${listIdx + 1}. ` : "- ");
+
+      const itemContent = item.content ?? [];
+      if (itemContent.length != 1 && itemContent[0].type != "paragraph") {
+        throw new Error(
+          `Unexpected list item content type: ${itemContent[0].type}`,
+        );
+      }
+      this.inListItem = true;
+      this.handleSecondLevel(itemContent[0].content ?? []);
+      this.inListItem = false;
+      this.addSingleBreak();
+    }
+    this.addSingleBreak();
+  }
+
+  private handleHorizontalRule(_content: JSONContent) {
+    this.addDoubleBreak();
+    this.pushText("----");
+    this.addDoubleBreak();
+  }
+
+  private handleTopLevel(arr: JSONContent[]) {
+    for (const content of arr) {
       switch (content.type) {
         case "authorSelect": {
           this.handleAuthorSelect(content);
@@ -151,8 +195,20 @@ class MessageOfAuthorGetter {
           this.handleParagraph(content);
           break;
         }
+        case "bulletList": {
+          this.handleList(content, false);
+          break;
+        }
+        case "orderedList": {
+          this.handleList(content, true);
+          break;
+        }
+        case "horizontalRule": {
+          this.handleHorizontalRule(content);
+          break;
+        }
         default: {
-          throw new Error(`Unexpected content type: ${content.type}`);
+          throw new Error(`Unexpected top level content type: ${content.type}`);
         }
       }
     }
@@ -172,7 +228,6 @@ export const getMessagesOfAuthor = (
   editorState: EditorState,
 ): TransformResult => {
   const state = new MessageOfAuthorGetter(editorState);
-  state.handleTopLevel();
 
   const errors = state.getErrors();
   if (errors.length > 0) {

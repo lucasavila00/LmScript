@@ -39,7 +39,6 @@ export const VariableSelect = Node.create({
       createNewVariableSelect:
         () =>
         ({ commands }) => {
-          console.log("createNewVariableSelect", this.name);
           return commands.insertContent({
             type: "variableSelect",
             attrs: {

@@ -13,7 +13,6 @@ const ComponentTyped: FC<{
   const editor = useContext(EditorContext);
 
   const foundVariable = availableVariables.find((v) => v.uuid === selectedUuid);
-  console.log({ foundVariable });
   return (
     <StyledReactSelect
       classNames={{

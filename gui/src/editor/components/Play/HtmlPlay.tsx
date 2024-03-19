@@ -26,6 +26,7 @@ class LoadingSuspend {
 
 type SpanLike =
   | { tag: "text"; text: string }
+  | { tag: "hardBreak" }
   | {
       tag: "captured";
       text: string;
@@ -33,10 +34,19 @@ type SpanLike =
     }
   | { tag: "loading" };
 
-type ParagraphLike = {
-  tag: "p" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
-  text: SpanLike[];
-};
+type ParagraphLike =
+  | {
+      tag: "p" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+      text: SpanLike[];
+    }
+  | { tag: "hr" }
+  | {
+      tag: "list";
+      ordered: boolean;
+      listItems: Array<{
+        content: SpanLike[];
+      }>;
+    };
 
 type AuthorMsg = {
   author: string;
@@ -70,10 +80,34 @@ const getDataThrowing = (
 
   function addToLastParagraphLike(it: SpanLike) {
     const last = paragraphLikes[paragraphLikes.length - 1];
-    if (last != null) {
-      last.text.push(it);
-    } else {
+    if (last == null) {
       throw new Error("Expected last to be defined");
+    }
+    switch (last.tag) {
+      case "list": {
+        const lastListItem = last.listItems[last.listItems.length - 1];
+        if (lastListItem == null) {
+          throw new Error("Expected lastListItem to be defined");
+        }
+        lastListItem.content.push(it);
+        break;
+      }
+      case "h1":
+      case "h2":
+      case "h3":
+      case "h4":
+      case "h5":
+      case "h6":
+      case "p": {
+        last.text.push(it);
+        break;
+      }
+      case "hr": {
+        throw new Error("Unexpected adding text to hr");
+      }
+      default: {
+        return assertIsNever(last);
+      }
     }
   }
 
@@ -125,8 +159,16 @@ const getDataThrowing = (
           }
           break;
         }
+        case "hardBreak": {
+          addToLastParagraphLike({
+            tag: "hardBreak",
+          });
+          break;
+        }
         default: {
-          throw new Error(`Unexpected content type: ${content.type}`);
+          throw new Error(
+            `Unexpected second level content type: ${content.type}`,
+          );
         }
       }
     });
@@ -152,6 +194,40 @@ const getDataThrowing = (
     });
     handleSecondLevel(content.content ?? []);
   }
+  function handleList(content: JSONContent, numbered: boolean) {
+    paragraphLikes.push({
+      tag: "list",
+      ordered: numbered,
+      listItems: [],
+    });
+    const items = content.content ?? [];
+    for (const item of items) {
+      const last = paragraphLikes[paragraphLikes.length - 1];
+      if (last.tag != "list") {
+        throw new Error(`Unexpected list item type: ${last.tag}`);
+      }
+      last.listItems.push({
+        content: [],
+      });
+
+      if (item.type !== "listItem") {
+        throw new Error(`Unexpected list item type: ${item.type}`);
+      }
+
+      const itemContent = item.content ?? [];
+      if (itemContent.length != 1 && itemContent[0].type != "paragraph") {
+        throw new Error(
+          `Unexpected list item content type: ${itemContent[0].type}`,
+        );
+      }
+      handleSecondLevel(itemContent[0].content ?? []);
+    }
+  }
+  function handleHorizontalRule(_content: JSONContent) {
+    paragraphLikes.push({
+      tag: "hr",
+    });
+  }
   for (const content of (root.content ?? []).slice(1)) {
     switch (content.type) {
       case "authorSelect": {
@@ -166,8 +242,22 @@ const getDataThrowing = (
         handleParagraph(content);
         break;
       }
+      case "bulletList": {
+        handleList(content, false);
+        break;
+      }
+      case "orderedList": {
+        handleList(content, true);
+        break;
+      }
+      case "horizontalRule": {
+        handleHorizontalRule(content);
+        break;
+      }
       default: {
-        throw new Error(`Unexpected content type: ${content.type}`);
+        throw new Error(
+          `Unexpected content html top level type: ${content.type}`,
+        );
       }
     }
   }
@@ -223,6 +313,9 @@ const RenderSpanLike: FC<{ part: SpanLike }> = ({ part }) => {
         </span>
       );
     }
+    case "hardBreak": {
+      return <br />;
+    }
     default: {
       return assertIsNever(part);
     }
@@ -230,10 +323,47 @@ const RenderSpanLike: FC<{ part: SpanLike }> = ({ part }) => {
 };
 
 const RenderParagraphLike: FC<{ part: ParagraphLike }> = ({ part }) => {
-  const chd = part.text.map((part, idx) => (
-    <RenderSpanLike key={idx} part={part} />
-  ));
-  return createElement(part.tag, {}, chd);
+  switch (part.tag) {
+    case "h1":
+    case "h2":
+    case "h3":
+    case "h4":
+    case "h5":
+    case "h6":
+    case "p": {
+      const chd = part.text.map((part, idx) => (
+        <RenderSpanLike key={idx} part={part} />
+      ));
+      return createElement(part.tag, {}, chd);
+    }
+    case "list": {
+      const listItems = part.listItems.map((parts, idx) => {
+        return (
+          <li key={idx}>
+            <p>
+              {parts.content.map((part, idx2) => (
+                <RenderSpanLike part={part} key={idx2} />
+              ))}
+            </p>
+          </li>
+        );
+      });
+      if (part.ordered) {
+        return <ol>{listItems}</ol>;
+      }
+      return <ul>{listItems}</ul>;
+    }
+    case "hr": {
+      return (
+        <div data-type="horizontalRule">
+          <hr />
+        </div>
+      );
+    }
+    default: {
+      return assertIsNever(part);
+    }
+  }
 };
 
 const RenderAuthorMessage: FC<{ msg: AuthorMsg; isFirst: boolean }> = ({

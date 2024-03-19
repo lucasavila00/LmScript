@@ -199,6 +199,7 @@ const EditModeSidebar: FC<{
         <Button
           className="mt-20"
           onClick={() => {
+            // eslint-disable-next-line no-console
             console.log(
               JSON.stringify({
                 variables: variablesHook.variables,

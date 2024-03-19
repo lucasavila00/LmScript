@@ -16,6 +16,11 @@ import { VariableSelect } from "../extensions/VariableSelect/VariableSelect";
 import { LmGenerator } from "../extensions/LmGenerator/LmGenerator";
 import { useSamplingParams } from "./useSamplingParams";
 import { useCallback, useState } from "react";
+import { ListItem } from "@tiptap/extension-list-item";
+
+const CustomListItem = ListItem.extend({
+  content: "paragraph",
+});
 
 const Doc = TiptapDocument.extend({
   content: "authorSelect block*",
@@ -83,7 +88,7 @@ export const useBlockEditor = () => {
 
           // these use default
           history: undefined,
-          listItem: undefined,
+          listItem: false,
           orderedList: undefined,
           paragraph: undefined,
           text: undefined,
@@ -109,6 +114,7 @@ export const useBlockEditor = () => {
         TrailingNode,
         VariableSelect,
         LmGenerator,
+        CustomListItem,
       ],
       editorProps: {
         attributes: {
