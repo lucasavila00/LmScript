@@ -22,12 +22,12 @@ const bench = async () => {
           promptTokens += pt;
           completionTokens += ct;
         },
-      }
+      },
     ),
     {
       template: "llama-2-chat",
       temperature: 0.1,
-    }
+    },
   );
   let errors = 0;
   const MAX_JOBS = 1;
