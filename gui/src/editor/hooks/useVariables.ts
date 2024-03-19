@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { NamedVariable } from "../lib/types";
+import { newUuid } from "../../lib/utils";
 
 export const useVariables = (initialVariables: NamedVariable[]) => {
   const [variables, setVariables] = useState<NamedVariable[]>(initialVariables);
@@ -25,6 +26,7 @@ export const useVariables = (initialVariables: NamedVariable[]) => {
         {
           name: finalName,
           value: "",
+          uuid: newUuid(),
         },
       ];
     });

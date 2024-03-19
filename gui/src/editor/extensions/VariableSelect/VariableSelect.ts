@@ -20,15 +20,15 @@ export const VariableSelect = Node.create({
 
   addAttributes() {
     return {
-      name: {
-        default: "",
+      uuid: {
+        default: undefined,
         parseHTML: (element) => {
-          return element.getAttribute("data-name");
+          return element.getAttribute("data-uuid");
         },
 
         renderHTML: (attributes) => {
           return {
-            "data-name": attributes.name,
+            "data-uuid": attributes.name,
           };
         },
       },
@@ -43,7 +43,7 @@ export const VariableSelect = Node.create({
           return commands.insertContent({
             type: "variableSelect",
             attrs: {
-              name: "",
+              uuid: undefined,
             },
           });
         },

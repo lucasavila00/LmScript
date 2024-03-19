@@ -87,14 +87,14 @@ class MessageOfAuthorGetter {
           break;
         }
         case "variableSelect": {
-          const variableName = content.attrs?.name;
+          const variableUuid = content.attrs?.uuid;
           const fromVariables = this.editorState.variables.find(
-            (v) => v.name === variableName,
+            (v) => v.uuid === variableUuid,
           );
           if (fromVariables?.value == null) {
             this.errors.push({
               tag: "variable-not-found",
-              variableId: variableName,
+              variableId: variableUuid,
             });
           } else {
             this.pushText(fromVariables.value);
@@ -102,9 +102,25 @@ class MessageOfAuthorGetter {
           break;
         }
         case "lmGenerator": {
+          const nodeAttrs = content.attrs as GenerationNodeAttrs;
+          if (nodeAttrs.type === "selection") {
+            nodeAttrs.choices.forEach((choice) => {
+              if (choice.tag === "variable") {
+                const fromVariables = this.editorState.variables.find(
+                  (v) => v.uuid === choice.value,
+                );
+                if (fromVariables?.value == null) {
+                  this.errors.push({
+                    tag: "variable-not-found",
+                    variableId: choice.value,
+                  });
+                }
+              }
+            });
+          }
           this.messageParts.push({
             tag: "lmGenerate",
-            nodeAttrs: content.attrs as GenerationNodeAttrs,
+            nodeAttrs,
           });
           break;
         }

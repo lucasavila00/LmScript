@@ -88,12 +88,12 @@ const getDataThrowing = (
           break;
         }
         case "variableSelect": {
-          const variableName = content.attrs?.name;
+          const variableUuid = content.attrs?.uuid;
           const fromVariables = editorState.variables.find(
-            (v) => v.name === variableName,
+            (v) => v.uuid === variableUuid,
           );
           if (fromVariables?.value == null) {
-            throw new Error(`Variable not found: ${variableName}`);
+            throw new Error(`Variable not found: ${variableUuid}`);
           } else {
             addToLastParagraphLike({
               tag: "text",

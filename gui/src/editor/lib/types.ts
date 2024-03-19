@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { JSONContent } from "@tiptap/react";
 export type NamedVariable = {
+  uuid: string;
   name: string;
   value: string;
 };
@@ -53,6 +54,7 @@ export type GenerationNodeAttrs = {
   name: string;
   max_tokens: number;
   stop: string[];
+  regex: string | undefined;
 };
 
 export type UiGenerationData = {

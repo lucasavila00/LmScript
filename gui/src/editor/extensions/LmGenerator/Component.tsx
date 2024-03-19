@@ -34,16 +34,31 @@ const ChoicesEditor: FC<{
         control: () => "rounded-none",
       }}
       isMulti={true}
-      value={choices.map((it): ChoicesOption => {
-        switch (it.tag) {
-          case "variable":
-            return {
-              label: `{${it.value}}`,
-              value: it.value,
-              tag: "variable" as const,
-            };
+      value={choices.flatMap((choice): ChoicesOption[] => {
+        switch (choice.tag) {
+          case "variable": {
+            const theVariable = availableVariables.find(
+              (v) => v.uuid === choice.value,
+            );
+            if (theVariable == null) {
+              return [];
+            }
+            return [
+              {
+                label: `{${theVariable.name}}`,
+                value: choice.value,
+                tag: "variable" as const,
+              },
+            ];
+          }
           case "typed":
-            return { label: it.value, value: it.value, tag: "typed" as const };
+            return [
+              {
+                label: choice.value,
+                value: choice.value,
+                tag: "typed" as const,
+              },
+            ];
           default:
             throw new Error("Invalid tag");
         }
@@ -118,7 +133,33 @@ const StopEditor: FC<{
     />
   );
 };
-
+const RegexEditor: FC<{
+  regex: string | undefined;
+  onChange: (regex: string | undefined) => void;
+}> = ({ regex, onChange }) => {
+  return (
+    <StyledCreatableReactSelect
+      classNames={{
+        container: () => "inline-block",
+        control: () => "rounded-none",
+      }}
+      value={
+        regex == null
+          ? undefined
+          : {
+              value: regex,
+              label: regex,
+            }
+      }
+      options={[]}
+      placeholder="Type to create..."
+      noOptionsMessage={() => "Type to create..."}
+      onChange={(it) => {
+        onChange(it?.value);
+      }}
+    />
+  );
+};
 const InnerGenerator: FC<{
   attrs: GenerationNodeAttrs;
   updateAttributes: (attrs: { readonly [attr: string]: unknown }) => void;
@@ -144,7 +185,12 @@ const InnerGenerator: FC<{
         />
       );
     case "regex":
-      return <>todo regex</>;
+      return (
+        <RegexEditor
+          regex={attrs.regex}
+          onChange={(regex) => updateAttributes({ ...attrs, regex })}
+        />
+      );
     default: {
       throw new Error("Invalid type" + attrs.type);
     }

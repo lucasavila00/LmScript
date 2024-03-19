@@ -6,9 +6,18 @@ export const initialContent: EditorState = {
       name: "content",
       value:
         'Question: "What is the person doing?" Answer: "The person is happy"',
+      uuid: "e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e3",
     },
-    { name: "PERSON", value: "A person." },
-    { name: "OBJECT", value: "An object." },
+    {
+      name: "PERSON",
+      value: "A person.",
+      uuid: "e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e4",
+    },
+    {
+      name: "OBJECT",
+      value: "An object.",
+      uuid: "e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e5",
+    },
   ],
   doc: {
     type: "doc",
@@ -32,7 +41,10 @@ export const initialContent: EditorState = {
         type: "paragraph",
         content: [
           { type: "text", text: '"' },
-          { type: "variableSelect", attrs: { name: "content" } },
+          {
+            type: "variableSelect",
+            attrs: { uuid: "e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e3" },
+          },
           { type: "text", text: '"' },
         ],
       },
@@ -48,9 +60,15 @@ export const initialContent: EditorState = {
             type: "text",
             text: "First explain why you're choosing the best subject for the illustration, then choose the best subject for the illustration, either a person or an object. Answer with just \"",
           },
-          { type: "variableSelect", attrs: { name: "PERSON" } },
+          {
+            type: "variableSelect",
+            attrs: { uuid: "e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e4" },
+          },
           { type: "text", text: '" or "' },
-          { type: "variableSelect", attrs: { name: "OBJECT" } },
+          {
+            type: "variableSelect",
+            attrs: { uuid: "e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e5" },
+          },
           { type: "text", text: '".' },
         ],
       },
@@ -73,7 +91,10 @@ export const initialContent: EditorState = {
         type: "paragraph",
         content: [
           { type: "text", text: "Illustrate: " },
-          { type: "variableSelect", attrs: { name: "PERSON" } },
+          {
+            type: "variableSelect",
+            attrs: { uuid: "e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e4" },
+          },
         ],
       },
       {
@@ -94,7 +115,10 @@ export const initialContent: EditorState = {
         type: "paragraph",
         content: [
           { type: "text", text: "Illustrate: " },
-          { type: "variableSelect", attrs: { name: "OBJECT" } },
+          {
+            type: "variableSelect",
+            attrs: { uuid: "e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e5" },
+          },
         ],
       },
       { type: "authorSelect", attrs: { author: "assistant" } },
@@ -124,8 +148,16 @@ export const initialContent: EditorState = {
             attrs: {
               id: "id9100e156-5a1c-4ae5-bcf9-bc531a659220",
               choices: [
-                { label: "{PERSON}", value: "PERSON", tag: "variable" },
-                { label: "{OBJECT}", value: "OBJECT", tag: "variable" },
+                {
+                  label: "{PERSON}",
+                  value: "e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e4",
+                  tag: "variable",
+                },
+                {
+                  label: "{OBJECT}",
+                  value: "e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e5",
+                  tag: "variable",
+                },
               ],
               type: "selection",
               max_tokens: 16,

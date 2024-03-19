@@ -16,9 +16,18 @@ const editorState: Pick<EditorState, "doc" | "variables"> = {
       name: "content",
       value:
         'Question: "What is the person doing?" Answer: "The person is happy"',
+      uuid: "e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e3",
     },
-    { name: "PERSON", value: "A person." },
-    { name: "OBJECT", value: "An object." },
+    {
+      name: "PERSON",
+      value: "A person.",
+      uuid: "e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e4",
+    },
+    {
+      name: "OBJECT",
+      value: "An object.",
+      uuid: "e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e5",
+    },
   ],
   doc: {
     type: "doc",
@@ -137,8 +146,16 @@ const editorState: Pick<EditorState, "doc" | "variables"> = {
             attrs: {
               id: "id9100e156-5a1c-4ae5-bcf9-bc531a659220",
               choices: [
-                { label: "{PERSON}", value: "PERSON", tag: "variable" },
-                { label: "{OBJECT}", value: "OBJECT", tag: "variable" },
+                {
+                  label: "{PERSON}",
+                  value: "e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e4",
+                  tag: "variable",
+                },
+                {
+                  label: "{OBJECT}",
+                  value: "e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e5",
+                  tag: "variable",
+                },
               ],
               type: "selection",
               max_tokens: 16,

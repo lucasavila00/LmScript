@@ -36,7 +36,7 @@ const messagePartToTasks = (
             name: part.nodeAttrs.id,
             stop: [],
             max_tokens: 256,
-            regex: part.nodeAttrs.id,
+            regex: part.nodeAttrs.regex,
           };
         }
         case "selection": {
@@ -46,9 +46,9 @@ const messagePartToTasks = (
             choices: part.nodeAttrs.choices.map((choice) => {
               switch (choice.tag) {
                 case "variable": {
-                  const item = variables.find((v) => v.name === choice.value);
+                  const item = variables.find((v) => v.uuid === choice.value);
                   if (item == null) {
-                    // TODO: this should be checked in the other function, or move this to the class
+                    // We just throw here and assume this was checked before.
                     throw new Error(`Variable ${choice.value} not found`);
                   }
                   return item.value;

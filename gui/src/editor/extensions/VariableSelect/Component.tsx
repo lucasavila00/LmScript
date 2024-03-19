@@ -6,12 +6,14 @@ import { StyledReactSelect } from "../../../components/ui/react-select";
 import { EditorContext } from "../../../editor/context/editor";
 
 const ComponentTyped: FC<{
-  selectedName: string;
-  onChange: (name: string) => void;
-}> = ({ selectedName, onChange }) => {
+  selectedUuid: string;
+  onChange: (uuid: string) => void;
+}> = ({ selectedUuid, onChange }) => {
   const availableVariables = useContext(VariablesContext);
   const editor = useContext(EditorContext);
 
+  const foundVariable = availableVariables.find((v) => v.uuid === selectedUuid);
+  console.log({ foundVariable });
   return (
     <StyledReactSelect
       classNames={{
@@ -19,13 +21,14 @@ const ComponentTyped: FC<{
         control: () => "!min-h-8",
       }}
       value={
-        selectedName === ""
+        selectedUuid == null || foundVariable == null
           ? undefined
           : {
-              label: `{${selectedName}}`,
-              value: selectedName,
+              label: `{${foundVariable.name}}`,
+              value: selectedUuid,
             }
       }
+      key={foundVariable?.uuid ?? ""}
       onChange={(v) => {
         if (v != null) {
           onChange(v.value);
@@ -35,7 +38,7 @@ const ComponentTyped: FC<{
       isClearable={false}
       options={availableVariables.map((v) => ({
         label: `{${v.name}}`,
-        value: v.name,
+        value: v.uuid,
       }))}
       onMenuClose={() => {
         setTimeout(() => {
@@ -49,16 +52,16 @@ export const Component: FC<{
   node: Node;
   updateAttributes: (attrs: { readonly [attr: string]: unknown }) => void;
 }> = (props) => {
-  const selectedName = props.node.attrs.name;
+  const selectedUuid = props.node.attrs.uuid;
   return (
     <NodeViewWrapper as="span">
       {/* <ControlLabelContext.Provider value={"Print:\u00A0"}> */}
       <ComponentTyped
-        selectedName={selectedName}
-        onChange={(name) => {
+        selectedUuid={selectedUuid}
+        onChange={(uuid) => {
           props.updateAttributes({
             ...props.node.attrs,
-            name,
+            uuid,
           });
         }}
       />

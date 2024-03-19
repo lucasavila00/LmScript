@@ -42,7 +42,7 @@ const getClassNames = <
         classNames?.menu?.(e),
       ),
     placeholder: (e) =>
-      cn("text-muted-foreground pl-2", classNames?.placeholder?.(e)),
+      cn("text-muted-foreground", classNames?.placeholder?.(e)),
     option: (e) =>
       cn(
         "cursor-default",

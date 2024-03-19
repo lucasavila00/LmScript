@@ -125,6 +125,7 @@ test("handles variableSelect", async () => {
         name: "content",
         value:
           'Question: "What is the person doing?" Answer: "The person is happy"',
+        uuid: "e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e5",
       },
     ],
     samplingParams: SAMPLING_PARAMS,

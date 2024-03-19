@@ -89,6 +89,17 @@ export const LmGenerator = Node.create({
           };
         },
       },
+      regex: {
+        default: undefined,
+        parseHTML: (element) => {
+          return element.getAttribute("data-regex");
+        },
+        renderHTML: (attributes) => {
+          return {
+            "data-regex": attributes.regex,
+          };
+        },
+      },
     };
   },
   addCommands() {
