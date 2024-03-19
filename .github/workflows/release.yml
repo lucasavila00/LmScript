@@ -23,10 +23,11 @@ jobs:
           node-version: 20
 
       - name: Install Dependencies
-        - run: npm config set "@tiptap-pro:registry" https://registry.tiptap.dev/
-        - run: npm config set "//registry.tiptap.dev/:_authToken" ${{ secrets.TIPTAP_TOKEN }}
-        - run: cd gui && npm install
-        - run: cd egui && npm install
+        run: |
+          npm config set "@tiptap-pro:registry" https://registry.tiptap.dev/
+          npm config set "//registry.tiptap.dev/:_authToken" ${{ secrets.TIPTAP_TOKEN }}
+          cd gui && npm install
+          cd egui && npm install
 
       - name: build-linux
         if: matrix.os == 'ubuntu-latest'
