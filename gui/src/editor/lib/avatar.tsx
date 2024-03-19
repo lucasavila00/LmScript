@@ -1,11 +1,15 @@
-export const avatarLabel = (author: string) => {
+import { ReactNode } from "react";
+import { BotIcon, SparkleIcon, UserIcon } from "lucide-react";
+
+const AVATAR_CN = "aspect-square h-full w-full m-2";
+export const avatarLabel = (author: string): ReactNode => {
   switch (author) {
     case "system":
-      return "Sys";
+      return <SparkleIcon className={AVATAR_CN} />;
     case "user":
-      return "Usr";
+      return <UserIcon className={AVATAR_CN} />;
     case "assistant":
-      return "Ast";
+      return <BotIcon className={AVATAR_CN} />;
     default:
       return "Unk";
   }

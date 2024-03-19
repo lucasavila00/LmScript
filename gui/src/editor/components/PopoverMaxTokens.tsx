@@ -6,8 +6,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "../../components/ui/popover";
-import { Pencil1Icon } from "@radix-ui/react-icons";
 import { EditorContext } from "../context/editor";
+import { ChevronDownIcon } from "lucide-react";
 
 export const PopoverMaxTokens: FC<{
   max: number;
@@ -34,7 +34,7 @@ export const PopoverMaxTokens: FC<{
           variant="outline"
         >
           <span className="text-muted-foreground">Max:</span>&nbsp;{max}
-          <Pencil1Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+          <ChevronDownIcon className="h-4 w-4 shrink-0 ml-1 text-muted-foreground" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80">

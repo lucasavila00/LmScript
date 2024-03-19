@@ -6,8 +6,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "../../components/ui/popover";
-import { Pencil1Icon } from "@radix-ui/react-icons";
 import { EditorContext } from "../../editor/context/editor";
+import { ChevronDownIcon } from "lucide-react";
 
 export const PopoverNameEditor: FC<{
   name: string;
@@ -34,7 +34,7 @@ export const PopoverNameEditor: FC<{
           variant="outline"
         >
           <span className="text-muted-foreground">As:</span>&nbsp;{name}
-          <Pencil1Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+          <ChevronDownIcon className="h-4 w-4 shrink-0 ml-1 text-muted-foreground" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80">
