@@ -221,6 +221,7 @@ export const RightSidebar = memo<{
   samplingParamsHook: ReturnType<typeof useSamplingParams>;
   isExecuting: boolean;
   backendConfigHook: ReturnType<typeof useBackendConfig>;
+  onClose: () => void;
 }>(
   ({
     backendConfigHook,
@@ -229,30 +230,43 @@ export const RightSidebar = memo<{
     isOpen,
     variablesHook,
     samplingParamsHook,
+    onClose,
   }) => {
     const windowClassName = cn(
-      "absolute top-0 right-0 bg-white lg:bg-white/30 lg:backdrop-blur-xl h-full lg:h-auto lg:relative z-[999] w-0 duration-300 transition-all",
-      "dark:bg-black lg:dark:bg-black/30",
+      "absolute top-0 right-0 bg-white h-full lg:h-auto lg:relative z-[999] w-0 duration-300 transition-all",
+      "dark:bg-black",
       !isOpen && "border-l-transparent",
       isOpen && "w-80 border-l border-l-neutral-200 dark:border-l-neutral-800",
     );
 
     return (
-      <div className={windowClassName}>
-        <div className="w-full h-full overflow-hidden">
-          <div className="w-full h-full p-6 overflow-auto">
-            {isExecuting ? (
-              <BackendSetup backendConfigHook={backendConfigHook} />
-            ) : (
-              <EditModeSidebar
-                editor={editor}
-                variablesHook={variablesHook}
-                samplingParamsHook={samplingParamsHook}
-              />
-            )}
+      <>
+        <div
+          className={cn(
+            "w-full h-full absolute left-0 top-0 transition duration-300 lg:pointer-events-none",
+            isOpen
+              ? "backdrop-blur lg:backdrop-blur-none"
+              : "backdrop-blur-none pointer-events-none",
+          )}
+          onClick={onClose}
+        ></div>
+
+        <div className={windowClassName}>
+          <div className="w-full h-full overflow-hidden">
+            <div className="w-full h-full min-w-80 w-80 p-6 overflow-auto">
+              {isExecuting ? (
+                <BackendSetup backendConfigHook={backendConfigHook} />
+              ) : (
+                <EditModeSidebar
+                  editor={editor}
+                  variablesHook={variablesHook}
+                  samplingParamsHook={samplingParamsHook}
+                />
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      </>
     );
   },
 );

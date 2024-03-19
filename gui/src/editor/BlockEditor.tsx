@@ -84,6 +84,7 @@ export const BlockEditor = () => {
           samplingParamsHook={samplingParamsHook}
           backendConfigHook={backendConfigHook}
           isExecuting={isExecuting}
+          onClose={rightSidebar.close}
         />
       </div>
     </>
