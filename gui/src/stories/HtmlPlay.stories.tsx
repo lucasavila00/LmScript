@@ -176,6 +176,7 @@ export const LoadingAll = () => {
         captures: {},
         finalText: undefined,
       }}
+      onRetry={() => {}}
       editorState={editorState}
     />
   );
@@ -191,6 +192,7 @@ export const LoadingSecond = () => {
         },
         finalText: undefined,
       }}
+      onRetry={() => {}}
       editorState={editorState}
     />
   );
@@ -207,6 +209,7 @@ export const LoadedAll = () => {
         },
         finalText: undefined,
       }}
+      onRetry={() => {}}
       editorState={editorState}
     />
   );

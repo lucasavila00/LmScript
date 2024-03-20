@@ -16,6 +16,7 @@ export const generateAsyncAtom = atomFamily<
     messages: MessageOfAuthor[];
     samplingParams: SamplingParams;
     variables: NamedVariable[];
+    cacheBumper: number;
   }
 >({
   key: "generateAsyncAtom",
@@ -72,6 +73,18 @@ export const generateAsyncAtom = atomFamily<
                 captures: out.captured,
                 finalText: out.text,
                 state: "finished",
+              };
+            }
+            return prev;
+          });
+        })
+        .catch((error) => {
+          opts.setSelf((prev) => {
+            if ("captures" in prev) {
+              return {
+                ...prev,
+                state: "error",
+                error,
               };
             }
             return prev;

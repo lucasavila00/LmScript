@@ -58,7 +58,8 @@ export type GenerationNodeAttrs = {
 };
 
 export type UiGenerationData = {
-  state: "loading" | "initialized" | "finished";
+  state: "loading" | "initialized" | "finished" | "error";
   captures: Record<string, string>;
   finalText: string | undefined;
+  error?: unknown;
 };
