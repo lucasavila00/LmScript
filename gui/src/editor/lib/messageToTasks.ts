@@ -8,7 +8,8 @@ import { MessageOfAuthor, MessagePart } from "./playMessages";
 import { assertIsNever } from "../../lib/utils";
 import { NamedVariable } from "./types";
 
-const messagePartToTasks = (
+// exported for testing
+export const messagePartToTasks = (
   part: MessagePart,
   variables: NamedVariable[],
 ): Task => {
@@ -54,7 +55,17 @@ const messagePartToTasks = (
                   return item.value;
                 }
                 case "typed": {
-                  return choice.value;
+                  const val = choice.value;
+                  if (val.startsWith("{") && val.endsWith("}")) {
+                    const inner = val.slice(1, -1);
+                    const foundVariable = variables.find(
+                      (v) => v.name === inner,
+                    );
+                    if (foundVariable != null) {
+                      return foundVariable.value;
+                    }
+                  }
+                  return val;
                 }
                 default: {
                   return assertIsNever(choice);
