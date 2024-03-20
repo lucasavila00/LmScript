@@ -1,4 +1,5 @@
 import { Avatar, AvatarFallback } from "../../../components/ui/avatar";
+import { Button } from "../../../components/ui/button";
 import { avatarLabel, avatarFullLabel } from "../../../editor/lib/avatar";
 import {
   EditorState,
@@ -398,7 +399,24 @@ const RenderAuthorMessage: FC<{ msg: AuthorMsg; isFirst: boolean }> = ({
 export const HtmlPlay: FC<{
   uiGenerationData: UiGenerationData;
   editorState: Pick<EditorState, "doc" | "variables">;
-}> = ({ uiGenerationData, editorState }) => {
+  onRetry: () => void;
+}> = ({ uiGenerationData, editorState, onRetry }) => {
+  if (uiGenerationData.state == "error") {
+    return (
+      <>
+        <div className="flex items-center justify-center flex-col mt-8 gap-2">
+          <div className="text-lg font-medium">An Error Ocurred</div>
+          <div className="text-sm text-muted-foreground max-w-xl text-center">
+            {String(uiGenerationData.error)}
+          </div>
+          <Button className="mt-4" onClick={onRetry}>
+            Retry
+          </Button>
+        </div>
+      </>
+    );
+  }
+
   const acc = getData(uiGenerationData, editorState);
   return (
     <div className="ProseMirror">
