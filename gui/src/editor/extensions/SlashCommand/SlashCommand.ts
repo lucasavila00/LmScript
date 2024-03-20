@@ -50,22 +50,13 @@ export const SlashCommand = Extension.create({
         pluginKey: new PluginKey(extensionName),
         allow: ({ state, range }) => {
           const $from = state.doc.resolve(range.from);
-          const isRootDepth = $from.depth === 1;
-          const isParagraph = $from.parent.type.name === "paragraph";
-          // const isStartOfNode = $from.parent.textContent?.charAt(0) === "/";
-          const isStartOfNode = true;
-          const isInColumn = this.editor.isActive("column");
 
           const afterContent = $from.parent.textContent?.substring(
             $from.parent.textContent?.indexOf("/"),
           );
           const isValidAfterContent = !afterContent?.endsWith("  ");
 
-          return (
-            ((isRootDepth && isParagraph && isStartOfNode) ||
-              (isInColumn && isParagraph && isStartOfNode)) &&
-            isValidAfterContent
-          );
+          return isValidAfterContent;
         },
         command: ({ editor, props }: { editor: Editor; props: any }) => {
           const { view, state } = editor;
