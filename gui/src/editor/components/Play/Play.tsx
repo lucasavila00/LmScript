@@ -90,9 +90,12 @@ export const Play: FC<{
               }
             }
           })
-          .map((str) => {
+          .map((str, idx) => {
             return (
-              <div className="text-sm text-muted-foreground max-w-xl text-center">
+              <div
+                key={idx}
+                className="text-sm text-muted-foreground max-w-xl text-center"
+              >
                 {str}
               </div>
             );
