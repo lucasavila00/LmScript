@@ -18,10 +18,15 @@ export type MessageOfAuthor = {
   parts: MessagePart[];
 };
 
-export type Error = {
-  tag: "variable-not-found";
-  variableId: string;
-};
+export type Error =
+  | {
+      tag: "variable-not-found";
+      variableId: string;
+    }
+  | {
+      tag: "variable-in-choice-not-found";
+      variableId: string;
+    };
 
 export type TransformSuccess = {
   tag: "success";
@@ -117,7 +122,7 @@ class MessageOfAuthorGetter {
                 );
                 if (fromVariables?.value == null) {
                   this.errors.push({
-                    tag: "variable-not-found",
+                    tag: "variable-in-choice-not-found",
                     variableId: choice.value,
                   });
                 }
