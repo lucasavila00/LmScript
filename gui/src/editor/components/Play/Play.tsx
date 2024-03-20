@@ -72,5 +72,32 @@ export const Play: FC<{
       />
     );
   }
-  return <>TODO: validation error {JSON.stringify(msgs)}</>;
+  return (
+    <>
+      <div className="flex items-center justify-center flex-col mt-8 gap-2">
+        <div className="text-lg font-medium">Validation Error</div>
+        {msgs.value
+          .map((err) => {
+            switch (err.tag) {
+              case "variable-not-found": {
+                return `There are variable inputs unconnected`;
+              }
+              case "variable-in-choice-not-found": {
+                return `There are variable inputs unconnected in a choice generation`;
+              }
+              default: {
+                return assertIsNever(err);
+              }
+            }
+          })
+          .map((str) => {
+            return (
+              <div className="text-sm text-muted-foreground max-w-xl text-center">
+                {str}
+              </div>
+            );
+          })}
+      </div>
+    </>
+  );
 };
