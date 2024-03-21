@@ -7,15 +7,7 @@ import { useState } from "react";
 import { LmEditorState } from "gui/src/editor/lib/types";
 import { useSidebar } from "gui/src/editor/hooks/useSideBar";
 
-const serializeFile = (content: LmEditorState): string =>
-  JSON.stringify(
-    {
-      version: "1",
-      ...content,
-    },
-    null,
-    2,
-  );
+const serializeFile = (content: LmEditorState): string => JSON.stringify(content, null, 2);
 
 function App(): JSX.Element {
   const darkModeHook = useDarkmode();
