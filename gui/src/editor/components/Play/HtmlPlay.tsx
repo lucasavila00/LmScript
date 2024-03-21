@@ -509,7 +509,8 @@ export const HtmlPlay: FC<{
   uiGenerationData: UiGenerationData;
   editorState: Pick<LmEditorState, "doc" | "variables">;
   onRetry: () => void;
-}> = ({ uiGenerationData, editorState, onRetry }) => {
+  onOpenBackendConfig: () => void;
+}> = ({ onOpenBackendConfig, uiGenerationData, editorState, onRetry }) => {
   if (uiGenerationData.state == "error") {
     return (
       <>
@@ -520,6 +521,13 @@ export const HtmlPlay: FC<{
           </div>
           <Button className="mt-4" onClick={onRetry}>
             Retry
+          </Button>
+
+          <div className="text-sm text-muted-foreground max-w-xl text-center mt-8">
+            If the error persists, please check the backend configuration.
+          </div>
+          <Button className="mt-4" onClick={onOpenBackendConfig}>
+            Open Backend Config
           </Button>
         </div>
       </>

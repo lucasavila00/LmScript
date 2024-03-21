@@ -257,6 +257,7 @@ export const LoadingAll = () => {
       }}
       onRetry={() => {}}
       editorState={editorState}
+      onOpenBackendConfig={() => {}}
     />
   );
 };
@@ -273,6 +274,7 @@ export const LoadingSecond = () => {
       }}
       onRetry={() => {}}
       editorState={editorState}
+      onOpenBackendConfig={() => {}}
     />
   );
 };
@@ -302,6 +304,7 @@ Paragraph 2`,
       }}
       onRetry={() => {}}
       editorState={editorState}
+      onOpenBackendConfig={() => {}}
     />
   );
 };
