@@ -45,15 +45,14 @@ const LoadedBlockEditor: FC<
   const menuContainerRef = useRef(null);
   const backendConfigHook = useBackendConfig();
 
-  const editorDoc = editor.getJSON();
   const lmEditorState = useCallback(
     () => ({
-      doc: editorDoc,
+      doc: editor.getJSON(),
       variables: variablesHook.variables,
       samplingParams: samplingParamsHook.samplingParams,
       version: "1" as const,
     }),
-    [editorDoc, variablesHook.variables, samplingParamsHook.samplingParams],
+    [editor, variablesHook.variables, samplingParamsHook.samplingParams],
   );
 
   const onSaveFileRef = useRef(onSaveFile);
