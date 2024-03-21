@@ -61,7 +61,8 @@ const SelectChatTemplate: FC<{
   );
 };
 
-const CHAT_TEMPLATE_DESCRIPTION = "TODO template desc.";
+const CHAT_TEMPLATE_DESCRIPTION =
+  "The chat template to use. This will be used to generate the chat. Each model has different chat templates.";
 const UrlTokenTemplateConfig: FC<{
   setBackend: (backend: Backend) => void;
   tag: "runpod-serverless-sglang" | "sglang";
@@ -222,7 +223,9 @@ const VllmConfig: FC<{
               <FormControl>
                 <Input placeholder="" {...field} />
               </FormControl>
-              <FormDescription>TODO model</FormDescription>
+              <FormDescription>
+                The model to use. Your vLLM server must have this model available.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -288,7 +291,11 @@ export const BackendSetup = memo<{
         }}
       />
       <UnconnectedFormDescription className="mt-2">
-        TODO describe backend
+        You can use any of the backends supported by{" "}
+        <a href="https://github.com/lucasavila00/LmScript" target="_blank">
+          LmScript
+        </a>
+        .
       </UnconnectedFormDescription>
       <BackendConfig setBackend={backendConfigHook.setBackend} backendTag={backendTag} />
     </>
