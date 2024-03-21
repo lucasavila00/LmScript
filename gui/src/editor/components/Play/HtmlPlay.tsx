@@ -5,6 +5,7 @@ import { LmEditorState, GenerationNodeAttrs, UiGenerationData } from "../../../e
 import { assertIsNever } from "../../../lib/utils";
 import { JSONContent } from "@tiptap/react";
 import { FC, createElement, useEffect, useState } from "react";
+import { Token, Tokens, lexer } from "marked";
 
 const levelMap: Record<number, "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | undefined> = {
   1: "h1",
@@ -18,34 +19,108 @@ class LoadingSuspend {
   constructor(public arr: AuthorMsg[]) {}
 }
 
-type SpanLike =
-  | { tag: "text"; text: string }
-  | { tag: "hardBreak" }
-  | {
-      tag: "captured";
-      text: string;
-      capturedAs: string;
-    }
-  | { tag: "loading" };
+type SpanText = { tag: "text"; text: string; capturedAs: string | undefined };
+type SpanHardBreak = { tag: "hardBreak" };
+type SpanLike = SpanText | SpanHardBreak | { tag: "loading" };
 
-type ParagraphLike =
-  | {
-      tag: "p" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
-      text: SpanLike[];
-    }
-  | { tag: "hr" }
-  | {
-      tag: "list";
-      ordered: boolean;
-      listItems: Array<{
-        content: SpanLike[];
-      }>;
-    };
+type ParagraphList = {
+  tag: "list";
+  ordered: boolean;
+  listItems: Array<{
+    content: SpanLike[];
+  }>;
+  capturedAs: string | undefined;
+};
+type ParagraphHr = { tag: "hr"; capturedAs: string | undefined };
+
+type ParagraphHeadingOrP = {
+  tag: "p" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+  text: SpanLike[];
+};
+type ParagraphLike = ParagraphHeadingOrP | ParagraphHr | ParagraphList;
 
 type AuthorMsg = {
   author: string;
   parts: ParagraphLike[];
 };
+
+type ParsedGeneration =
+  | SpanText
+  | ParagraphList
+  | SpanHardBreak
+  | ParagraphHr
+  | ParagraphHeadingOrP;
+
+const handleParsedTokensSpanLike = (
+  tokens: Token[],
+  capturedAs: string | undefined,
+): SpanText[] => {
+  return tokens.map((token) => {
+    switch (token.type) {
+      case "text": {
+        return { tag: "text", text: token.text, capturedAs };
+      }
+      default: {
+        return { tag: "text", text: token.raw, capturedAs };
+      }
+    }
+  });
+};
+const parseGeneration = (captured: string, capturedAs: string): ParsedGeneration[] => {
+  let paragraphCount = 0;
+  return lexer(captured).flatMap((parsed): ParsedGeneration[] => {
+    switch (parsed.type) {
+      case "paragraph": {
+        paragraphCount++;
+        if (paragraphCount == 1) {
+          return handleParsedTokensSpanLike(parsed.tokens ?? [], capturedAs);
+        }
+        return [
+          {
+            tag: "p",
+            text: handleParsedTokensSpanLike(parsed.tokens ?? [], capturedAs),
+          },
+        ];
+      }
+      case "list": {
+        const items: Tokens.ListItem[] = parsed.items ?? [];
+        return [
+          {
+            tag: "list",
+            ordered: parsed.ordered,
+            listItems: items.map((item) => ({
+              content: handleParsedTokensSpanLike(item.tokens, undefined),
+            })),
+            capturedAs,
+          },
+        ];
+      }
+      case "heading": {
+        return [
+          {
+            tag: levelMap[parsed.depth] ?? "h6",
+            text: handleParsedTokensSpanLike(parsed.tokens ?? [], capturedAs),
+          },
+        ];
+      }
+      case "hr": {
+        return [{ tag: "hr", capturedAs }];
+      }
+      case "space": {
+        // treat \n or \n\n and so on as hardBreak
+        if (parsed.raw.split("\n").every((it) => it === "")) {
+          return [{ tag: "hardBreak" }];
+        }
+
+        return [{ tag: "text", text: parsed.raw, capturedAs }];
+      }
+      default: {
+        return [{ tag: "text", text: parsed.raw, capturedAs }];
+      }
+    }
+  });
+};
+
 const getDataThrowing = (
   uiGenerationData: UiGenerationData,
   editorState: Pick<LmEditorState, "doc" | "variables">,
@@ -112,6 +187,7 @@ const getDataThrowing = (
           addToLastParagraphLike({
             tag: "text",
             text: content.text ?? "",
+            capturedAs: undefined,
           });
           break;
         }
@@ -124,6 +200,7 @@ const getDataThrowing = (
             addToLastParagraphLike({
               tag: "text",
               text: fromVariables.value,
+              capturedAs: undefined,
             });
           }
 
@@ -143,11 +220,32 @@ const getDataThrowing = (
 
             throw new LoadingSuspend(authorMsgs);
           } else {
-            addToLastParagraphLike({
-              tag: "captured",
-              text: captured,
-              capturedAs: nodeAttrs.name,
-            });
+            const parsedItems = parseGeneration(captured, nodeAttrs.name);
+            for (const parsed of parsedItems) {
+              switch (parsed.tag) {
+                case "hardBreak":
+                case "text": {
+                  addToLastParagraphLike(parsed);
+                  break;
+                }
+                case "h1":
+                case "h2":
+                case "h3":
+                case "h4":
+                case "h5":
+                case "h6":
+                case "p":
+                case "hr":
+                case "list": {
+                  paragraphLikes.push(parsed);
+                  break;
+                }
+                default: {
+                  assertIsNever(parsed);
+                  break;
+                }
+              }
+            }
           }
           break;
         }
@@ -189,6 +287,7 @@ const getDataThrowing = (
       tag: "list",
       ordered: numbered,
       listItems: [],
+      capturedAs: undefined,
     });
     const items = content.content ?? [];
     for (const item of items) {
@@ -214,6 +313,7 @@ const getDataThrowing = (
   function handleHorizontalRule(_content: JSONContent) {
     paragraphLikes.push({
       tag: "hr",
+      capturedAs: undefined,
     });
   }
   for (const content of (root.content ?? []).slice(1)) {
@@ -287,17 +387,17 @@ const SpanLoading = () => {
 const RenderSpanLike: FC<{ part: SpanLike }> = ({ part }) => {
   switch (part.tag) {
     case "text": {
-      return <span>{part.text}</span>;
-    }
-    case "loading": {
-      return <SpanLoading />;
-    }
-    case "captured": {
+      const className = part.capturedAs == null ? undefined : GENERATED_CN;
+      const title = part.capturedAs == null ? undefined : part.capturedAs;
+
       return (
-        <span title={part.capturedAs} className={GENERATED_CN}>
+        <span className={className} title={title}>
           {part.text}
         </span>
       );
+    }
+    case "loading": {
+      return <SpanLoading />;
     }
     case "hardBreak": {
       return <br />;
@@ -321,6 +421,8 @@ const RenderParagraphLike: FC<{ part: ParagraphLike }> = ({ part }) => {
       return createElement(part.tag, {}, chd);
     }
     case "list": {
+      const className = part.capturedAs == null ? undefined : GENERATED_CN;
+      const title = part.capturedAs == null ? undefined : part.capturedAs;
       const listItems = part.listItems.map((parts, idx) => {
         return (
           <li key={idx}>
@@ -333,9 +435,17 @@ const RenderParagraphLike: FC<{ part: ParagraphLike }> = ({ part }) => {
         );
       });
       if (part.ordered) {
-        return <ol>{listItems}</ol>;
+        return (
+          <ol title={title} className={className}>
+            {listItems}
+          </ol>
+        );
       }
-      return <ul>{listItems}</ul>;
+      return (
+        <ul title={title} className={className}>
+          {listItems}
+        </ul>
+      );
     }
     case "hr": {
       return (
@@ -376,6 +486,20 @@ const RenderAuthorMessage: FC<{ msg: AuthorMsg; isFirst: boolean }> = ({ msg, is
   );
 };
 
+const HtmlPlayNoErrorInState: FC<{
+  uiGenerationData: UiGenerationData;
+  editorState: Pick<LmEditorState, "doc" | "variables">;
+}> = ({ uiGenerationData, editorState }) => {
+  const acc = getData(uiGenerationData, editorState);
+  return (
+    <div className="ProseMirror">
+      {acc.map((msg, idx) => {
+        return <RenderAuthorMessage isFirst={idx === 0} key={idx} msg={msg} />;
+      })}
+    </div>
+  );
+};
+
 export const HtmlPlay: FC<{
   uiGenerationData: UiGenerationData;
   editorState: Pick<LmEditorState, "doc" | "variables">;
@@ -396,13 +520,6 @@ export const HtmlPlay: FC<{
       </>
     );
   }
-
-  const acc = getData(uiGenerationData, editorState);
-  return (
-    <div className="ProseMirror">
-      {acc.map((msg, idx) => {
-        return <RenderAuthorMessage isFirst={idx === 0} key={idx} msg={msg} />;
-      })}
-    </div>
-  );
+  // TODO: add error handling layer, showing the raw output
+  return <HtmlPlayNoErrorInState uiGenerationData={uiGenerationData} editorState={editorState} />;
 };

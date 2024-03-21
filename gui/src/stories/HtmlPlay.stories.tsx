@@ -50,7 +50,10 @@ const editorState: Pick<LmEditorState, "doc" | "variables"> = {
         type: "paragraph",
         content: [
           { type: "text", text: '"' },
-          { type: "variableSelect", attrs: { name: "content" } },
+          {
+            type: "variableSelect",
+            attrs: { uuid: "e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e3" },
+          },
           { type: "text", text: '"' },
         ],
       },
@@ -66,16 +69,19 @@ const editorState: Pick<LmEditorState, "doc" | "variables"> = {
             type: "text",
             text: "First explain why you're choosing the best subject for the illustration, then choose the best subject for the illustration, either a person or an object. Answer with just \"",
           },
-          { type: "variableSelect", attrs: { name: "PERSON" } },
+          {
+            type: "variableSelect",
+            attrs: { uuid: "e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e4" },
+          },
           { type: "text", text: '" or "' },
-          { type: "variableSelect", attrs: { name: "OBJECT" } },
+          {
+            type: "variableSelect",
+            attrs: { uuid: "e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e5" },
+          },
           { type: "text", text: '".' },
         ],
       },
-      {
-        type: "paragraph",
-        content: [{ type: "text", text: "For example:" }],
-      },
+      { type: "paragraph", content: [{ type: "text", text: "For example:" }] },
       {
         type: "heading",
         attrs: { level: 4 },
@@ -94,7 +100,10 @@ const editorState: Pick<LmEditorState, "doc" | "variables"> = {
         type: "paragraph",
         content: [
           { type: "text", text: "Illustrate: " },
-          { type: "variableSelect", attrs: { name: "PERSON" } },
+          {
+            type: "variableSelect",
+            attrs: { uuid: "e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e4" },
+          },
         ],
       },
       {
@@ -115,7 +124,10 @@ const editorState: Pick<LmEditorState, "doc" | "variables"> = {
         type: "paragraph",
         content: [
           { type: "text", text: "Illustrate: " },
-          { type: "variableSelect", attrs: { name: "OBJECT" } },
+          {
+            type: "variableSelect",
+            attrs: { uuid: "e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e5" },
+          },
         ],
       },
       { type: "authorSelect", attrs: { author: "assistant" } },
@@ -164,6 +176,74 @@ const editorState: Pick<LmEditorState, "doc" | "variables"> = {
           },
         ],
       },
+      {
+        type: "paragraph",
+        content: [
+          { type: "text", text: "A list: " },
+          {
+            type: "lmGenerator",
+            attrs: {
+              id: "e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e6",
+              choices: [],
+              type: "generation",
+              max_tokens: 256,
+              name: "bullet_list",
+              stop: ["\n"],
+            },
+          },
+        ],
+      },
+      {
+        type: "paragraph",
+        content: [
+          { type: "text", text: "An ordered list: " },
+          {
+            type: "lmGenerator",
+            attrs: {
+              id: "e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e7",
+              choices: [],
+              type: "generation",
+              max_tokens: 256,
+              name: "ordered_list",
+              stop: ["\n"],
+            },
+          },
+        ],
+      },
+      {
+        type: "paragraph",
+        content: [
+          { type: "text", text: "An heading 2: " },
+          {
+            type: "lmGenerator",
+            attrs: {
+              id: "e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e8",
+              choices: [],
+              type: "generation",
+              max_tokens: 256,
+              name: "ordered_list",
+              stop: ["\n"],
+            },
+          },
+        ],
+      },
+      {
+        type: "paragraph",
+        content: [
+          { type: "text", text: "Multi paragraphs: " },
+          {
+            type: "lmGenerator",
+            attrs: {
+              id: "e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e9",
+              choices: [],
+              type: "generation",
+              max_tokens: 256,
+              name: "ordered_list",
+              stop: ["\n"],
+            },
+          },
+        ],
+      },
     ],
   },
 };
@@ -205,6 +285,18 @@ export const LoadedAll = () => {
         captures: {
           "720ddbc0-12e6-4583-83b6-d0229a60445b": "The explanation!",
           "id9100e156-5a1c-4ae5-bcf9-bc531a659220": "A person.",
+          "e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e6": `
+- A list item 1
+- A list item 2
+`,
+          "e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e7": `
+1. B list item 1
+2. B list item 2
+`,
+          "e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e8": `## Heading 2`,
+          "e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e9": `Paragraph 1
+
+Paragraph 2`,
         },
         finalText: undefined,
       }}
