@@ -1,5 +1,4 @@
 {
-  "version": "1",
   "doc": {
     "type": "doc",
     "content": [
@@ -17,5 +16,6 @@
   "variables": [],
   "samplingParams": {
     "temperature": 0.1
-  }
+  },
+  "version": "1"
 }

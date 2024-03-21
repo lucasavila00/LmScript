@@ -23,6 +23,9 @@ function App(): JSX.Element {
   const bumpKey = (): void => setKeyBuster((prev) => prev + 1);
   const sidebarState = useSidebar(true);
   const [initialEditorData, setInitialEditorData] = useState(initialContent);
+  const onSaveFile = (content: LmEditorState): void => {
+    window.electron.ipcRenderer.invoke("saveFile", serializeFile(content), currentFilePath);
+  };
   return (
     <>
       {DarkModeSwitcher}
@@ -42,10 +45,7 @@ function App(): JSX.Element {
               bumpKey();
             });
         }}
-        onSaveFile={(content) => {
-          setInitialEditorData(content);
-          window.electron.ipcRenderer.invoke("saveFile", serializeFile(content), currentFilePath);
-        }}
+        onSaveFile={onSaveFile}
         onOpenFile={() => {
           window.electron.ipcRenderer.invoke("openFile").then((data) => {
             if (data == null) {

@@ -1,7 +1,7 @@
-import { EditorContent } from "@tiptap/react";
+import { Editor, EditorContent } from "@tiptap/react";
 import { useBlockEditor } from "./hooks/useBlockEditor";
 import { ContentItemMenu } from "./components/ContentItemMenu";
-import { FC, useRef } from "react";
+import { FC, useCallback, useEffect, useRef } from "react";
 import { RightSidebar } from "./components/RightSidebar";
 import { EditorHeader } from "./components/EditorHeader";
 import { VariablesContext } from "./context/variables";
@@ -11,44 +11,64 @@ import { useBackendConfig } from "./hooks/useBackendConfig";
 import { Play } from "./components/Play/Play";
 import { LmEditorState } from "./lib/types";
 import { SidebarState } from "./hooks/useSideBar";
+import { useVariables } from "./hooks/useVariables";
+import { useSamplingParams } from "./hooks/useSamplingParams";
 
-import stringify from "json-stable-stringify";
-
-export const BlockEditor: FC<{
-  initialContent: LmEditorState;
+type LoadedEditorCommonProps = {
   currentFilePath: string | undefined;
   onSaveFileAs: (content: LmEditorState) => void;
   onSaveFile: (content: LmEditorState) => void;
   sidebarState: SidebarState;
   onOpenFile: () => void;
-}> = ({
-  initialContent,
+};
+
+const LoadedBlockEditor: FC<
+  LoadedEditorCommonProps & {
+    editor: Editor;
+    isExecuting: boolean;
+    toggleExecuting: () => void;
+    variablesHook: ReturnType<typeof useVariables>;
+    samplingParamsHook: ReturnType<typeof useSamplingParams>;
+  }
+> = ({
+  isExecuting,
+  toggleExecuting,
+  editor,
+  variablesHook,
+  samplingParamsHook,
   onSaveFileAs,
   currentFilePath,
   onSaveFile,
   sidebarState,
   onOpenFile,
 }) => {
-  const {
-    isExecuting,
-    toggleExecuting,
-    editor,
-    variablesHook,
-    samplingParamsHook,
-  } = useBlockEditor(initialContent);
   const menuContainerRef = useRef(null);
   const backendConfigHook = useBackendConfig();
-  if (editor == null) {
-    // it can be null while mounting
-    return <></>;
-  }
 
-  const lmEditorState = {
-    doc: editor?.getJSON(),
-    variables: variablesHook.variables,
-    samplingParams: samplingParamsHook.samplingParams,
-    version: "1" as const,
-  };
+  const editorDoc = editor.getJSON();
+  const lmEditorState = useCallback(
+    () => ({
+      doc: editorDoc,
+      variables: variablesHook.variables,
+      samplingParams: samplingParamsHook.samplingParams,
+      version: "1" as const,
+    }),
+    [editorDoc, variablesHook.variables, samplingParamsHook.samplingParams],
+  );
+
+  const onSaveFileRef = useRef(onSaveFile);
+  onSaveFileRef.current = onSaveFile;
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (currentFilePath != null) {
+        onSaveFileRef.current(lmEditorState());
+      }
+    }, 2000);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [lmEditorState, currentFilePath]);
+
   const header = (
     <EditorHeader
       isRightSidebarOpen={sidebarState.isOpen}
@@ -58,9 +78,8 @@ export const BlockEditor: FC<{
       fileManagement={{
         filePath: currentFilePath,
         onOpenFile,
-        onSaveFile: () => onSaveFile(lmEditorState),
-        onSaveAsFile: () => onSaveFileAs(lmEditorState),
-        hasChangesToSave: stringify(lmEditorState) != stringify(initialContent),
+        onSaveFile: () => onSaveFile(lmEditorState()),
+        onSaveAsFile: () => onSaveFileAs(lmEditorState()),
       }}
     />
   );
@@ -79,7 +98,7 @@ export const BlockEditor: FC<{
                   <>
                     <Play
                       backend={backendConfigHook.backend}
-                      editorState={lmEditorState}
+                      editorState={lmEditorState()}
                     />
                   </>
                 )}
@@ -114,5 +133,46 @@ export const BlockEditor: FC<{
         />
       </div>
     </>
+  );
+};
+
+export const BlockEditor: FC<
+  LoadedEditorCommonProps & {
+    initialContent: LmEditorState;
+  }
+> = ({
+  initialContent,
+  onSaveFileAs,
+  currentFilePath,
+  onSaveFile,
+  sidebarState,
+  onOpenFile,
+}) => {
+  const {
+    isExecuting,
+    toggleExecuting,
+    editor,
+    variablesHook,
+    samplingParamsHook,
+  } = useBlockEditor(initialContent);
+
+  if (editor == null) {
+    // it can be null while mounting
+    return <></>;
+  }
+
+  return (
+    <LoadedBlockEditor
+      isExecuting={isExecuting}
+      toggleExecuting={toggleExecuting}
+      editor={editor}
+      variablesHook={variablesHook}
+      samplingParamsHook={samplingParamsHook}
+      onSaveFileAs={onSaveFileAs}
+      currentFilePath={currentFilePath}
+      onSaveFile={onSaveFile}
+      sidebarState={sidebarState}
+      onOpenFile={onOpenFile}
+    />
   );
 };
