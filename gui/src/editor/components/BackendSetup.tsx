@@ -23,14 +23,45 @@ import {
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { useForm } from "react-hook-form";
-import { ALL_CHAT_TEMPLATES } from "@lmscript/client/chat-template";
+import { ALL_CHAT_TEMPLATES, ChatTemplate } from "@lmscript/client/chat-template";
 import { Label } from "../../components/ui/label";
 const RunpodSglangConfigSchema = z.object({
   url: z.string().min(4),
   token: z.string(),
   template: z.enum(ALL_CHAT_TEMPLATES),
 });
+const SelectChatTemplate: FC<{
+  value: ChatTemplate | undefined;
+  onChange: (value: string | undefined) => void;
+}> = ({ value, onChange }) => {
+  return (
+    <StyledReactSelect
+      value={
+        value == null
+          ? undefined
+          : {
+              value: value,
+              label: value,
+            }
+      }
+      onChange={(it) => {
+        onChange(it?.value);
+      }}
+      isClearable={false}
+      placeholder="Select a chat template..."
+      classNames={{
+        control: () => "!min-h-9",
+        container: () => "!min-h-9 mt-2",
+      }}
+      options={ALL_CHAT_TEMPLATES.map((template) => ({
+        value: template,
+        label: template,
+      }))}
+    />
+  );
+};
 
+const CHAT_TEMPLATE_DESCRIPTION = "TODO template desc.";
 const UrlTokenTemplateConfig: FC<{
   setBackend: (backend: Backend) => void;
   tag: "runpod-serverless-sglang" | "sglang";
@@ -50,6 +81,90 @@ const UrlTokenTemplateConfig: FC<{
       url: values.url,
       token: values.token,
       template: values.template,
+    });
+  }
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 mt-8">
+        <FormField
+          control={form.control}
+          name="url"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>URL</FormLabel>
+              <FormControl>
+                <Input placeholder="http://localhost:8000" {...field} />
+              </FormControl>
+              <FormDescription>The URL of the Endpoint.</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="token"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Token</FormLabel>
+              <FormControl>
+                <Input placeholder="" {...field} />
+              </FormControl>
+              <FormDescription>Leave empty if running locally.</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="template"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Chat Template</FormLabel>
+              <FormControl>
+                <SelectChatTemplate value={field.value} onChange={field.onChange} />
+              </FormControl>
+              <FormDescription>{CHAT_TEMPLATE_DESCRIPTION}</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button variant="outline" type="submit" className="w-full">
+          Save
+        </Button>
+      </form>
+    </Form>
+  );
+};
+
+const VllmConfigSchema = z.object({
+  url: z.string().min(4),
+  token: z.string(),
+  template: z.enum(ALL_CHAT_TEMPLATES),
+  model: z.string(),
+});
+
+const VllmConfig: FC<{
+  setBackend: (backend: Backend) => void;
+  tag: "runpod-serverless-vllm";
+}> = ({ setBackend, tag }) => {
+  const form = useForm<z.infer<typeof VllmConfigSchema>>({
+    resolver: zodResolver(VllmConfigSchema),
+    defaultValues: {
+      url: "http://localhost:8000",
+      token: "",
+      template: "llama-2-chat",
+      model: "",
+    },
+  });
+
+  function onSubmit(values: z.infer<typeof VllmConfigSchema>) {
+    setBackend({
+      tag: tag,
+      url: values.url,
+      token: values.token,
+      template: values.template,
+      model: values.model,
     });
   }
 
@@ -91,31 +206,23 @@ const UrlTokenTemplateConfig: FC<{
             <FormItem>
               <FormLabel>Chat Template</FormLabel>
               <FormControl>
-                <StyledReactSelect
-                  value={
-                    field.value == null
-                      ? undefined
-                      : {
-                          value: field.value,
-                          label: field.value,
-                        }
-                  }
-                  onChange={(it) => {
-                    field.onChange(it?.value);
-                  }}
-                  isClearable={false}
-                  placeholder="Select a chat template..."
-                  classNames={{
-                    control: () => "!min-h-9",
-                    container: () => "!min-h-9 mt-2",
-                  }}
-                  options={ALL_CHAT_TEMPLATES.map((template) => ({
-                    value: template,
-                    label: template,
-                  }))}
-                />
+                <SelectChatTemplate value={field.value} onChange={field.onChange} />
               </FormControl>
-              <FormDescription>TODO template desc.</FormDescription>
+              <FormDescription>{CHAT_TEMPLATE_DESCRIPTION}</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="model"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Model</FormLabel>
+              <FormControl>
+                <Input placeholder="" {...field} />
+              </FormControl>
+              <FormDescription>TODO model</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -137,7 +244,7 @@ const BackendConfig: FC<{
       return <UrlTokenTemplateConfig setBackend={setBackend} tag="runpod-serverless-sglang" />;
     }
     case "runpod-serverless-vllm": {
-      return <>TODO vllm</>;
+      return <VllmConfig setBackend={setBackend} tag="runpod-serverless-vllm" />;
     }
     case "sglang": {
       return <UrlTokenTemplateConfig setBackend={setBackend} tag="sglang" />;
