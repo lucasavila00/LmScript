@@ -19,7 +19,6 @@ export type FileManagerProps = {
   onOpenFile: () => void;
   onSaveFile: () => void;
   onSaveAsFile: () => void;
-  hasChangesToSave: boolean;
 };
 const getFileNameFromPath = (path: string | undefined) => {
   if (path == null) {
@@ -84,8 +83,8 @@ export const EditorHeader: FC<{
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost">
-              {getFileNameFromPath(fileManagement.filePath)}
-              {fileManagement.hasChangesToSave ? " *" : ""}{" "}
+              {getFileNameFromPath(fileManagement.filePath)}{" "}
+              {fileManagement.filePath == null ? " *" : ""}{" "}
               <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
