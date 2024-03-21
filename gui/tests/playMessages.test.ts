@@ -8,6 +8,7 @@ const SAMPLING_PARAMS: SamplingParams = {
 test("no author select in first position", async () => {
   const msgs = () =>
     getMessagesOfAuthor({
+      version: "1",
       variables: [],
       samplingParams: SAMPLING_PARAMS,
       doc: {
@@ -22,6 +23,7 @@ test("no author select in first position", async () => {
 
 test("empty state", async () => {
   const msgs = getMessagesOfAuthor({
+    version: "1",
     variables: [],
     samplingParams: SAMPLING_PARAMS,
     doc: {
@@ -44,6 +46,7 @@ test("empty state", async () => {
 
 test("handles paragraph", async () => {
   const msgs = getMessagesOfAuthor({
+    version: "1",
     variables: [],
     samplingParams: SAMPLING_PARAMS,
     doc: {
@@ -84,6 +87,7 @@ test("handles paragraph", async () => {
 
 test("handles heading", async () => {
   const msgs = getMessagesOfAuthor({
+    version: "1",
     variables: [],
     samplingParams: SAMPLING_PARAMS,
     doc: {
@@ -120,6 +124,7 @@ test("handles heading", async () => {
 
 test("handles variableSelect", async () => {
   const msgs = getMessagesOfAuthor({
+    version: "1",
     variables: [
       {
         name: "content",
@@ -169,6 +174,7 @@ test("handles variableSelect", async () => {
 
 test("handles missing variableSelect", async () => {
   const msgs = getMessagesOfAuthor({
+    version: "1",
     variables: [],
     samplingParams: SAMPLING_PARAMS,
     doc: {
@@ -197,6 +203,7 @@ test("handles missing variableSelect", async () => {
 
 test("handles lmGenerator", async () => {
   const msgs = getMessagesOfAuthor({
+    version: "1",
     variables: [],
     samplingParams: SAMPLING_PARAMS,
     doc: {
