@@ -1,7 +1,7 @@
 # Web GUI
 
 Prefer the Electron GUI. The webapp cannot communicate with local SGLang servers
-because of CORS.
+because of CORS, and many features are currently missing from the web version.
 
 ## Installation
 

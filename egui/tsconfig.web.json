@@ -11,6 +11,9 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "moduleResolution": "Bundler",
+    "noImplicitAny": true,
+    "strict": true,
+    "noFallthroughCasesInSwitch": true,
     "paths": {
       "@renderer/*": ["src/renderer/src/*"]
     }

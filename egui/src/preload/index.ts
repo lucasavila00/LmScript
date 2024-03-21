@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer } from "electron";
 import { electronAPI } from "@electron-toolkit/preload";
+import { OnCapture } from "@lmscript/client/backends/abstract";
 
 // Custom APIs for renderer
 const api = {};
@@ -13,9 +14,11 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld("api", api);
 
     contextBridge.exposeInMainWorld("capture", {
-      onCapture: (callback) => ipcRenderer.on("onCapture", (_event, value) => callback(value)),
+      onCapture: (callback: (value: OnCapture) => void) =>
+        ipcRenderer.on("onCapture", (_event, value) => callback(value)),
     });
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error(error);
   }
 } else {

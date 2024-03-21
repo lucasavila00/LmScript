@@ -14,6 +14,8 @@ import { createPortal } from "react-dom";
 import { BlockEditor } from "./editor/BlockEditor";
 import { useDarkmode } from "./lib/use-dark-mode";
 import { RenderDarkModeSwitcher } from "./components/dark-mode";
+import { initialContent } from "./editor/hooks/init";
+import { useSidebar } from "./editor/hooks/useSideBar";
 
 export default function App() {
   const darkModeHook = useDarkmode();
@@ -23,10 +25,28 @@ export default function App() {
     document.body,
   );
 
+  const sidebarState = useSidebar(true);
+
   return (
     <>
       {DarkModeSwitcher}
-      <BlockEditor />
+      <BlockEditor
+        onOpenFile={() => {
+          // eslint-disable-next-line no-console
+          console.log("open file");
+        }}
+        sidebarState={sidebarState}
+        initialContent={initialContent}
+        onSaveFileAs={(content) => {
+          // eslint-disable-next-line no-console
+          console.log("save as", content);
+        }}
+        currentFilePath={undefined}
+        onSaveFile={(content) => {
+          // eslint-disable-next-line no-console
+          console.log("save", content);
+        }}
+      />
     </>
   );
 }

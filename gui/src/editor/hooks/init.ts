@@ -1,6 +1,7 @@
-import { EditorState } from "../lib/types";
+import { LmEditorState } from "../lib/types";
 
-export const initialContent: EditorState = {
+export const initialContent: LmEditorState = {
+  version: "1",
   variables: [
     {
       name: "content",

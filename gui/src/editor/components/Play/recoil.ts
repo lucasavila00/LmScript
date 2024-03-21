@@ -16,7 +16,7 @@ export const generateAsyncAtom = atomFamily<
     messages: MessageOfAuthor[];
     samplingParams: SamplingParams;
     variables: NamedVariable[];
-    cacheBumper: number;
+    cacheBuster: number;
   }
 >({
   key: "generateAsyncAtom",
