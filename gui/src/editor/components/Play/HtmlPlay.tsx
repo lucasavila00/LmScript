@@ -36,6 +36,7 @@ type ParagraphHr = { tag: "hr"; capturedAs: string | undefined };
 type ParagraphHeadingOrP = {
   tag: "p" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
   text: SpanLike[];
+  capturedAs: string | undefined;
 };
 type ParagraphLike = ParagraphHeadingOrP | ParagraphHr | ParagraphList;
 
@@ -78,7 +79,8 @@ const parseGeneration = (captured: string, capturedAs: string): ParsedGeneration
         return [
           {
             tag: "p",
-            text: handleParsedTokensSpanLike(parsed.tokens ?? [], capturedAs),
+            text: handleParsedTokensSpanLike(parsed.tokens ?? [], undefined),
+            capturedAs,
           },
         ];
       }
@@ -99,7 +101,8 @@ const parseGeneration = (captured: string, capturedAs: string): ParsedGeneration
         return [
           {
             tag: levelMap[parsed.depth] ?? "h6",
-            text: handleParsedTokensSpanLike(parsed.tokens ?? [], capturedAs),
+            text: handleParsedTokensSpanLike(parsed.tokens ?? [], undefined),
+            capturedAs,
           },
         ];
       }
@@ -271,6 +274,7 @@ const getDataThrowing = (
     paragraphLikes.push({
       tag,
       text: [],
+      capturedAs: undefined,
     });
     handleSecondLevel(content.content ?? []);
   }
@@ -279,6 +283,7 @@ const getDataThrowing = (
     paragraphLikes.push({
       tag: "p",
       text: [],
+      capturedAs: undefined,
     });
     handleSecondLevel(content.content ?? []);
   }
@@ -409,6 +414,8 @@ const RenderSpanLike: FC<{ part: SpanLike }> = ({ part }) => {
 };
 
 const RenderParagraphLike: FC<{ part: ParagraphLike }> = ({ part }) => {
+  const className = part.capturedAs == null ? undefined : GENERATED_CN;
+  const title = part.capturedAs == null ? undefined : part.capturedAs;
   switch (part.tag) {
     case "h1":
     case "h2":
@@ -418,11 +425,9 @@ const RenderParagraphLike: FC<{ part: ParagraphLike }> = ({ part }) => {
     case "h6":
     case "p": {
       const chd = part.text.map((part, idx) => <RenderSpanLike key={idx} part={part} />);
-      return createElement(part.tag, {}, chd);
+      return createElement(part.tag, { title, className }, chd);
     }
     case "list": {
-      const className = part.capturedAs == null ? undefined : GENERATED_CN;
-      const title = part.capturedAs == null ? undefined : part.capturedAs;
       const listItems = part.listItems.map((parts, idx) => {
         return (
           <li key={idx}>
@@ -449,7 +454,7 @@ const RenderParagraphLike: FC<{ part: ParagraphLike }> = ({ part }) => {
     }
     case "hr": {
       return (
-        <div data-type="horizontalRule">
+        <div title={title} className={className} data-type="horizontalRule">
           <hr />
         </div>
       );
