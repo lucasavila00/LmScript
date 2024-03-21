@@ -1,7 +1,5 @@
 import { cn } from "../../lib/utils";
 import { FC, memo, useEffect, useRef } from "react";
-import { Editor } from "@tiptap/react";
-import { Button } from "../../components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../../components/ui/tabs";
 import { VariablesSidebar } from "./VariablesSidebar";
 import { useVariables } from "../hooks/useVariables";
@@ -97,7 +95,10 @@ const SamplingParamsForm: FC<{
                   {...restField}
                 />
               </FormControl>
-              <FormDescription>TODO top_p desc</FormDescription>
+              <FormDescription>
+                Top-p: nucleus sampling; sampling from the most probable tokens until a cumulative
+                probability threshold is reached.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -120,7 +121,9 @@ const SamplingParamsForm: FC<{
                   {...restField}
                 />
               </FormControl>
-              <FormDescription>TODO top_k desc</FormDescription>
+              <FormDescription>
+                Top-k sampling selects from the top k most probable tokens.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -143,7 +146,9 @@ const SamplingParamsForm: FC<{
                   {...restField}
                 />
               </FormControl>
-              <FormDescription>TODO frequency_penalty desc</FormDescription>
+              <FormDescription>
+                Frequency penalty discourages repetition of high-frequency tokens.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -166,7 +171,10 @@ const SamplingParamsForm: FC<{
                   {...restField}
                 />
               </FormControl>
-              <FormDescription>TODO presence_penalty desc</FormDescription>
+              <FormDescription>
+                Presence penalty encourages the model to generate diverse responses by penalizing
+                repeated tokens.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -176,10 +184,9 @@ const SamplingParamsForm: FC<{
   );
 };
 const EditModeSidebar: FC<{
-  editor: Editor;
   variablesHook: ReturnType<typeof useVariables>;
   samplingParamsHook: ReturnType<typeof useSamplingParams>;
-}> = ({ editor, variablesHook, samplingParamsHook }) => {
+}> = ({ variablesHook, samplingParamsHook }) => {
   return (
     <Tabs defaultValue="variables">
       <TabsList className="grid w-full grid-cols-2">
@@ -191,78 +198,49 @@ const EditModeSidebar: FC<{
       </TabsContent>
       <TabsContent value="settings">
         <SamplingParamsForm samplingParamsHook={samplingParamsHook} />
-        <Button
-          className="mt-20"
-          onClick={() => {
-            // eslint-disable-next-line no-console
-            console.log(
-              JSON.stringify({
-                variables: variablesHook.variables,
-                doc: editor.getJSON(),
-                samplingParams: samplingParamsHook.samplingParams,
-              }),
-            );
-          }}
-        >
-          TODO CONSOLE PRINT
-        </Button>
       </TabsContent>
     </Tabs>
   );
 };
 export const RightSidebar = memo<{
-  editor: Editor;
   isOpen: boolean;
   variablesHook: ReturnType<typeof useVariables>;
   samplingParamsHook: ReturnType<typeof useSamplingParams>;
   isExecuting: boolean;
   backendConfigHook: ReturnType<typeof useBackendConfig>;
   onClose: () => void;
-}>(
-  ({
-    backendConfigHook,
-    isExecuting,
-    editor,
-    isOpen,
-    variablesHook,
-    samplingParamsHook,
-    onClose,
-  }) => {
-    const windowClassName = cn(
-      "absolute top-0 right-0 bg-white h-full lg:h-auto lg:relative z-[999] w-0 duration-300 transition-all",
-      "dark:bg-black",
-      !isOpen && "border-l-transparent",
-      isOpen && "w-80 border-l border-l-neutral-200 dark:border-l-neutral-800",
-    );
+}>(({ backendConfigHook, isExecuting, isOpen, variablesHook, samplingParamsHook, onClose }) => {
+  const windowClassName = cn(
+    "absolute top-0 right-0 bg-white h-full lg:h-auto lg:relative z-[999] w-0 duration-300 transition-all",
+    "dark:bg-black",
+    !isOpen && "border-l-transparent",
+    isOpen && "w-80 border-l border-l-neutral-200 dark:border-l-neutral-800",
+  );
 
-    return (
-      <>
-        <div
-          className={cn(
-            "w-full h-full absolute left-0 top-0 transition duration-300 lg:pointer-events-none",
-            isOpen
-              ? "backdrop-blur lg:backdrop-blur-none"
-              : "backdrop-blur-none pointer-events-none",
-          )}
-          onClick={onClose}
-        ></div>
+  return (
+    <>
+      <div
+        className={cn(
+          "w-full h-full absolute left-0 top-0 transition duration-300 lg:pointer-events-none",
+          isOpen ? "backdrop-blur lg:backdrop-blur-none" : "backdrop-blur-none pointer-events-none",
+        )}
+        onClick={onClose}
+      ></div>
 
-        <div className={windowClassName}>
-          <div className="w-full h-full overflow-hidden">
-            <div className="w-full h-full min-w-80 w-80 p-6 overflow-auto">
-              {isExecuting ? (
-                <BackendSetup backendConfigHook={backendConfigHook} />
-              ) : (
-                <EditModeSidebar
-                  editor={editor}
-                  variablesHook={variablesHook}
-                  samplingParamsHook={samplingParamsHook}
-                />
-              )}
-            </div>
+      <div className={windowClassName}>
+        <div className="w-full h-full overflow-hidden">
+          <div className="w-full h-full min-w-80 w-80 p-6 overflow-auto">
+            {isExecuting ? (
+              <BackendSetup backendConfigHook={backendConfigHook} />
+            ) : (
+              <EditModeSidebar
+                variablesHook={variablesHook}
+                samplingParamsHook={samplingParamsHook}
+              />
+            )}
           </div>
         </div>
-      </>
-    );
-  },
-);
+      </div>
+    </>
+  );
+});

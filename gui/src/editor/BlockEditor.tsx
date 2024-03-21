@@ -14,6 +14,7 @@ import { SidebarState } from "./hooks/useSideBar";
 import { useVariables } from "./hooks/useVariables";
 import { useSamplingParams } from "./hooks/useSamplingParams";
 import stringify from "json-stable-stringify";
+import { Button } from "../components/ui/button";
 type LoadedEditorCommonProps = {
   currentFilePath: string | undefined;
   onSaveFileAs: (content: LmEditorState) => void;
@@ -109,7 +110,10 @@ const LoadedBlockEditor: FC<
               {header}
               <div className="flex-1 overflow-y-auto">
                 {backendConfigHook.backend == null ? (
-                  <>TODO: select a backend msg</>
+                  <div className="mt-8">
+                    Configure a backend to execute the editor content.
+                    <Button onClick={sidebarState.open}>Open Backend Config</Button>
+                  </div>
                 ) : (
                   <>
                     <Play
@@ -138,7 +142,6 @@ const LoadedBlockEditor: FC<
         )}
         <RightSidebar
           isOpen={sidebarState.isOpen}
-          editor={editor}
           variablesHook={variablesHook}
           samplingParamsHook={samplingParamsHook}
           backendConfigHook={backendConfigHook}
