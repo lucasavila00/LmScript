@@ -13,13 +13,42 @@ import { LmEditorState } from "./lib/types";
 import { SidebarState } from "./hooks/useSideBar";
 import { useVariables } from "./hooks/useVariables";
 import { useSamplingParams } from "./hooks/useSamplingParams";
-
+import stringify from "json-stable-stringify";
 type LoadedEditorCommonProps = {
   currentFilePath: string | undefined;
   onSaveFileAs: (content: LmEditorState) => void;
   onSaveFile: (content: LmEditorState) => void;
   sidebarState: SidebarState;
   onOpenFile: () => void;
+  initialContent: LmEditorState;
+};
+
+const useAutoSave = (
+  getLmEditorState: () => LmEditorState,
+  currentFilePath: string | undefined,
+  onSaveFile: (content: LmEditorState) => void,
+  initialContent: LmEditorState,
+) => {
+  const onSaveFileRef = useRef(onSaveFile);
+  onSaveFileRef.current = onSaveFile;
+
+  const initialContentRef = useRef(initialContent);
+  initialContentRef.current = initialContent;
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (
+        stringify(initialContentRef.current) !==
+          stringify(getLmEditorState()) &&
+        currentFilePath != null
+      ) {
+        onSaveFileRef.current(getLmEditorState());
+      }
+    }, 2000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [getLmEditorState, currentFilePath]);
 };
 
 const LoadedBlockEditor: FC<
@@ -41,33 +70,21 @@ const LoadedBlockEditor: FC<
   onSaveFile,
   sidebarState,
   onOpenFile,
+  initialContent,
 }) => {
   const menuContainerRef = useRef(null);
   const backendConfigHook = useBackendConfig();
-
-  const editorDoc = editor.getJSON();
-  const lmEditorState = useCallback(
+  const getLmEditorState = useCallback(
     () => ({
-      doc: editorDoc,
+      doc: editor.getJSON(),
       variables: variablesHook.variables,
       samplingParams: samplingParamsHook.samplingParams,
       version: "1" as const,
     }),
-    [editorDoc, variablesHook.variables, samplingParamsHook.samplingParams],
+    [editor, variablesHook.variables, samplingParamsHook.samplingParams],
   );
 
-  const onSaveFileRef = useRef(onSaveFile);
-  onSaveFileRef.current = onSaveFile;
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (currentFilePath != null) {
-        onSaveFileRef.current(lmEditorState());
-      }
-    }, 2000);
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [lmEditorState, currentFilePath]);
+  useAutoSave(getLmEditorState, currentFilePath, onSaveFile, initialContent);
 
   const header = (
     <EditorHeader
@@ -78,8 +95,8 @@ const LoadedBlockEditor: FC<
       fileManagement={{
         filePath: currentFilePath,
         onOpenFile,
-        onSaveFile: () => onSaveFile(lmEditorState()),
-        onSaveAsFile: () => onSaveFileAs(lmEditorState()),
+        onSaveFile: () => onSaveFile(getLmEditorState()),
+        onSaveAsFile: () => onSaveFileAs(getLmEditorState()),
       }}
     />
   );
@@ -98,7 +115,7 @@ const LoadedBlockEditor: FC<
                   <>
                     <Play
                       backend={backendConfigHook.backend}
-                      editorState={lmEditorState()}
+                      editorState={getLmEditorState()}
                     />
                   </>
                 )}
@@ -173,6 +190,7 @@ export const BlockEditor: FC<
       onSaveFile={onSaveFile}
       sidebarState={sidebarState}
       onOpenFile={onOpenFile}
+      initialContent={initialContent}
     />
   );
 };

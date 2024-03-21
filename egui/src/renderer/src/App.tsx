@@ -24,6 +24,7 @@ function App(): JSX.Element {
   const sidebarState = useSidebar(true);
   const [initialEditorData, setInitialEditorData] = useState(initialContent);
   const onSaveFile = (content: LmEditorState): void => {
+    setInitialEditorData(content);
     window.electron.ipcRenderer.invoke("saveFile", serializeFile(content), currentFilePath);
   };
   return (
