@@ -12,8 +12,7 @@ export const useTextmenuContentTypes = (editor: Editor) => {
       },
       {
         icon: "Pilcrow",
-        onClick: () =>
-          editor.chain().focus().liftListItem("listItem").setParagraph().run(),
+        onClick: () => editor.chain().focus().liftListItem("listItem").setParagraph().run(),
         id: "paragraph",
         disabled: () => !editor.can().setParagraph(),
         isActive: () =>
@@ -27,12 +26,7 @@ export const useTextmenuContentTypes = (editor: Editor) => {
       {
         icon: "Heading1",
         onClick: () =>
-          editor
-            .chain()
-            .focus()
-            .liftListItem("listItem")
-            .setHeading({ level: 1 })
-            .run(),
+          editor.chain().focus().liftListItem("listItem").setHeading({ level: 1 }).run(),
         id: "heading1",
         disabled: () => !editor.can().setHeading({ level: 1 }),
         isActive: () => editor.isActive("heading", { level: 1 }),
@@ -42,12 +36,7 @@ export const useTextmenuContentTypes = (editor: Editor) => {
       {
         icon: "Heading2",
         onClick: () =>
-          editor
-            .chain()
-            .focus()
-            .liftListItem("listItem")
-            .setHeading({ level: 2 })
-            .run(),
+          editor.chain().focus().liftListItem("listItem").setHeading({ level: 2 }).run(),
         id: "heading2",
         disabled: () => !editor.can().setHeading({ level: 2 }),
         isActive: () => editor.isActive("heading", { level: 2 }),
@@ -57,12 +46,7 @@ export const useTextmenuContentTypes = (editor: Editor) => {
       {
         icon: "Heading3",
         onClick: () =>
-          editor
-            .chain()
-            .focus()
-            .liftListItem("listItem")
-            .setHeading({ level: 3 })
-            .run(),
+          editor.chain().focus().liftListItem("listItem").setHeading({ level: 3 }).run(),
         id: "heading3",
         disabled: () => !editor.can().setHeading({ level: 3 }),
         isActive: () => editor.isActive("heading", { level: 3 }),

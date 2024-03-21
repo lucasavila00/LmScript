@@ -1,19 +1,12 @@
 import { Avatar, AvatarFallback } from "../../../components/ui/avatar";
 import { Button } from "../../../components/ui/button";
 import { avatarLabel, avatarFullLabel } from "../../../editor/lib/avatar";
-import {
-  LmEditorState,
-  GenerationNodeAttrs,
-  UiGenerationData,
-} from "../../../editor/lib/types";
+import { LmEditorState, GenerationNodeAttrs, UiGenerationData } from "../../../editor/lib/types";
 import { assertIsNever } from "../../../lib/utils";
 import { JSONContent } from "@tiptap/react";
 import { FC, createElement, useEffect, useState } from "react";
 
-const levelMap: Record<
-  number,
-  "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | undefined
-> = {
+const levelMap: Record<number, "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | undefined> = {
   1: "h1",
   2: "h2",
   3: "h3",
@@ -124,9 +117,7 @@ const getDataThrowing = (
         }
         case "variableSelect": {
           const variableUuid = content.attrs?.uuid;
-          const fromVariables = editorState.variables.find(
-            (v) => v.uuid === variableUuid,
-          );
+          const fromVariables = editorState.variables.find((v) => v.uuid === variableUuid);
           if (fromVariables?.value == null) {
             throw new Error(`Variable not found: ${variableUuid}`);
           } else {
@@ -167,9 +158,7 @@ const getDataThrowing = (
           break;
         }
         default: {
-          throw new Error(
-            `Unexpected second level content type: ${content.type}`,
-          );
+          throw new Error(`Unexpected second level content type: ${content.type}`);
         }
       }
     });
@@ -217,9 +206,7 @@ const getDataThrowing = (
 
       const itemContent = item.content ?? [];
       if (itemContent.length != 1 && itemContent[0].type != "paragraph") {
-        throw new Error(
-          `Unexpected list item content type: ${itemContent[0].type}`,
-        );
+        throw new Error(`Unexpected list item content type: ${itemContent[0].type}`);
       }
       handleSecondLevel(itemContent[0].content ?? []);
     }
@@ -256,9 +243,7 @@ const getDataThrowing = (
         break;
       }
       default: {
-        throw new Error(
-          `Unexpected content html top level type: ${content.type}`,
-        );
+        throw new Error(`Unexpected content html top level type: ${content.type}`);
       }
     }
   }
@@ -332,9 +317,7 @@ const RenderParagraphLike: FC<{ part: ParagraphLike }> = ({ part }) => {
     case "h5":
     case "h6":
     case "p": {
-      const chd = part.text.map((part, idx) => (
-        <RenderSpanLike key={idx} part={part} />
-      ));
+      const chd = part.text.map((part, idx) => <RenderSpanLike key={idx} part={part} />);
       return createElement(part.tag, {}, chd);
     }
     case "list": {
@@ -367,10 +350,7 @@ const RenderParagraphLike: FC<{ part: ParagraphLike }> = ({ part }) => {
   }
 };
 
-const RenderAuthorMessage: FC<{ msg: AuthorMsg; isFirst: boolean }> = ({
-  msg,
-  isFirst,
-}) => {
+const RenderAuthorMessage: FC<{ msg: AuthorMsg; isFirst: boolean }> = ({ msg, isFirst }) => {
   return (
     <div>
       <div

@@ -1,13 +1,6 @@
 import { Backend } from "../../hooks/useBackendConfig";
-import {
-  MessageOfAuthor,
-  getMessagesOfAuthor,
-} from "../../../editor/lib/playMessages";
-import {
-  LmEditorState,
-  NamedVariable,
-  SamplingParams,
-} from "../../../editor/lib/types";
+import { MessageOfAuthor, getMessagesOfAuthor } from "../../../editor/lib/playMessages";
+import { LmEditorState, NamedVariable, SamplingParams } from "../../../editor/lib/types";
 import { FC, useState } from "react";
 import { useRecoilValueLoadable } from "recoil";
 import { generateAsyncAtom } from "./recoil";
@@ -92,10 +85,7 @@ export const Play: FC<{
           })
           .map((str, idx) => {
             return (
-              <div
-                key={idx}
-                className="text-sm text-muted-foreground max-w-xl text-center"
-              >
+              <div key={idx} className="text-sm text-muted-foreground max-w-xl text-center">
                 {str}
               </div>
             );

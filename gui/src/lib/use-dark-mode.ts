@@ -18,10 +18,7 @@ export const useDarkmode = () => {
     document.documentElement.classList.toggle("dark", isDarkMode);
   }, [isDarkMode]);
 
-  const toggleDarkMode = useCallback(
-    () => setIsDarkMode((isDark) => !isDark),
-    [],
-  );
+  const toggleDarkMode = useCallback(() => setIsDarkMode((isDark) => !isDark), []);
   const lightMode = useCallback(() => setIsDarkMode(false), []);
   const darkMode = useCallback(() => setIsDarkMode(true), []);
 

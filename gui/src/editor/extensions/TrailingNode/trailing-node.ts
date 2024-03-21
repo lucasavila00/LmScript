@@ -4,9 +4,7 @@ import { Plugin, PluginKey } from "@tiptap/pm/state";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 function nodeEqualsType({ types, node }) {
-  return (
-    (Array.isArray(types) && types.includes(node.type)) || node.type === types
-  );
+  return (Array.isArray(types) && types.includes(node.type)) || node.type === types;
 }
 
 /**

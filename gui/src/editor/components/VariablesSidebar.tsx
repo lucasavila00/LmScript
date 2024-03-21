@@ -33,10 +33,7 @@ export const VariablesSidebar: FC<{
                     // className="h-8 w-8 min-h-8 min-w-8 p-0"
                     onClick={() => onDeleteVariable(idx)}
                   >
-                    <Icon
-                      name="Trash"
-                      className="w-4 h-4 text-neutral-500 hover:text-red-500"
-                    />
+                    <Icon name="Trash" className="w-4 h-4 text-neutral-500 hover:text-red-500" />
                   </button>
                 </div>
                 <Textarea

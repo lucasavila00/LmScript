@@ -1,18 +1,11 @@
 import { type Task } from "@lmscript/client/backends/abstract";
-import {
-  getRoleEnd,
-  getRoleStart,
-  ChatTemplate,
-} from "@lmscript/client/chat-template";
+import { getRoleEnd, getRoleStart, ChatTemplate } from "@lmscript/client/chat-template";
 import { MessageOfAuthor, MessagePart } from "./playMessages";
 import { assertIsNever } from "../../lib/utils";
 import { NamedVariable } from "./types";
 
 // exported for testing
-export const messagePartToTasks = (
-  part: MessagePart,
-  variables: NamedVariable[],
-): Task => {
+export const messagePartToTasks = (part: MessagePart, variables: NamedVariable[]): Task => {
   switch (part.tag) {
     case "text": {
       return {
@@ -58,9 +51,7 @@ export const messagePartToTasks = (
                   const val = choice.value;
                   if (val.startsWith("{") && val.endsWith("}")) {
                     const inner = val.slice(1, -1);
-                    const foundVariable = variables.find(
-                      (v) => v.name === inner,
-                    );
+                    const foundVariable = variables.find((v) => v.name === inner);
                     if (foundVariable != null) {
                       return foundVariable.value;
                     }

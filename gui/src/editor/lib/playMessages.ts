@@ -46,9 +46,7 @@ class MessageOfAuthorGetter {
   private acc: MessageOfAuthor[] = [];
   private errors: Error[] = [];
   private inListItem = false;
-  constructor(
-    private readonly editorState: Pick<LmEditorState, "doc" | "variables">,
-  ) {
+  constructor(private readonly editorState: Pick<LmEditorState, "doc" | "variables">) {
     const root = this.editorState.doc;
     if (root.type !== "doc") {
       throw new Error("Expected doc as root");
@@ -99,9 +97,7 @@ class MessageOfAuthorGetter {
         }
         case "variableSelect": {
           const variableUuid = content.attrs?.uuid;
-          const fromVariables = this.editorState.variables.find(
-            (v) => v.uuid === variableUuid,
-          );
+          const fromVariables = this.editorState.variables.find((v) => v.uuid === variableUuid);
           if (fromVariables?.value == null) {
             this.errors.push({
               tag: "variable-not-found",
@@ -144,9 +140,7 @@ class MessageOfAuthorGetter {
           break;
         }
         default: {
-          throw new Error(
-            `Unexpected second level content type: ${content.type}`,
-          );
+          throw new Error(`Unexpected second level content type: ${content.type}`);
         }
       }
     }
@@ -167,9 +161,7 @@ class MessageOfAuthorGetter {
 
       const itemContent = item.content ?? [];
       if (itemContent.length != 1 && itemContent[0].type != "paragraph") {
-        throw new Error(
-          `Unexpected list item content type: ${itemContent[0].type}`,
-        );
+        throw new Error(`Unexpected list item content type: ${itemContent[0].type}`);
       }
       this.inListItem = true;
       this.handleSecondLevel(itemContent[0].content ?? []);
@@ -229,9 +221,7 @@ class MessageOfAuthorGetter {
   }
 }
 
-export const getMessagesOfAuthor = (
-  editorState: LmEditorState,
-): TransformResult => {
+export const getMessagesOfAuthor = (editorState: LmEditorState): TransformResult => {
   const state = new MessageOfAuthorGetter(editorState);
 
   const errors = state.getErrors();

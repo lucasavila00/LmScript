@@ -33,20 +33,10 @@ export const EditorHeader: FC<{
   isExecuting: boolean;
   toggleExecuting: () => void;
   fileManagement: FileManagerProps;
-}> = ({
-  isRightSidebarOpen,
-  toggleRightSidebar,
-  isExecuting,
-  toggleExecuting,
-  fileManagement,
-}) => {
+}> = ({ isRightSidebarOpen, toggleRightSidebar, isExecuting, toggleExecuting, fileManagement }) => {
   useEffect(() => {
     const keyboardListener = (e: KeyboardEvent) => {
-      if (
-        fileManagement.filePath != null &&
-        e.key === "s" &&
-        (e.metaKey || e.ctrlKey)
-      ) {
+      if (fileManagement.filePath != null && e.key === "s" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         fileManagement.onSaveFile();
         return;
@@ -84,8 +74,7 @@ export const EditorHeader: FC<{
           <DropdownMenuTrigger asChild>
             <Button variant="ghost">
               {getFileNameFromPath(fileManagement.filePath)}{" "}
-              {fileManagement.filePath == null ? " *" : ""}{" "}
-              <ChevronDown className="ml-2 h-4 w-4" />
+              {fileManagement.filePath == null ? " *" : ""} <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56">
@@ -120,9 +109,7 @@ export const EditorHeader: FC<{
             active={isRightSidebarOpen}
             className={isRightSidebarOpen ? "bg-transparent" : ""}
           >
-            <Icon
-              name={isRightSidebarOpen ? "PanelRightClose" : "PanelRight"}
-            />
+            <Icon name={isRightSidebarOpen ? "PanelRightClose" : "PanelRight"} />
           </ToolbarButton>
         </div>
       </div>

@@ -62,8 +62,7 @@ export const MenuList = React.forwardRef((props: MenuListProps, ref) => {
 
         if (newCommandIndex < 0) {
           newGroupIndex = selectedGroupIndex - 1;
-          newCommandIndex =
-            props.items[newGroupIndex]?.commands.length - 1 || 0;
+          newCommandIndex = props.items[newGroupIndex]?.commands.length - 1 || 0;
         }
 
         if (newGroupIndex < 0) {
@@ -78,11 +77,7 @@ export const MenuList = React.forwardRef((props: MenuListProps, ref) => {
       }
 
       if (event.key === "Enter") {
-        if (
-          !props.items.length ||
-          selectedGroupIndex === -1 ||
-          selectedCommandIndex === -1
-        ) {
+        if (!props.items.length || selectedGroupIndex === -1 || selectedCommandIndex === -1) {
           return false;
         }
 
@@ -135,8 +130,7 @@ export const MenuList = React.forwardRef((props: MenuListProps, ref) => {
               <DropdownButton
                 key={`${command.label}`}
                 isActive={
-                  selectedGroupIndex === groupIndex &&
-                  selectedCommandIndex === commandIndex
+                  selectedGroupIndex === groupIndex && selectedCommandIndex === commandIndex
                 }
                 onClick={createCommandClickHandler(groupIndex, commandIndex)}
               >

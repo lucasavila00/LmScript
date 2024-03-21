@@ -35,17 +35,11 @@ export type RunpodServerlessVLLMBackend = {
   template: ChatTemplate;
 };
 
-export type Backend =
-  | SGLangBackend
-  | RunpodServerlessSGLangBackend
-  | RunpodServerlessVLLMBackend;
+export type Backend = SGLangBackend | RunpodServerlessSGLangBackend | RunpodServerlessVLLMBackend;
 
 export type BackendTag = Backend["tag"];
 
-const useLocalStorageState = <T>(
-  key: string,
-  defaultValue: T,
-): [T, (value: T) => void] => {
+const useLocalStorageState = <T>(key: string, defaultValue: T): [T, (value: T) => void] => {
   const [state, setState] = useState<T>(() => {
     const storedValue = localStorage.getItem(key);
     return storedValue ? JSON.parse(storedValue) : defaultValue;
@@ -60,10 +54,7 @@ const useLocalStorageState = <T>(
 };
 
 export const useBackendConfig = () => {
-  const [backend, setBackend] = useLocalStorageState<Backend | null>(
-    "backend-config-v1",
-    null,
-  );
+  const [backend, setBackend] = useLocalStorageState<Backend | null>("backend-config-v1", null);
   return {
     backend,
     setBackend,

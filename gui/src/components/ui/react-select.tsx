@@ -11,11 +11,7 @@ import ReactSelect, {
 } from "react-select";
 import CreatableSelect from "react-select/creatable";
 
-const getClassNames = <
-  Option,
-  IsMulti extends boolean,
-  Group extends GroupBase<Option>,
->(
+const getClassNames = <Option, IsMulti extends boolean, Group extends GroupBase<Option>>(
   classNames: ClassNamesConfig<Option, IsMulti, Group> | undefined,
 ): ClassNamesConfig<Option, IsMulti, Group> => {
   return {
@@ -29,20 +25,15 @@ const getClassNames = <
         classNames?.control?.(e),
       ),
     dropdownIndicator: (e) =>
-      cn(
-        "text-gray-400 dark:text-gray-400",
-        classNames?.dropdownIndicator?.(e),
-      ),
-    clearIndicator: (e) =>
-      cn("text-gray-400 dark:text-gray-400", classNames?.clearIndicator?.(e)),
+      cn("text-gray-400 dark:text-gray-400", classNames?.dropdownIndicator?.(e)),
+    clearIndicator: (e) => cn("text-gray-400 dark:text-gray-400", classNames?.clearIndicator?.(e)),
     menu: (e) =>
       cn(
         "absolute top-0 mt-1 text-sm z-10 w-full",
         "rounded-md border bg-popover shadow-md overflow-x-hidden",
         classNames?.menu?.(e),
       ),
-    placeholder: (e) =>
-      cn("text-muted-foreground", classNames?.placeholder?.(e)),
+    placeholder: (e) => cn("text-muted-foreground", classNames?.placeholder?.(e)),
     option: (e) =>
       cn(
         "cursor-default",
@@ -63,11 +54,7 @@ const getClassNames = <
     valueContainer: (e) => cn("flex gap-2", classNames?.valueContainer?.(e)),
   };
 };
-const getStyles = <
-  Option,
-  IsMulti extends boolean,
-  Group extends GroupBase<Option>,
->(
+const getStyles = <Option, IsMulti extends boolean, Group extends GroupBase<Option>>(
   styles: StylesConfig<Option, IsMulti, Group> | undefined,
 ): StylesConfig<Option, IsMulti, Group> => ({
   ...styles,
@@ -81,11 +68,10 @@ const getStyles = <
 
 export const ControlLabelContext = createContext<ReactNode>("");
 
-function CustomControl<
-  Option,
-  IsMulti extends boolean,
-  Group extends GroupBase<Option>,
->({ children, ...rest }: ControlProps<Option, IsMulti, Group>) {
+function CustomControl<Option, IsMulti extends boolean, Group extends GroupBase<Option>>({
+  children,
+  ...rest
+}: ControlProps<Option, IsMulti, Group>) {
   const label = useContext(ControlLabelContext);
   return (
     <>
@@ -96,11 +82,7 @@ function CustomControl<
     </>
   );
 }
-const getComponents = <
-  Option,
-  IsMulti extends boolean,
-  Group extends GroupBase<Option>,
->(
+const getComponents = <Option, IsMulti extends boolean, Group extends GroupBase<Option>>(
   components: SelectComponentsConfig<Option, IsMulti, Group> | undefined,
 ): SelectComponentsConfig<Option, IsMulti, Group> => {
   return {

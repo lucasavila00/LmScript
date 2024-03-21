@@ -1,11 +1,7 @@
 import { Button } from "../../components/ui/button";
 import { FC, useContext, useState } from "react";
 import { Input } from "../../components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "../../components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "../../components/ui/popover";
 import { EditorContext } from "../context/editor";
 import { ChevronDownIcon } from "lucide-react";
 

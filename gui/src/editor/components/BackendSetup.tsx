@@ -65,9 +65,7 @@ const UrlTokenTemplateConfig: FC<{
               <FormControl>
                 <Input placeholder="http://localhost:8000" {...field} />
               </FormControl>
-              <FormDescription>
-                The URL of the Runpod Serverless Endpoint.
-              </FormDescription>
+              <FormDescription>The URL of the Runpod Serverless Endpoint.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -136,12 +134,7 @@ const BackendConfig: FC<{
   if (backendTag == null) return <></>;
   switch (backendTag) {
     case "runpod-serverless-sglang": {
-      return (
-        <UrlTokenTemplateConfig
-          setBackend={setBackend}
-          tag="runpod-serverless-sglang"
-        />
-      );
+      return <UrlTokenTemplateConfig setBackend={setBackend} tag="runpod-serverless-sglang" />;
     }
     case "runpod-serverless-vllm": {
       return <>TODO vllm</>;
@@ -190,10 +183,7 @@ export const BackendSetup = memo<{
       <UnconnectedFormDescription className="mt-2">
         TODO describe backend
       </UnconnectedFormDescription>
-      <BackendConfig
-        setBackend={backendConfigHook.setBackend}
-        backendTag={backendTag}
-      />
+      <BackendConfig setBackend={backendConfigHook.setBackend} backendTag={backendTag} />
     </>
   );
 });

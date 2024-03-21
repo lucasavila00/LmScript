@@ -14,9 +14,7 @@ export const Component: FC<{
     <NodeViewWrapper className="flex justify-center">
       <div className="select-none flex gap-2 items-center min-w-0 mx-auto">
         <Avatar>
-          <AvatarFallback>
-            {avatarLabel(props.node.attrs.author)}
-          </AvatarFallback>
+          <AvatarFallback>{avatarLabel(props.node.attrs.author)}</AvatarFallback>
         </Avatar>
         <StyledReactSelect
           value={{

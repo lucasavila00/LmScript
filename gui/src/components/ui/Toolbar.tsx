@@ -10,16 +10,7 @@ export type ToolbarWrapperProps = {
 } & HTMLProps<HTMLDivElement>;
 
 export const ToolbarWrapper = forwardRef<HTMLDivElement, ToolbarWrapperProps>(
-  (
-    {
-      shouldShowContent = true,
-      children,
-      isVertical = false,
-      className,
-      ...rest
-    },
-    ref,
-  ) => {
+  ({ shouldShowContent = true, children, isVertical = false, className, ...rest }, ref) => {
     const toolbarClassName = cn(
       "text-black inline-flex h-full leading-none gap-0.5",
       isVertical ? "flex-col p-2" : "flex-row p-1 items-center",
@@ -56,12 +47,7 @@ export const ToolbarDivider = forwardRef<HTMLDivElement, ToolbarDividerProps>(
   },
 );
 
-type ButtonVariant =
-  | "primary"
-  | "secondary"
-  | "tertiary"
-  | "quaternary"
-  | "ghost";
+type ButtonVariant = "primary" | "secondary" | "tertiary" | "quaternary" | "ghost";
 type ButtonSize = "medium" | "small" | "icon" | "iconSmall";
 
 type ButtonProps = {
@@ -137,12 +123,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     );
 
     return (
-      <button
-        ref={ref}
-        disabled={disabled}
-        className={buttonClassName}
-        {...rest}
-      >
+      <button ref={ref} disabled={disabled} className={buttonClassName} {...rest}>
         {children}
       </button>
     );

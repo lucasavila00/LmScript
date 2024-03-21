@@ -37,8 +37,7 @@ const useAutoSave = (
   useEffect(() => {
     const interval = setInterval(() => {
       if (
-        stringify(initialContentRef.current) !==
-          stringify(getLmEditorState()) &&
+        stringify(initialContentRef.current) !== stringify(getLmEditorState()) &&
         currentFilePath != null
       ) {
         onSaveFileRef.current(getLmEditorState());
@@ -113,10 +112,7 @@ const LoadedBlockEditor: FC<
                   <>TODO: select a backend msg</>
                 ) : (
                   <>
-                    <Play
-                      backend={backendConfigHook.backend}
-                      editorState={getLmEditorState()}
-                    />
+                    <Play backend={backendConfigHook.backend} editorState={getLmEditorState()} />
                   </>
                 )}
               </div>
@@ -128,10 +124,7 @@ const LoadedBlockEditor: FC<
               <EditorContext.Provider value={editor}>
                 <div className="relative flex flex-col flex-1 h-full overflow-hidden">
                   {header}
-                  <EditorContent
-                    editor={editor}
-                    className="flex-1 overflow-y-auto"
-                  />
+                  <EditorContent editor={editor} className="flex-1 overflow-y-auto" />
                   <ContentItemMenu editor={editor} />
                   <TextMenu editor={editor} />
                 </div>
@@ -157,21 +150,9 @@ export const BlockEditor: FC<
   LoadedEditorCommonProps & {
     initialContent: LmEditorState;
   }
-> = ({
-  initialContent,
-  onSaveFileAs,
-  currentFilePath,
-  onSaveFile,
-  sidebarState,
-  onOpenFile,
-}) => {
-  const {
-    isExecuting,
-    toggleExecuting,
-    editor,
-    variablesHook,
-    samplingParamsHook,
-  } = useBlockEditor(initialContent);
+> = ({ initialContent, onSaveFileAs, currentFilePath, onSaveFile, sidebarState, onOpenFile }) => {
+  const { isExecuting, toggleExecuting, editor, variablesHook, samplingParamsHook } =
+    useBlockEditor(initialContent);
 
   if (editor == null) {
     // it can be null while mounting
