@@ -112,7 +112,11 @@ const LoadedBlockEditor: FC<
                   <>TODO: select a backend msg</>
                 ) : (
                   <>
-                    <Play backend={backendConfigHook.backend} editorState={getLmEditorState()} />
+                    <Play
+                      backend={backendConfigHook.backend}
+                      editorState={getLmEditorState()}
+                      onOpenBackendConfig={sidebarState.open}
+                    />
                   </>
                 )}
               </div>

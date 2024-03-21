@@ -13,7 +13,8 @@ const PlayStream: FC<{
   samplingParams: SamplingParams;
   variables: NamedVariable[];
   editorState: LmEditorState;
-}> = ({ variables, backend, messages, samplingParams, editorState }) => {
+  onOpenBackendConfig: () => void;
+}> = ({ variables, backend, messages, samplingParams, editorState, onOpenBackendConfig }) => {
   const [cacheBuster, setcacheBuster] = useState(0);
   const onRetry = () => setcacheBuster((prev) => prev + 1);
   const loadable = useRecoilValueLoadable(
@@ -40,6 +41,7 @@ const PlayStream: FC<{
           uiGenerationData={loadable.contents}
           editorState={editorState}
           onRetry={onRetry}
+          onOpenBackendConfig={onOpenBackendConfig}
         />
       );
     }
@@ -52,7 +54,8 @@ const PlayStream: FC<{
 export const Play: FC<{
   backend: Backend;
   editorState: LmEditorState;
-}> = ({ editorState, backend }) => {
+  onOpenBackendConfig: () => void;
+}> = ({ editorState, backend, onOpenBackendConfig }) => {
   const msgs = getMessagesOfAuthor(editorState);
   if (msgs.tag === "success") {
     return (
@@ -62,6 +65,7 @@ export const Play: FC<{
         samplingParams={editorState.samplingParams}
         variables={editorState.variables}
         editorState={editorState}
+        onOpenBackendConfig={onOpenBackendConfig}
       />
     );
   }
