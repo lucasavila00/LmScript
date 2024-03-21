@@ -1,10 +1,7 @@
 import { Icon } from "../../../../components/ui/Icon";
 import { icons } from "lucide-react";
 import { Surface } from "../../../../components/ui/Surface";
-import {
-  DropdownButton,
-  DropdownCategoryTitle,
-} from "../../../../components/ui/Dropdown";
+import { DropdownButton, DropdownCategoryTitle } from "../../../../components/ui/Dropdown";
 
 export type ContentTypePickerOption = {
   label: string;
@@ -22,9 +19,7 @@ export type ContentTypePickerCategory = {
   type: "category";
 };
 
-export type ContentPickerOptions = Array<
-  ContentTypePickerOption | ContentTypePickerCategory
->;
+export type ContentPickerOptions = Array<ContentTypePickerOption | ContentTypePickerCategory>;
 
 export type ContentTypePickerProps = {
   options: ContentPickerOptions;
@@ -43,11 +38,7 @@ export const ContentTypePicker = ({ options }: ContentTypePickerProps) => {
       {options.map((option) => {
         if (isOption(option)) {
           return (
-            <DropdownButton
-              key={option.id}
-              onClick={option.onClick}
-              isActive={option.isActive()}
-            >
+            <DropdownButton key={option.id} onClick={option.onClick} isActive={option.isActive()}>
               <Icon name={option.icon} className="w-4 h-4 mr-1" />
               {option.label}
             </DropdownButton>
@@ -55,9 +46,7 @@ export const ContentTypePicker = ({ options }: ContentTypePickerProps) => {
         } else if (isCategory(option)) {
           return (
             <div className="mt-2 first:mt-0" key={option.id}>
-              <DropdownCategoryTitle key={option.id}>
-                {option.label}
-              </DropdownCategoryTitle>
+              <DropdownCategoryTitle key={option.id}>{option.label}</DropdownCategoryTitle>
             </div>
           );
         }

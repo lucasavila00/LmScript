@@ -24,25 +24,17 @@ const useContentItemActions = (
     editor.commands.setNodeSelection(currentNodePos);
 
     const { $anchor } = editor.state.selection;
-    const selectedNode =
-      $anchor.node(1) || (editor.state.selection as NodeSelection).node;
+    const selectedNode = $anchor.node(1) || (editor.state.selection as NodeSelection).node;
 
     editor
       .chain()
       .setMeta("hideDragHandle", true)
-      .insertContentAt(
-        currentNodePos + (currentNode?.nodeSize || 0),
-        selectedNode.toJSON(),
-      )
+      .insertContentAt(currentNodePos + (currentNode?.nodeSize || 0), selectedNode.toJSON())
       .run();
   }, [editor, currentNodePos, currentNode?.nodeSize]);
 
   const copyNodeToClipboard = useCallback(() => {
-    editor
-      .chain()
-      .setMeta("hideDragHandle", true)
-      .setNodeSelection(currentNodePos)
-      .run();
+    editor.chain().setMeta("hideDragHandle", true).setNodeSelection(currentNodePos).run();
 
     document.execCommand("copy");
   }, [editor, currentNodePos]);
@@ -61,11 +53,8 @@ const useContentItemActions = (
       const currentNodeSize = currentNode?.nodeSize || 0;
       const insertPos = currentNodePos + currentNodeSize;
       const currentNodeIsEmptyParagraph =
-        currentNode?.type.name === "paragraph" &&
-        currentNode?.content?.size === 0;
-      const focusPos = currentNodeIsEmptyParagraph
-        ? currentNodePos + 2
-        : insertPos + 2;
+        currentNode?.type.name === "paragraph" && currentNode?.content?.size === 0;
+      const focusPos = currentNodeIsEmptyParagraph ? currentNodePos + 2 : insertPos + 2;
 
       editor
         .chain()
@@ -76,9 +65,7 @@ const useContentItemActions = (
             } else {
               tr.insert(
                 insertPos,
-                state.schema.nodes.paragraph.create(null, [
-                  state.schema.text("/"),
-                ]),
+                state.schema.nodes.paragraph.create(null, [state.schema.text("/")]),
               );
             }
 

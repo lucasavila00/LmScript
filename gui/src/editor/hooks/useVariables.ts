@@ -17,8 +17,7 @@ export const useVariables = (initialVariables: NamedVariable[]) => {
           }
           return n;
         });
-      const suffix =
-        duplicated.length > 0 ? `_${Math.max(...duplicated) + 1}` : "";
+      const suffix = duplicated.length > 0 ? `_${Math.max(...duplicated) + 1}` : "";
 
       const finalName = `${defaultName}${suffix}`;
       return [

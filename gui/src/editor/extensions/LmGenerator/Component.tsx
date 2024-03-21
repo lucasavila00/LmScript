@@ -1,7 +1,4 @@
-import {
-  StyledCreatableReactSelect,
-  StyledReactSelect,
-} from "../../../components/ui/react-select";
+import { StyledCreatableReactSelect, StyledReactSelect } from "../../../components/ui/react-select";
 import { VariablesContext } from "../../../editor/context/variables";
 import { Node } from "@tiptap/pm/model";
 import { NodeViewWrapper } from "@tiptap/react";
@@ -37,9 +34,7 @@ const ChoicesEditor: FC<{
       value={choices.flatMap((choice): ChoicesOption[] => {
         switch (choice.tag) {
           case "variable": {
-            const theVariable = availableVariables.find(
-              (v) => v.uuid === choice.value,
-            );
+            const theVariable = availableVariables.find((v) => v.uuid === choice.value);
             if (theVariable == null) {
               return [];
             }
@@ -73,9 +68,7 @@ const ChoicesEditor: FC<{
               return true;
             }
             case "variable": {
-              const found = availableVariables.find(
-                (av) => av.uuid === v.value,
-              );
+              const found = availableVariables.find((av) => av.uuid === v.value);
               return found != null;
             }
             default: {
@@ -137,8 +130,7 @@ const StopEditor: FC<{
       }}
       isMulti={true}
       value={stop.map((it) => ({
-        label:
-          STOP_AT_OPTIONS.find((option) => option.value === it)?.label ?? it,
+        label: STOP_AT_OPTIONS.find((option) => option.value === it)?.label ?? it,
         value: it,
       }))}
       options={STOP_AT_OPTIONS}
@@ -185,10 +177,7 @@ const InnerGenerator: FC<{
   switch (attrs.type) {
     case "generation":
       return (
-        <StopEditor
-          stop={attrs.stop}
-          onChange={(stop) => updateAttributes({ ...attrs, stop })}
-        />
+        <StopEditor stop={attrs.stop} onChange={(stop) => updateAttributes({ ...attrs, stop })} />
       );
     case "selection":
       return (

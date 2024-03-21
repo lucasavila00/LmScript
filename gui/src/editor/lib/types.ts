@@ -34,11 +34,7 @@ export type StoredChoice =
       tag: "typed";
       value: string;
     };
-export const ALL_GENERATION_NODE_TYPES = [
-  "generation",
-  "selection",
-  "regex",
-] as const;
+export const ALL_GENERATION_NODE_TYPES = ["generation", "selection", "regex"] as const;
 
 export type GenerationNodeType = (typeof ALL_GENERATION_NODE_TYPES)[number];
 

@@ -10,9 +10,7 @@
       content: "Type  /  to browse options";
     }
 
-    > [data-type="columns"]
-      > [data-type="column"]
-      > p.is-empty.has-focus::before {
+    > [data-type="columns"] > [data-type="column"] > p.is-empty.has-focus::before {
       content: "Type  /  to browse options";
     }
   }

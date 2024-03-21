@@ -4,9 +4,7 @@ import { useCallback } from "react";
 import { TippyProps, TooltipProps } from "./types";
 
 const isMac =
-  typeof window !== "undefined"
-    ? navigator.platform.toUpperCase().indexOf("MAC") >= 0
-    : false;
+  typeof window !== "undefined" ? navigator.platform.toUpperCase().indexOf("MAC") >= 0 : false;
 
 const ShortcutKey = ({ children }: { children: string }): JSX.Element => {
   const className =
@@ -43,9 +41,7 @@ export const Tooltip = ({
         data-reference-hidden={attrs["data-reference-hidden"]}
         data-escaped={attrs["data-escaped"]}
       >
-        {title && (
-          <span className="text-xs font-medium text-neutral-500">{title}</span>
-        )}
+        {title && <span className="text-xs font-medium text-neutral-500">{title}</span>}
         {shortcut && (
           <span className="flex items-center gap-0.5">
             {shortcut.map((shortcutKey) => (

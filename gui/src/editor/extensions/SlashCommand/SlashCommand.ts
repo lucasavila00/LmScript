@@ -1,10 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Editor, Extension } from "@tiptap/core";
 import { ReactRenderer } from "@tiptap/react";
-import Suggestion, {
-  SuggestionKeyDownProps,
-  SuggestionProps,
-} from "@tiptap/suggestion";
+import Suggestion, { SuggestionKeyDownProps, SuggestionProps } from "@tiptap/suggestion";
 import { PluginKey } from "@tiptap/pm/state";
 import tippy from "tippy.js";
 
@@ -65,9 +62,7 @@ export const SlashCommand = Extension.create({
           const end = $from.pos;
           const from = $head?.nodeBefore
             ? end -
-              ($head.nodeBefore.text?.substring(
-                $head.nodeBefore.text?.indexOf("/"),
-              ).length ?? 0)
+              ($head.nodeBefore.text?.substring($head.nodeBefore.text?.indexOf("/")).length ?? 0)
             : $from.start();
 
           const tr = state.tr.deleteRange(from, end);
@@ -85,22 +80,17 @@ export const SlashCommand = Extension.create({
                 const queryNormalized = query.toLowerCase().trim();
 
                 if (item.aliases) {
-                  const aliases = item.aliases.map((alias) =>
-                    alias.toLowerCase().trim(),
-                  );
+                  const aliases = item.aliases.map((alias) => alias.toLowerCase().trim());
 
                   return (
-                    labelNormalized.includes(queryNormalized) ||
-                    aliases.includes(queryNormalized)
+                    labelNormalized.includes(queryNormalized) || aliases.includes(queryNormalized)
                   );
                 }
 
                 return labelNormalized.includes(queryNormalized);
               })
               .filter((command) =>
-                command.shouldBeHidden
-                  ? !command.shouldBeHidden(this.editor)
-                  : true,
+                command.shouldBeHidden ? !command.shouldBeHidden(this.editor) : true,
               ),
           }));
 
@@ -151,15 +141,8 @@ export const SlashCommand = Extension.create({
 
                 let yPos = rect.y;
 
-                if (
-                  rect.top + component.element.offsetHeight + 40 >
-                  window.innerHeight
-                ) {
-                  const diff =
-                    rect.top +
-                    component.element.offsetHeight -
-                    window.innerHeight +
-                    40;
+                if (rect.top + component.element.offsetHeight + 40 > window.innerHeight) {
+                  const diff = rect.top + component.element.offsetHeight - window.innerHeight + 40;
                   yPos = rect.y - diff;
                 }
 
@@ -248,10 +231,7 @@ export const SlashCommand = Extension.create({
               popup?.[0].hide();
               if (scrollHandler) {
                 const { view } = props.editor;
-                view.dom.parentElement?.removeEventListener(
-                  "scroll",
-                  scrollHandler,
-                );
+                view.dom.parentElement?.removeEventListener("scroll", scrollHandler);
               }
               component.destroy();
             },

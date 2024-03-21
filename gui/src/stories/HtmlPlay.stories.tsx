@@ -14,8 +14,7 @@ const editorState: Pick<LmEditorState, "doc" | "variables"> = {
   variables: [
     {
       name: "content",
-      value:
-        'Question: "What is the person doing?" Answer: "The person is happy"',
+      value: 'Question: "What is the person doing?" Answer: "The person is happy"',
       uuid: "e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e3",
     },
     {

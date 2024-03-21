@@ -2,12 +2,7 @@ import { cn } from "../../lib/utils";
 import { FC, memo, useEffect, useRef } from "react";
 import { Editor } from "@tiptap/react";
 import { Button } from "../../components/ui/button";
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
-} from "../../components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "../../components/ui/tabs";
 import { VariablesSidebar } from "./VariablesSidebar";
 import { useVariables } from "../hooks/useVariables";
 import {
@@ -76,9 +71,9 @@ const SamplingParamsForm: FC<{
                 />
               </FormControl>
               <FormDescription>
-                Controls the “creativity” or randomness. A higher temperature
-                (e.g., 0.7) results in more creative output, while a lower
-                temperature (e.g., 0.2) makes the output more deterministic.
+                Controls the “creativity” or randomness. A higher temperature (e.g., 0.7) results in
+                more creative output, while a lower temperature (e.g., 0.2) makes the output more
+                deterministic.
               </FormDescription>
               <FormMessage />
             </FormItem>
