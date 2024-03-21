@@ -1,0 +1,21 @@
+{
+  "version": "1",
+  "doc": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "authorSelect",
+        "attrs": {
+          "author": "system"
+        }
+      },
+      {
+        "type": "paragraph"
+      }
+    ]
+  },
+  "variables": [],
+  "samplingParams": {
+    "temperature": 0.1
+  }
+}

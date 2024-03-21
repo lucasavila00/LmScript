@@ -15,7 +15,8 @@ export const SamplingParams = z.object({
 
 export type SamplingParams = z.infer<typeof SamplingParams>;
 
-export type EditorState = {
+export type LmEditorState = {
+  version: "1";
   doc: JSONContent;
   variables: NamedVariable[];
   samplingParams: SamplingParams;

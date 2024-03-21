@@ -1,5 +1,5 @@
 import { HtmlPlay } from "../editor/components/Play/HtmlPlay";
-import { EditorState } from "../editor/lib/types";
+import { LmEditorState } from "../editor/lib/types";
 
 const meta = {
   title: "HtmlPlay",
@@ -10,7 +10,7 @@ const meta = {
 
 export default meta;
 
-const editorState: Pick<EditorState, "doc" | "variables"> = {
+const editorState: Pick<LmEditorState, "doc" | "variables"> = {
   variables: [
     {
       name: "content",

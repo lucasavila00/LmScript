@@ -1,5 +1,5 @@
 import { JSONContent } from "@tiptap/react";
-import { Author, EditorState, GenerationNodeAttrs } from "./types";
+import { Author, LmEditorState, GenerationNodeAttrs } from "./types";
 
 export type MessagePartText = {
   tag: "text";
@@ -47,7 +47,7 @@ class MessageOfAuthorGetter {
   private errors: Error[] = [];
   private inListItem = false;
   constructor(
-    private readonly editorState: Pick<EditorState, "doc" | "variables">,
+    private readonly editorState: Pick<LmEditorState, "doc" | "variables">,
   ) {
     const root = this.editorState.doc;
     if (root.type !== "doc") {
@@ -230,7 +230,7 @@ class MessageOfAuthorGetter {
 }
 
 export const getMessagesOfAuthor = (
-  editorState: EditorState,
+  editorState: LmEditorState,
 ): TransformResult => {
   const state = new MessageOfAuthorGetter(editorState);
 

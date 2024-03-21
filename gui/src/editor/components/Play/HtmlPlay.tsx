@@ -2,7 +2,7 @@ import { Avatar, AvatarFallback } from "../../../components/ui/avatar";
 import { Button } from "../../../components/ui/button";
 import { avatarLabel, avatarFullLabel } from "../../../editor/lib/avatar";
 import {
-  EditorState,
+  LmEditorState,
   GenerationNodeAttrs,
   UiGenerationData,
 } from "../../../editor/lib/types";
@@ -55,7 +55,7 @@ type AuthorMsg = {
 };
 const getDataThrowing = (
   uiGenerationData: UiGenerationData,
-  editorState: Pick<EditorState, "doc" | "variables">,
+  editorState: Pick<LmEditorState, "doc" | "variables">,
 ) => {
   const authorMsgs: AuthorMsg[] = [];
   let paragraphLikes: ParagraphLike[] = [];
@@ -273,7 +273,7 @@ const getDataThrowing = (
 
 const getData = (
   uiGenerationData: UiGenerationData,
-  editorState: Pick<EditorState, "doc" | "variables">,
+  editorState: Pick<LmEditorState, "doc" | "variables">,
 ): AuthorMsg[] => {
   try {
     return getDataThrowing(uiGenerationData, editorState);
@@ -398,7 +398,7 @@ const RenderAuthorMessage: FC<{ msg: AuthorMsg; isFirst: boolean }> = ({
 
 export const HtmlPlay: FC<{
   uiGenerationData: UiGenerationData;
-  editorState: Pick<EditorState, "doc" | "variables">;
+  editorState: Pick<LmEditorState, "doc" | "variables">;
   onRetry: () => void;
 }> = ({ uiGenerationData, editorState, onRetry }) => {
   if (uiGenerationData.state == "error") {

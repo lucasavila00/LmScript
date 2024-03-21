@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, ipcMain } from "electron";
+import { app, shell, BrowserWindow, ipcMain, dialog } from "electron";
 import { join } from "path";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
 import icon from "../../resources/icon.png?asset";
@@ -7,6 +7,7 @@ import { AbstractBackend } from "@lmscript/client/backends/abstract";
 import { VllmBackend } from "@lmscript/client/backends/vllm";
 import { RunpodServerlessBackend } from "@lmscript/client/backends/runpod-serverless-sglang";
 import type { Backend } from "gui/src/editor/hooks/useBackendConfig";
+import fs from "node:fs";
 
 const assertIsNever = (x: never): never => {
   throw new Error(`Unexpected: ${x}`);
@@ -82,10 +83,40 @@ app.whenReady().then(() => {
   });
 
   // IPC test
-  ipcMain.on("ping", () => console.log("pong"));
+  // ipcMain.on("ping", () => console.log("pong"));
 
   const mainWindow = createWindow();
 
+  ipcMain.handle("saveFileAs", async (_, content) => {
+    // use dialog to save file
+    const { filePath } = await dialog.showSaveDialog(mainWindow, {
+      defaultPath: "Untitled.json",
+      filters: [{ name: "JSON", extensions: ["json"] }],
+    });
+    if (filePath != null && filePath != "") {
+      await fs.promises.writeFile(filePath, content, "utf-8");
+      return filePath;
+    }
+    return null;
+  });
+  ipcMain.handle("saveFile", async (_, content, filePath) =>
+    fs.promises.writeFile(filePath, content, "utf-8"),
+  );
+
+  ipcMain.handle("openFile", async (_) => {
+    // use dialog to get file path
+    const { filePaths } = await dialog.showOpenDialog(mainWindow, {
+      filters: [{ name: "JSON", extensions: ["json"] }],
+    });
+
+    const filePath = filePaths[0];
+    if (filePath != null) {
+      const stringifiedContent = await fs.promises.readFile(filePath, "utf-8");
+
+      return { stringifiedContent, filePath };
+    }
+    return undefined;
+  });
   ipcMain.handle("executeJSON", async (_, config, data) => {
     const backend = getBackendInstance(config);
     return backend.executeJSON(data, {

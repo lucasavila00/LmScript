@@ -4,7 +4,7 @@ import {
   getMessagesOfAuthor,
 } from "../../../editor/lib/playMessages";
 import {
-  EditorState,
+  LmEditorState,
   NamedVariable,
   SamplingParams,
 } from "../../../editor/lib/types";
@@ -19,17 +19,17 @@ const PlayStream: FC<{
   messages: MessageOfAuthor[];
   samplingParams: SamplingParams;
   variables: NamedVariable[];
-  editorState: EditorState;
+  editorState: LmEditorState;
 }> = ({ variables, backend, messages, samplingParams, editorState }) => {
-  const [cacheBumper, setCacheBumper] = useState(0);
-  const onRetry = () => setCacheBumper((prev) => prev + 1);
+  const [cacheBuster, setcacheBuster] = useState(0);
+  const onRetry = () => setcacheBuster((prev) => prev + 1);
   const loadable = useRecoilValueLoadable(
     generateAsyncAtom({
       samplingParams,
       backend,
       messages,
       variables,
-      cacheBumper,
+      cacheBuster,
     }),
   );
   switch (loadable.state) {
@@ -58,7 +58,7 @@ const PlayStream: FC<{
 
 export const Play: FC<{
   backend: Backend;
-  editorState: EditorState;
+  editorState: LmEditorState;
 }> = ({ editorState, backend }) => {
   const msgs = getMessagesOfAuthor(editorState);
   if (msgs.tag === "success") {
