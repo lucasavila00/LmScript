@@ -6,6 +6,7 @@ import { assertIsNever } from "../../../lib/utils";
 import { JSONContent } from "@tiptap/react";
 import { FC, createElement, useEffect, useState } from "react";
 import { Token, Tokens, lexer } from "marked";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui/tabs";
 
 const levelMap: Record<number, "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | undefined> = {
   1: "h1",
@@ -52,21 +53,9 @@ type ParsedGeneration =
   | ParagraphHr
   | ParagraphHeadingOrP;
 
-const handleParsedTokensSpanLike = (
-  tokens: Token[],
-  capturedAs: string | undefined,
-): SpanText[] => {
-  return tokens.map((token) => {
-    switch (token.type) {
-      case "text": {
-        return { tag: "text", text: token.text, capturedAs };
-      }
-      default: {
-        return { tag: "text", text: token.raw, capturedAs };
-      }
-    }
-  });
-};
+const handleParsedTokensSpanLike = (tokens: Token[], capturedAs: string | undefined): SpanText[] =>
+  tokens.map((token) => ({ tag: "text", text: token.raw, capturedAs }));
+
 const parseGeneration = (captured: string, capturedAs: string): ParsedGeneration[] => {
   let paragraphCount = 0;
   return lexer(captured).flatMap((parsed): ParsedGeneration[] => {
@@ -497,11 +486,35 @@ const HtmlPlayNoErrorInState: FC<{
 }> = ({ uiGenerationData, editorState }) => {
   const acc = getData(uiGenerationData, editorState);
   return (
-    <div className="ProseMirror">
-      {acc.map((msg, idx) => {
-        return <RenderAuthorMessage isFirst={idx === 0} key={idx} msg={msg} />;
-      })}
-    </div>
+    <Tabs defaultValue="rich">
+      <div className="p-2 sticky top-0 z-10 bg-white dark:bg-black">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="rich">Rich Text</TabsTrigger>
+          <TabsTrigger value="raw">Raw Text</TabsTrigger>
+          <TabsTrigger value="json">JSON</TabsTrigger>
+        </TabsList>
+      </div>
+      <TabsContent value="rich">
+        <div className="ProseMirror">
+          {acc.map((msg, idx) => {
+            return <RenderAuthorMessage isFirst={idx === 0} key={idx} msg={msg} />;
+          })}
+        </div>
+      </TabsContent>
+      <TabsContent value="raw">
+        <pre className="whitespace-pre-wrap p-4 max-w-2xl mx-auto">
+          {uiGenerationData.state == "loading" ? <>Loading...</> : uiGenerationData.finalText}
+        </pre>
+      </TabsContent>
+      <TabsContent value="json">
+        <div className="p-4">
+          {uiGenerationData.state == "loading" ? <>Loading...</> : <></>}
+          <pre className="whitespace-pre-wrap">
+            {JSON.stringify(uiGenerationData.captures, null, 2)}
+          </pre>
+        </div>
+      </TabsContent>
+    </Tabs>
   );
 };
 
@@ -514,7 +527,7 @@ export const HtmlPlay: FC<{
   if (uiGenerationData.state == "error") {
     return (
       <>
-        <div className="flex items-center justify-center flex-col mt-8 gap-2">
+        <div className="flex items-center justify-center flex-col mt-12 gap-2">
           <div className="text-lg font-medium">An Error Ocurred</div>
           <div className="text-sm text-muted-foreground max-w-xl text-center">
             {String(uiGenerationData.error)}
