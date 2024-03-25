@@ -16,23 +16,14 @@ export class VllmBackend implements AbstractBackend {
   readonly #model: string;
   readonly #reportUsage: ReportUsage;
   readonly #auth: string | undefined;
-  constructor(
-    options: {
-      url: string;
-      auth?: string;
-      model: string;
-      reportUsage?: ReportUsage;
-    },
-  ) {
+  constructor(options: { url: string; auth?: string; model: string; reportUsage?: ReportUsage }) {
     this.#url = options.url;
     this.#model = options.model;
     this.#reportUsage = options?.reportUsage ?? NOOP;
     this.#auth = options.auth;
   }
 
-  async #fetchJSONNoRet<T>(
-    body: object,
-  ): Promise<T> {
+  async #fetchJSONNoRet<T>(body: object): Promise<T> {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
     };
@@ -50,9 +41,7 @@ export class VllmBackend implements AbstractBackend {
     const json = await response.json();
     return json;
   }
-  async #fetchJSON<T>(
-    body: object,
-  ): Promise<T> {
+  async #fetchJSON<T>(body: object): Promise<T> {
     let lastError: unknown = null;
     for (let i = 1; i < 5; i++) {
       try {
@@ -66,10 +55,7 @@ export class VllmBackend implements AbstractBackend {
     }
     throw new Error(`HTTP request failed: ${lastError}`);
   }
-  async executeJSON(
-    data: GenerationThread,
-    callbacks: ExecutionCallbacks,
-  ): Promise<TasksOutput> {
+  async executeJSON(data: GenerationThread, callbacks: ExecutionCallbacks): Promise<TasksOutput> {
     // const headers: Record<string, string> = {
     //   "Content-Type": "application/json",
     // };
@@ -91,9 +77,7 @@ export class VllmBackend implements AbstractBackend {
 
     const state = JSON.parse(JSON.stringify(data.initial_state));
 
-    const handleTask = async (
-      task: Task,
-    ) => {
+    const handleTask = async (task: Task) => {
       switch (task.tag) {
         case "AddTextTask": {
           state.text += task.text;

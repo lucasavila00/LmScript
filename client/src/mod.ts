@@ -60,16 +60,21 @@ const validateRegex = (regex: string) => {
     return false;
   }
 };
+
+type ClientStateWithCounter = ClientState & {
+  roleCounter: Record<Role, number>;
+};
 /**
  * The client is a thread of tasks that can be executed to generate text.
  */
+
 export class LmScript<
   GEN extends Record<string, string> = EmptyRecord,
   SEL extends Record<string, string> = EmptyRecord,
 > {
   #tasks: Task[];
   readonly #options: CreateClientOptions;
-  #state: ClientState;
+  #state: ClientStateWithCounter;
   readonly #fetcher: AbstractBackend;
 
   #currentRole: Role | undefined = undefined;
@@ -81,15 +86,17 @@ export class LmScript<
     this.#state = {
       text: "",
       captured: {},
+      roleCounter: {
+        assistant: 0,
+        system: 0,
+        user: 0,
+      },
     };
     this.#tasks = [];
     this.#fetcher = backend;
   }
 
-  #wrapRole<
-    GEN2 extends Record<string, string>,
-    SEL2 extends Record<string, string>,
-  >(
+  #wrapRole<GEN2 extends Record<string, string>, SEL2 extends Record<string, string>>(
     role: Role,
     cb: (it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>,
   ): LmScript<GEN2, SEL2> {
@@ -113,9 +120,13 @@ export class LmScript<
       throw new Error(ERROR_MESSAGES.missingTemplate);
     }
     if (typeof template === "string") {
-      return clone.push(getRoleStart(template, role));
+      return clone.push(getRoleStart(template, role, clone.#state.roleCounter[role]));
     }
     const [start] = template[role];
+    if (start == null) {
+      throw new Error(ERROR_MESSAGES.missingRoleStartInTemplateConfig(role));
+    }
+    clone.#state.roleCounter[role]++;
     return clone.push(start);
   }
   /**
@@ -129,12 +140,17 @@ export class LmScript<
       throw new Error(ERROR_MESSAGES.missingTemplate);
     }
     if (typeof template === "string") {
-      return this.push(getRoleEnd(template, role));
+      return this.push(getRoleEnd(template, role, this.#state.roleCounter[role]));
     }
     const [, end] = template[role];
 
     const clone = this.#clone(this.#state, this.#tasks);
+
     clone.#currentRole = undefined;
+    if (end == null) {
+      throw new Error(ERROR_MESSAGES.missingRoleStartInTemplateConfig(role));
+    }
+    clone.#state.roleCounter[role]++;
     return clone.push(end);
   }
   /**
@@ -165,9 +181,7 @@ export class LmScript<
   assistant<
     GEN2 extends Record<string, string> = Record<never, never>,
     SEL2 extends Record<string, string> = Record<never, never>,
-  >(
-    cb: (it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>,
-  ): LmScript<GEN2, SEL2> {
+  >(cb: (it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>): LmScript<GEN2, SEL2> {
     return this.#wrapRole("assistant", cb);
   }
   /**
@@ -180,9 +194,7 @@ export class LmScript<
   system<
     GEN2 extends Record<string, string> = Record<never, never>,
     SEL2 extends Record<string, string> = Record<never, never>,
-  >(
-    cb: (it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>,
-  ): LmScript<GEN2, SEL2> {
+  >(cb: (it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>): LmScript<GEN2, SEL2> {
     return this.#wrapRole("system", cb);
   }
   /**
@@ -195,13 +207,11 @@ export class LmScript<
   user<
     GEN2 extends Record<string, string> = Record<never, never>,
     SEL2 extends Record<string, string> = Record<never, never>,
-  >(
-    cb: (it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>,
-  ): LmScript<GEN2, SEL2> {
+  >(cb: (it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>): LmScript<GEN2, SEL2> {
     return this.#wrapRole("user", cb);
   }
 
-  #clone(state: ClientState, tasks: Task[]) {
+  #clone(state: ClientStateWithCounter, tasks: Task[]) {
     const newInstance = new LmScript<GEN, SEL>(this.#fetcher, this.#options);
     newInstance.#state = state;
     newInstance.#tasks = tasks;
@@ -221,10 +231,7 @@ export class LmScript<
     ]);
   }
 
-  #doSelection(
-    name: string | undefined,
-    options: SelectorOptions<string>,
-  ): LmScript<GEN, SEL> {
+  #doSelection(name: string | undefined, options: SelectorOptions<string>): LmScript<GEN, SEL> {
     return this.#clone(this.#state, [
       ...this.#tasks,
       {
@@ -248,14 +255,9 @@ export class LmScript<
    */
   match<K extends keyof SEL>(
     variable: K,
-  ): <
-    GEN2 extends Record<string, string>,
-    SEL2 extends Record<string, string>,
-  >(
-    choices: {
-      [P in SEL[K]]: (client: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>;
-    },
-  ) => LmScript<GEN2, SEL2> {
+  ): <GEN2 extends Record<string, string>, SEL2 extends Record<string, string>>(choices: {
+    [P in SEL[K]]: (client: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>;
+  }) => LmScript<GEN2, SEL2> {
     return (choices) => {
       const matchTask: MatchTask = {
         tag: "MatchTask",
@@ -267,10 +269,7 @@ export class LmScript<
             ) => LmScript<AnyRecord, AnyRecord> =
               // deno-lint-ignore no-explicit-any
               valueUntyped as any;
-            const client = new LmScript<AnyRecord, AnyRecord>(
-              this.#fetcher,
-              this.#options,
-            );
+            const client = new LmScript<AnyRecord, AnyRecord>(this.#fetcher, this.#options);
             const out = value(client);
             const tasks: Task[] = out.#tasks;
             return [key, tasks];
@@ -302,9 +301,7 @@ export class LmScript<
     _name: N,
   ): LmScript<
     {
-      [K in keyof SEL | N]: K extends N ? never
-        : K extends keyof SEL ? SEL[K]
-        : never;
+      [K in keyof SEL | N]: K extends N ? never : K extends keyof SEL ? SEL[K] : never;
     },
     GEN
   > {
@@ -322,9 +319,7 @@ export class LmScript<
   ): LmScript<
     GEN,
     {
-      [K in keyof SEL | N]: K extends N ? V
-        : K extends keyof SEL ? SEL[K]
-        : never;
+      [K in keyof SEL | N]: K extends N ? V : K extends keyof SEL ? SEL[K] : never;
     }
   >;
   /**
@@ -332,10 +327,7 @@ export class LmScript<
    * Does not capture the selected choice with a name.
    */
   select<V extends string>(options: SelectorOptions<V>): LmScript<GEN, SEL>;
-  select(
-    arg1: string | SelectorOptions<string>,
-    arg2?: SelectorOptions<string>,
-  ): unknown {
+  select(arg1: string | SelectorOptions<string>, arg2?: SelectorOptions<string>): unknown {
     if (typeof arg1 === "string") {
       return this.#doSelection(arg1, arg2!);
     }
@@ -354,9 +346,10 @@ export class LmScript<
       {
         tag: "GenerateTask",
         name,
-        stop: typeof generatorOptions?.stop === "string"
-          ? [generatorOptions.stop]
-          : generatorOptions?.stop ?? [],
+        stop:
+          typeof generatorOptions?.stop === "string"
+            ? [generatorOptions.stop]
+            : generatorOptions?.stop ?? [],
         max_tokens: generatorOptions?.maxTokens ?? 16,
         regex: generatorOptions?.regex,
       },
@@ -370,9 +363,7 @@ export class LmScript<
     _name: N,
   ): LmScript<
     {
-      [K in keyof GEN | N]: K extends N ? never
-        : K extends keyof GEN ? GEN[K]
-        : never;
+      [K in keyof GEN | N]: K extends N ? never : K extends keyof GEN ? GEN[K] : never;
     },
     SEL
   > {
@@ -388,9 +379,7 @@ export class LmScript<
     options?: GeneratorOptions | undefined,
   ): LmScript<
     {
-      [K in keyof GEN | N]: K extends N ? string
-        : K extends keyof GEN ? GEN[K]
-        : never;
+      [K in keyof GEN | N]: K extends N ? string : K extends keyof GEN ? GEN[K] : never;
     },
     SEL
   >;
@@ -409,9 +398,11 @@ export class LmScript<
 
   #executeJSONJustText(): Promise<{
     captured: {
-      [K in keyof GEN | keyof SEL]: K extends keyof GEN ? GEN[K]
-        : K extends keyof SEL ? SEL[K]
-        : never;
+      [K in keyof GEN | keyof SEL]: K extends keyof GEN
+        ? GEN[K]
+        : K extends keyof SEL
+          ? SEL[K]
+          : never;
     };
     state: LmScript<GEN, SEL>;
     rawText: string;
@@ -424,10 +415,7 @@ export class LmScript<
         throw new Error("INTERNAL ERROR: Expected only text.");
       }
     }
-    const newInstance = this.#clone(
-      { text, captured: this.#state.captured },
-      [],
-    );
+    const newInstance = this.#clone({ ...this.#state, text }, []);
     return Promise.resolve({
       // deno-lint-ignore no-explicit-any
       captured: this.#state.captured as any,
@@ -446,16 +434,16 @@ export class LmScript<
     },
   ): Promise<{
     captured: {
-      [K in keyof GEN | keyof SEL]: K extends keyof GEN ? GEN[K]
-        : K extends keyof SEL ? SEL[K]
-        : never;
+      [K in keyof GEN | keyof SEL]: K extends keyof GEN
+        ? GEN[K]
+        : K extends keyof SEL
+          ? SEL[K]
+          : never;
     };
     state: LmScript<GEN, SEL>;
     rawText: string;
   }> {
-    const areAllTasksText = this.#tasks.every(
-      (task) => task.tag === "AddTextTask",
-    );
+    const areAllTasksText = this.#tasks.every((task) => task.tag === "AddTextTask");
     if (areAllTasksText) {
       return this.#executeJSONJustText();
     }
@@ -472,7 +460,7 @@ export class LmScript<
         onCapture: onCapture ?? NOOP,
       },
     );
-    const newInstance = this.#clone(out, []);
+    const newInstance = this.#clone({ ...this.#state, ...out }, []);
     return {
       // deno-lint-ignore no-explicit-any
       captured: out.captured as any,

@@ -9,8 +9,7 @@ export type Role = "assistant" | "system" | "user";
  * A special type that represents the end of a message.
  * Do not use this directly, use `client.eos()` instead.
  */
-export type Eos =
-  "%%%%%%%%%HACK_TYPE_FOR_EOS_DO_NOT_USE_THIS_STRING_DIRECTLY%%%%%%%%%%";
+export type Eos = "%%%%%%%%%HACK_TYPE_FOR_EOS_DO_NOT_USE_THIS_STRING_DIRECTLY%%%%%%%%%%";
 
 /**
  * List of all supported chat templates.
@@ -94,11 +93,7 @@ const chatTemplates: AllChatTemplates = {
   },
 };
 
-export const getRoleStart = (
-  template: ChatTemplate,
-  role: Role,
-  countOfRole: number,
-): string => {
+export const getRoleStart = (template: ChatTemplate, role: Role, countOfRole: number): string => {
   if (role == "user" && countOfRole == 0) {
     const str = chatTemplates[template].firstUserMessage;
     if (str != null) {
@@ -112,11 +107,7 @@ export const getRoleStart = (
   }
   return str;
 };
-export const getRoleEnd = (
-  template: ChatTemplate,
-  role: Role,
-  countOfRole: number,
-): string => {
+export const getRoleEnd = (template: ChatTemplate, role: Role, countOfRole: number): string => {
   if (role == "user" && countOfRole == 0) {
     const firstUserMessage = chatTemplates[template].firstUserMessage;
     if (firstUserMessage != null) {

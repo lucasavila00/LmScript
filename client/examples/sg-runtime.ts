@@ -11,19 +11,14 @@ const bench = async () => {
       completionTokens += ct;
     },
   });
-  const model = new LmScript(
-    backend,
-    {
-      template: "llama-2-chat",
-      temperature: 0.1,
-    },
-  );
-  const batch = Array.from(
-    { length: 1 },
-    (_, _i) =>
-      kitchenSink(model).catch((e) => {
-        console.error(e);
-      }),
+  const model = new LmScript(backend, {
+    template: "llama-2-chat",
+    temperature: 0.1,
+  });
+  const batch = Array.from({ length: 1 }, (_, _i) =>
+    kitchenSink(model).catch((e) => {
+      console.error(e);
+    }),
   );
 
   const start = Date.now();

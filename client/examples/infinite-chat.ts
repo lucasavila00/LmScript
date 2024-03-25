@@ -17,7 +17,7 @@ class InfiniteChat {
       .assistant((c) =>
         c.gen("summary", {
           maxTokens: 512,
-        })
+        }),
       )
       .run();
     console.log(`[DEBUG SUMMARY]: ${summary.trim()}`);
@@ -30,7 +30,7 @@ class InfiniteChat {
       this.#ai = this.#client.system((t) =>
         t.push(
           `You are participating of a conversation which was summarized by the AI Model as "${summary}".\n Continue the conversation.`,
-        )
+        ),
       );
     } else {
       this.#ai = ai;
@@ -52,7 +52,7 @@ class InfiniteChat {
       .assistant((t) =>
         t.gen("response", {
           maxTokens: 512,
-        })
+        }),
       )
       .run();
     console.log(`Assistant: ${response.trim()}`);

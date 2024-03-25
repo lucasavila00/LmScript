@@ -29,11 +29,12 @@ type CaptureStreamMessage = {
 type OutputItems = CaptureStreamMessage | FinishedStreamMessage;
 
 type OutputStream = Array<
-  {
-    output: CaptureStreamMessage;
-  } | {
-    output: FinishedStreamMessage;
-  }
+  | {
+      output: CaptureStreamMessage;
+    }
+  | {
+      output: FinishedStreamMessage;
+    }
 >;
 type RunpodCompletedResponse = {
   status: "COMPLETED";
@@ -50,13 +51,15 @@ type RunpodInProgressResponse = {
   status: "IN_PROGRESS";
   stream?: OutputStream;
 };
-type RunSyncResponse = {
-  id: string;
-  status: "string";
-} | {
-  status: "COMPLETED";
-  output: OutputItems[];
-};
+type RunSyncResponse =
+  | {
+      id: string;
+      status: "string";
+    }
+  | {
+      status: "COMPLETED";
+      output: OutputItems[];
+    };
 
 class RunpodServerlessSingleExecutor {
   #url: string;
@@ -76,10 +79,7 @@ class RunpodServerlessSingleExecutor {
     this.#callbacks = callbacks;
   }
 
-  async #fetch<T>(
-    url: string,
-    body?: string,
-  ): Promise<T> {
+  async #fetch<T>(url: string, body?: string): Promise<T> {
     const response = await fetch(url, {
       headers: {
         "Content-Type": "application/json",
@@ -97,14 +97,9 @@ class RunpodServerlessSingleExecutor {
     return out;
   }
 
-  async #monitorProgress(
-    id: string,
-    retries: number,
-  ): Promise<TasksOutput> {
+  async #monitorProgress(id: string, retries: number): Promise<TasksOutput> {
     await delay(1000 * retries * retries);
-    const out = await this.#fetch<RunpodStreamResponse>(
-      this.#url + "/stream/" + id,
-    );
+    const out = await this.#fetch<RunpodStreamResponse>(this.#url + "/stream/" + id);
     return this.#handleRunpodStreamResponse(id, out, retries + 1);
   }
   #handleStream(stream: OutputItems[]) {
@@ -147,12 +142,8 @@ class RunpodServerlessSingleExecutor {
     }
   }
 
-  async executeJSON(
-    data: GenerationThread,
-  ): Promise<TasksOutput> {
-    const out = await this.#fetch<
-      RunSyncResponse
-    >(
+  async executeJSON(data: GenerationThread): Promise<TasksOutput> {
+    const out = await this.#fetch<RunSyncResponse>(
       this.#url + "/run",
       JSON.stringify({
         input: {
@@ -187,25 +178,17 @@ export class RunpodServerlessBackend implements AbstractBackend {
   #url: string;
   #apiToken: string;
   #reportUsage: ReportUsage;
-  constructor(
-    url: string,
-    apiToken: string,
-    callbacks?: { reportUsage: ReportUsage },
-  ) {
+  constructor(url: string, apiToken: string, callbacks?: { reportUsage: ReportUsage }) {
     this.#url = url;
     this.#apiToken = apiToken;
     this.#reportUsage = callbacks?.reportUsage ?? NOOP;
   }
 
-  async executeJSON(
-    data: GenerationThread,
-    callbacks: ExecutionCallbacks,
-  ): Promise<TasksOutput> {
-    const executor = new RunpodServerlessSingleExecutor(
-      this.#url,
-      this.#apiToken,
-      { ...callbacks, reportUsage: this.#reportUsage },
-    );
+  async executeJSON(data: GenerationThread, callbacks: ExecutionCallbacks): Promise<TasksOutput> {
+    const executor = new RunpodServerlessSingleExecutor(this.#url, this.#apiToken, {
+      ...callbacks,
+      reportUsage: this.#reportUsage,
+    });
 
     let lastError: unknown = null;
     for (let i = 1; i < 5; i++) {
