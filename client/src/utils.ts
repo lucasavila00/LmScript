@@ -9,6 +9,6 @@ export const ERROR_MESSAGES = {
   missingTemplate: "Template is required.",
   missingEosInTemplateConfig: "The template does not support eos.",
   cannotNestRoles: "Nesting roles is not supported.",
-  missingRoleStartInTemplateConfig: (role: string) =>
+  missingRoleStartInTemplateConfig: (role: string): string =>
     `The template does not support role '${role}' start.`,
 } as const;
