@@ -217,7 +217,21 @@ class MessageOfAuthorGetter {
     return this.errors;
   }
   getAcc(): MessageOfAuthor[] {
-    return this.acc;
+    return this.acc.map((data) => {
+      const parts = [...data.parts];
+      // trim left first, trim right last
+      const first = parts[0];
+      if (first.tag === "text") {
+        first.text = first.text.trimStart();
+      }
+
+      const last = parts[parts.length - 1];
+      if (last.tag === "text") {
+        last.text = last.text.trimEnd();
+      }
+
+      return { ...data, parts };
+    });
   }
 }
 

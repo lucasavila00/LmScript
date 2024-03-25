@@ -88,7 +88,7 @@ const chatTemplates: AllChatTemplates = {
     system: [null, null],
     firstUserMessage: ["<s>[INST] ", " [/INST]"],
     user: ["[INST] ", " [/INST]"],
-    assistant: ["", "</s>"],
+    assistant: ["", "</s> "],
     eos: "</s>",
   },
 };
