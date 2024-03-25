@@ -221,12 +221,12 @@ class MessageOfAuthorGetter {
       const parts = [...data.parts];
       // trim left first, trim right last
       const first = parts[0];
-      if (first.tag === "text") {
+      if (first != null && first.tag === "text") {
         first.text = first.text.trimStart();
       }
 
       const last = parts[parts.length - 1];
-      if (last.tag === "text") {
+      if (last != null && last.tag === "text") {
         last.text = last.text.trimEnd();
       }
 
