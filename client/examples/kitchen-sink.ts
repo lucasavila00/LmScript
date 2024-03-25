@@ -31,19 +31,13 @@ const toolUseMatching = async (model: InitClient, question: string) => {
     })
     .push(`. `)
     .match("tool")({
-      calculator: (thread) =>
-        thread.push(`The math expression is `).gen("tool_usage"),
-      "search engine": (thread) =>
-        thread.push(`The key word to search is `).gen("tool_usage"),
+      calculator: (thread) => thread.push(`The math expression is `).gen("tool_usage"),
+      "search engine": (thread) => thread.push(`The key word to search is `).gen("tool_usage"),
     })
     .run();
 };
 
-const multiTurnQuestion = (
-  model: InitClient,
-  question1: string,
-  question2: string,
-) =>
+const multiTurnQuestion = (model: InitClient, question1: string, question2: string) =>
   model
     .system((m) => m.push("You are a helpful assistant."))
     .user((m) => m.push(question1))
@@ -97,10 +91,7 @@ export const kitchenSink = async (client: InitClient) => {
   const { rawText: conversation2 } = await toolUse(client, "What is 2 + 2?");
 
   console.log(conversation2);
-  const { rawText: conversation22 } = await toolUseMatching(
-    client,
-    "What is 2 + 2?",
-  );
+  const { rawText: conversation22 } = await toolUseMatching(client, "What is 2 + 2?");
 
   console.log(conversation22);
 
@@ -118,10 +109,7 @@ export const kitchenSink = async (client: InitClient) => {
   );
   console.log(conversation4);
 
-  const { rawText: conversation5 } = await characterGen(
-    client,
-    "Harry Potter",
-  ).run({
+  const { rawText: conversation5 } = await characterGen(client, "Harry Potter").run({
     temperature: 0.1,
   });
 

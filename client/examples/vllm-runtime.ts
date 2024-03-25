@@ -5,23 +5,18 @@ import { VllmBackend } from "../src/backends/vllm.ts";
 const bench = async () => {
   let promptTokens = 0;
   let completionTokens = 0;
-  const backend = new VllmBackend(
-    {
-      url: `http://localhost:8000`,
-      model: "TheBloke/Mistral-7B-Instruct-v0.2-GPTQ",
-      reportUsage: ({ promptTokens: pt, completionTokens: ct }) => {
-        promptTokens += pt;
-        completionTokens += ct;
-      },
+  const backend = new VllmBackend({
+    url: `http://localhost:8000`,
+    model: "TheBloke/Mistral-7B-Instruct-v0.2-GPTQ",
+    reportUsage: ({ promptTokens: pt, completionTokens: ct }) => {
+      promptTokens += pt;
+      completionTokens += ct;
     },
-  );
-  const model = new LmScript(
-    backend,
-    {
-      template: "llama-2-chat",
-      temperature: 0.1,
-    },
-  );
+  });
+  const model = new LmScript(backend, {
+    template: "llama-2-chat",
+    temperature: 0.1,
+  });
   // const { captured } = await model
   //   .user((c) => c.push("What is 1+1"))
   //   .assistant(
@@ -29,12 +24,10 @@ const bench = async () => {
   //   ).run();
   // console.log(captured);
   // throw new Error("not implemented");
-  const batch = Array.from(
-    { length: 1 },
-    (_, _i) =>
-      kitchenSink(model).catch((e) => {
-        console.error(e);
-      }),
+  const batch = Array.from({ length: 1 }, (_, _i) =>
+    kitchenSink(model).catch((e) => {
+      console.error(e);
+    }),
   );
 
   const start = Date.now();

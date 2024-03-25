@@ -117,24 +117,16 @@ class SglServerExecutor {
     }
     throw new Error(`HTTP request failed: ${lastError}`);
   }
-  async #generate(
-    data: SglGenerateData,
-  ): Promise<{ text: string; meta_info: MetaInfoGeneration }> {
-    const out = await this.#httpRequest<
-      { text: string; meta_info: MetaInfoGeneration }
-    >(data);
+  async #generate(data: SglGenerateData): Promise<{ text: string; meta_info: MetaInfoGeneration }> {
+    const out = await this.#httpRequest<{ text: string; meta_info: MetaInfoGeneration }>(data);
     this.#reportUsage({
       completionTokens: out.meta_info.completion_tokens,
       promptTokens: out.meta_info.prompt_tokens,
     });
     return out;
   }
-  async #select(
-    data: SglSelectData,
-  ): Promise<{ text: string; meta_info: MetaInfoSelection }[]> {
-    const out = await this.#httpRequest<
-      { text: string; meta_info: MetaInfoSelection }[]
-    >(data);
+  async #select(data: SglSelectData): Promise<{ text: string; meta_info: MetaInfoSelection }[]> {
+    const out = await this.#httpRequest<{ text: string; meta_info: MetaInfoSelection }[]>(data);
     for (const item of out) {
       this.#reportUsage({
         completionTokens: item.meta_info.completion_tokens,
@@ -196,9 +188,7 @@ class SglServerExecutor {
           logprob_start_len: Math.max(prompt_len - 2, 0),
         });
 
-        const normalized_prompt_logprob = obj.map(
-          (r) => r.meta_info.normalized_prompt_logprob,
-        );
+        const normalized_prompt_logprob = obj.map((r) => r.meta_info.normalized_prompt_logprob);
 
         const argMax = normalized_prompt_logprob.reduce(
           (iMax, x, i, arr) => (x > arr[iMax] ? i : iMax),
@@ -253,16 +243,16 @@ class SglServerExecutor {
 export class SGLangBackend implements AbstractBackend {
   readonly #url: string;
   readonly #reportUsage: ReportUsage;
-  constructor(url: string, options?: {
-    reportUsage?: ReportUsage;
-  }) {
+  constructor(
+    url: string,
+    options?: {
+      reportUsage?: ReportUsage;
+    },
+  ) {
     this.#url = url;
     this.#reportUsage = options?.reportUsage ?? NOOP;
   }
-  async executeJSON(
-    data: GenerationThread,
-    callbacks: ExecutionCallbacks,
-  ): Promise<TasksOutput> {
+  async executeJSON(data: GenerationThread, callbacks: ExecutionCallbacks): Promise<TasksOutput> {
     const executor = new SglServerExecutor(
       this.#url,
       data.sampling_params,

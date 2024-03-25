@@ -37,10 +37,9 @@ const { captured } = await client
 Generates the text and captures it with a name.
 
 ```ts
-const { captured: { language } } = await client
-  .push("The best programming language is ")
-  .gen("language")
-  .run();
+const {
+  captured: { language },
+} = await client.push("The best programming language is ").gen("language").run();
 
 console.log(language);
 ```
@@ -50,7 +49,9 @@ console.log(language);
 Selects one of the choices.
 
 ```ts
-const { captured: { language } } = await client
+const {
+  captured: { language },
+} = await client
   .push("The best programming language is ")
   .select("language", { choices: ["javascript", "typescript"] })
   .run();
@@ -63,7 +64,9 @@ console.log(language);
 Repeats a previous capture.
 
 ```ts
-const { captured: { language } } = await client
+const {
+  captured: { language },
+} = await client
   .push("The best programming language is")
   .gen("language")
   .push(". I think that ")

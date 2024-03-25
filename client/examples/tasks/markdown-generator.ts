@@ -6,10 +6,9 @@ const listItemOrStop = (ai: InitClient) =>
       choices: ["\n- ", ai.eos()],
     })
     .match("list_item")({
-      "\n- ": (c) =>
-        c.gen("list_item_content", { maxTokens: 256, stop: ["\n"] }),
-      [ai.eos()]: (c) => c.castGenerated("list_item_content"),
-    });
+    "\n- ": (c) => c.gen("list_item_content", { maxTokens: 256, stop: ["\n"] }),
+    [ai.eos()]: (c) => c.castGenerated("list_item_content"),
+  });
 const generateMarkdownList = async (client: InitClient, content: string) => {
   let state = client
     .user((c) =>
@@ -28,7 +27,7 @@ Do not make up any content, use the content provided below.
 ## Content
 ${content}
 `,
-      )
+      ),
     )
     .startRole("assistant")
     .push("Sure, here's a markdown list summarizing the content above:\n");
@@ -53,10 +52,7 @@ ${content}
   return acc;
 };
 
-const generateMarkdownListWithRegex = async (
-  client: InitClient,
-  content: string,
-) => {
+const generateMarkdownListWithRegex = async (client: InitClient, content: string) => {
   // matches "- " followed by the text, many times
   const listRegex = "(- [^\n]*\n)+(- [^\n]*)";
   const state = await client
@@ -76,16 +72,14 @@ Do not make up any content, use the content provided below.
 ## Content
 ${content}
 `,
-      )
+      ),
     )
     .startRole("assistant")
     .push("Sure, here's a markdown list summarizing the content above:\n")
     .gen("markdown_list", { maxTokens: 1024, regex: listRegex })
     .run({ temperature: 0.0 });
 
-  return state.captured.markdown_list.split("\n").map((item) =>
-    item.replace("- ", "").trim()
-  );
+  return state.captured.markdown_list.split("\n").map((item) => item.replace("- ", "").trim());
 };
 const generateHeading = (client: InitClient, content: string) =>
   client
@@ -96,11 +90,9 @@ const generateHeading = (client: InitClient, content: string) =>
 ## Content
 ${content}
 `,
-      )
+      ),
     )
-    .assistant((c) =>
-      c.push(`Heading: "`).gen("heading", { maxTokens: 256, stop: ['"'] })
-    );
+    .assistant((c) => c.push(`Heading: "`).gen("heading", { maxTokens: 256, stop: ['"'] }));
 
 export const generateMarkdown = async (client: InitClient, content: string) => {
   const itemsRegex = await generateMarkdownListWithRegex(client, content);

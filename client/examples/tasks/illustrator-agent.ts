@@ -32,7 +32,7 @@ Illustrate: ${PERSON_ILLUSTRATOR}
 #### Example 2
 Explanation: I'm choosing an object because the scene is about an object.
 Illustrate: ${OBJECT_ILLUSTRATOR}`,
-        )
+        ),
       )
       .assistant((c) =>
         c
@@ -42,7 +42,7 @@ Illustrate: ${OBJECT_ILLUSTRATOR}`,
           .push(`Illustrate: `)
           .select("illustrator", {
             choices: [PERSON_ILLUSTRATOR, OBJECT_ILLUSTRATOR],
-          })
+          }),
       );
   }
 
@@ -103,7 +103,7 @@ Scene: "A movie theater"
 Subject: "A young black man wearing a dark suit"
 Subject Emotion: "Sad"
 Time Period: "In the 2020s"`,
-        )
+        ),
       )
       .assistant((c) =>
         c
@@ -124,7 +124,7 @@ Time Period: "In the 2020s"`,
           // start time period
           .push(`Time Period: "`)
           .gen("timePeriod", { stop: ['"', ".", "\n"], maxTokens: 512 })
-          .push(`"\n`)
+          .push(`"\n`),
       );
   }
   #getObjectIllustrationPrompt(content: string) {
@@ -170,7 +170,7 @@ Time Period: "In the 2020s"
 Object: "A big flowing river"
 Scene: "A forest"
 Time Period: "In the 1500s"`,
-        )
+        ),
       )
       .assistant((c) =>
         c
@@ -182,7 +182,7 @@ Time Period: "In the 1500s"`,
           .push(`\n`)
           .push(`Time Period: `)
           .gen("timePeriod", { stop: ['"', ".", "\n"], maxTokens: 512 })
-          .push(`</s>\n`)
+          .push(`</s>\n`),
       );
   }
 
@@ -209,8 +209,5 @@ Time Period: "In the 1500s"`,
     }
   }
 }
-export const getIllustrationPrompt = (
-  client: InitClient,
-  content: string,
-): Promise<string> =>
+export const getIllustrationPrompt = (client: InitClient, content: string): Promise<string> =>
   new IllustrationPromptAgent(client).getIllustrationPrompt(content);

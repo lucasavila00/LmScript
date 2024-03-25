@@ -14,16 +14,12 @@ const bench = async () => {
   let promptTokens = 0;
   let completionTokens = 0;
   const model = new LmScript(
-    new RunpodServerlessBackend(
-      getEnvVarOrThrow("RUNPOD_URL"),
-      getEnvVarOrThrow("RUNPOD_TOKEN"),
-      {
-        reportUsage: ({ promptTokens: pt, completionTokens: ct }) => {
-          promptTokens += pt;
-          completionTokens += ct;
-        },
+    new RunpodServerlessBackend(getEnvVarOrThrow("RUNPOD_URL"), getEnvVarOrThrow("RUNPOD_TOKEN"), {
+      reportUsage: ({ promptTokens: pt, completionTokens: ct }) => {
+        promptTokens += pt;
+        completionTokens += ct;
       },
-    ),
+    }),
     {
       template: "llama-2-chat",
       temperature: 0.1,
