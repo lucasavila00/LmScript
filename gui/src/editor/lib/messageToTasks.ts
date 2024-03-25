@@ -2,7 +2,7 @@ import { type Task } from "@lmscript/client/backends/abstract";
 import { getRoleEnd, getRoleStart, ChatTemplate } from "@lmscript/client/chat-template";
 import { MessageOfAuthor, MessagePart } from "./playMessages";
 import { assertIsNever } from "../../lib/utils";
-import { NamedVariable } from "./types";
+import { Author, NamedVariable } from "./types";
 
 // exported for testing
 export const messagePartToTasks = (part: MessagePart, variables: NamedVariable[]): Task => {
@@ -80,17 +80,24 @@ export const messagesToTasks = (
   template: ChatTemplate,
   variables: NamedVariable[],
 ): Task[] => {
+  const countOfRoles: Record<Author, number> = {
+    system: 0,
+    user: 0,
+    assistant: 0,
+  };
   return messages.flatMap((message): Task[] => {
-    return [
+    const item: Task[] = [
       {
         tag: "AddTextTask",
-        text: getRoleStart(template, message.author),
+        text: getRoleStart(template, message.author, countOfRoles[message.author]),
       },
       ...message.parts.flatMap((part) => messagePartToTasks(part, variables)),
       {
         tag: "AddTextTask",
-        text: getRoleEnd(template, message.author),
+        text: getRoleEnd(template, message.author, countOfRoles[message.author]),
       },
     ];
+    countOfRoles[message.author] += 1;
+    return item;
   });
 };
