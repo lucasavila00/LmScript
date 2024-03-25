@@ -74,9 +74,7 @@ test("handles paragraph", async () => {
           "parts": [
             {
               "tag": "text",
-              "text": "What is the best subject for the illustration to accompany the following?
-
-    ",
+              "text": "What is the best subject for the illustration to accompany the following?",
             },
           ],
         },
@@ -111,9 +109,7 @@ test("handles heading", async () => {
           "parts": [
             {
               "tag": "text",
-              "text": "###Content
-
-    ",
+              "text": "###Content",
             },
           ],
         },
@@ -160,9 +156,7 @@ test("handles variableSelect", async () => {
           "parts": [
             {
               "tag": "text",
-              "text": ""Question: "What is the person doing?" Answer: "The person is happy""
-
-    ",
+              "text": ""Question: "What is the person doing?" Answer: "The person is happy""",
             },
           ],
         },
@@ -256,9 +250,7 @@ test("handles lmGenerator", async () => {
             },
             {
               "tag": "text",
-              "text": "
-
-    ",
+              "text": "",
             },
           ],
         },

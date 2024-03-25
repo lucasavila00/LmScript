@@ -503,12 +503,20 @@ const HtmlPlayNoErrorInState: FC<{
       </TabsContent>
       <TabsContent value="raw">
         <pre className="whitespace-pre-wrap p-4 max-w-2xl mx-auto">
-          {uiGenerationData.state == "loading" ? <>Loading...</> : uiGenerationData.finalText}
+          {uiGenerationData.state == "loading" || uiGenerationData.state === "initialized" ? (
+            <>Loading...</>
+          ) : (
+            uiGenerationData.finalText
+          )}
         </pre>
       </TabsContent>
       <TabsContent value="json">
         <div className="p-4">
-          {uiGenerationData.state == "loading" ? <>Loading...</> : <></>}
+          {uiGenerationData.state == "loading" || uiGenerationData.state === "initialized" ? (
+            <>Loading...</>
+          ) : (
+            <></>
+          )}
           <pre className="whitespace-pre-wrap">
             {JSON.stringify(uiGenerationData.captures, null, 2)}
           </pre>
