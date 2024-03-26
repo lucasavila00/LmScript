@@ -32,4 +32,4 @@ There are more complete examples in the
 | [Typescript Client](https://github.com/lucasavila00/LmScript/tree/main/client)                          | Dependency-free client that can communicate with different backends.                        |
 | [GUI](https://github.com/lucasavila00/LmScript/tree/main/egui)                                          | Desktop Application that creates and executes LmScript programs.                            |
 | [Runpod Serverless SGLang](https://github.com/lucasavila00/LmScript/tree/main/runpod-serverless-sglang) | Docker image that runs SGLang on [Runpod Serverless](https://www.runpod.io/serverless-gpu). |
-| [Runpod Serverless vLLM](https://github.com/lucasavila00/LmScript/tree/main/runpod-serverless-vllm)     | Docker image that runs SGLang on [Runpod Serverless](https://www.runpod.io/serverless-gpu). |
+| [Runpod Serverless vLLM](https://github.com/lucasavila00/LmScript/tree/main/runpod-serverless-vllm)     | Docker image that runs vLLM on [Runpod Serverless](https://www.runpod.io/serverless-gpu).   |
