@@ -10,6 +10,7 @@ import { useRecoilValueLoadable } from "recoil";
 import { generateAsyncAtom } from "./recoil";
 import { assertIsNever } from "../../../lib/utils";
 import { HtmlPlay } from "./HtmlPlay";
+import { getGenerations } from "../../lib/generationsJson";
 
 const PlayStream: FC<{
   backend: Backend;
@@ -46,6 +47,7 @@ const PlayStream: FC<{
           editorState={editorState}
           onRetry={onRetry}
           onOpenBackendConfig={onOpenBackendConfig}
+          generations={getGenerations(messages)}
         />
       );
     }

@@ -91,11 +91,11 @@ const ChoicesEditor: FC<{
     />
   );
 };
-type StopAtOption = {
+type ReactSelectOption = {
   label: string;
   value: string;
 };
-const STOP_AT_OPTIONS: StopAtOption[] = [
+const STOP_AT_OPTIONS: ReactSelectOption[] = [
   {
     value: '"',
     label: 'Double quote (")',
@@ -134,7 +134,7 @@ const StopEditor: FC<{
         value: it,
       }))}
       options={STOP_AT_OPTIONS}
-      placeholder="Type to create..."
+      placeholder="Type to create. Always includes end of message."
       noOptionsMessage={() => "Type to create..."}
       isClearable={false}
       onChange={(newOptions) => {
@@ -143,6 +143,29 @@ const StopEditor: FC<{
     />
   );
 };
+
+const REGEX_OPTIONS: ReactSelectOption[] = [
+  {
+    label: "Bullet List",
+    value: "(- [^\n]*\n)+(- [^\n]*)",
+  },
+  {
+    label: "Numbered List",
+    value: "([0-9]+\\. [^\n]*\n)+([0-9]+\\. [^\n]*)",
+  },
+  {
+    label: "Integer",
+    value: "[0-9]+",
+  },
+  {
+    label: "Decimal",
+    value: "[0-9]+\\.[0-9]+",
+  },
+  {
+    label: "Date",
+    value: "\\d{4}-\\d{2}-\\d{2}",
+  },
+];
 const RegexEditor: FC<{
   regex: string | undefined;
   onChange: (regex: string | undefined) => void;
@@ -158,11 +181,12 @@ const RegexEditor: FC<{
           ? undefined
           : {
               value: regex,
-              label: regex,
+              label: REGEX_OPTIONS.find((option) => option.value === regex)?.label ?? regex,
             }
       }
-      options={[]}
+      options={REGEX_OPTIONS}
       placeholder="Type to create..."
+      isClearable={true}
       noOptionsMessage={() => "Type to create..."}
       onChange={(it) => {
         onChange(it?.value);

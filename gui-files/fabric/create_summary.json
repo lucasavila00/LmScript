@@ -1,0 +1,335 @@
+{
+  "doc": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "authorSelect",
+        "attrs": {
+          "author": "user"
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 1
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "IDENTITY and PURPOSE"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "You are an expert content summarizer. You take content in and output a Markdown formatted summary using the format below."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "Take a deep breath and think step by step about how to best accomplish this goal using the following steps."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 1
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "OUTPUT SECTIONS"
+          }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Combine all of your understanding of the content into a single, 20-word sentence in a section called ONE SENTENCE SUMMARY:."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Output the 10 most important points of the content as a list with no more than 15 words per point into a section called MAIN POINTS:."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Output a list of the 5 best takeaways from the content in a section called TAKEAWAYS:."
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 1
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "OUTPUT INSTRUCTIONS"
+          }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Create the output using the formatting above."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "You only output human readable Markdown."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Output numbered lists, not bullets."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Do not output warnings or notes—just the requested sections."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Do not repeat items in the output sections."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Do not start items with the same opening words."
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 1
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "INPUT:"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "INPUT: "
+          },
+          {
+            "type": "variableSelect",
+            "attrs": {
+              "uuid": "6f1f1cff-5940-4ca9-9924-22f041986a27"
+            }
+          }
+        ]
+      },
+      {
+        "type": "authorSelect",
+        "attrs": {
+          "author": "assistant"
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "ONE SENTENCE SUMMARY:"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "lmGenerator",
+            "attrs": {
+              "id": "285de5ae-aa57-416f-835a-47f728c34420",
+              "choices": [],
+              "type": "generation",
+              "max_tokens": 256,
+              "name": "summary",
+              "stop": [
+                "\n"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "MAIN POINTS:"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "lmGenerator",
+            "attrs": {
+              "id": "0fb92e55-49d9-4162-bf9d-131e3e9f4d7a",
+              "choices": [],
+              "type": "regex",
+              "max_tokens": 512,
+              "name": "main_points",
+              "stop": [],
+              "regex": "([0-9]+\\. [^\n]*\n)+([0-9]+\\. [^\n]*)"
+            }
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "TAKEAWAYS:"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "lmGenerator",
+            "attrs": {
+              "id": "8453a647-7b4c-4d9e-86db-49da0c53bc6b",
+              "choices": [],
+              "type": "regex",
+              "max_tokens": 512,
+              "name": "takeaways",
+              "stop": [],
+              "regex": "([0-9]+\\. [^\n]*\n)+([0-9]+\\. [^\n]*)"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "variables": [
+    {
+      "name": "input",
+      "value": "Felix of Burgundy (died 647 or 648) was a saint and the first bishop of the kingdom of the East Angles. He is widely credited as the man who introduced Christianity to the kingdom. Felix came from the Frankish kingdom of Burgundy, and may have been a priest at one of the monasteries in Francia founded by the Irish missionary Columbanus—Felix may have been Bishop of Châlons, before being forced to seek refuge elsewhere. Felix travelled from Burgundy to Canterbury before being sent by Archbishop Honorius of Canterbury to the kingdom of Sigeberht of East Anglia in about 630. Upon Felix's arrival in East Anglia, Sigeberht gave him a see at Dommoc, possibly in Suffolk, either at Walton, near Felixstowe, or at Dunwich. According to Bede, Felix helped Sigeberht to establish a school in his kingdom. Felix died on 8 March 647 or 648, having been bishop for 17 years. His relics were translated from Dommoc to Soham Abbey and then to the abbey at Ramsey. Several English churches are dedicated to him. ",
+      "uuid": "6f1f1cff-5940-4ca9-9924-22f041986a27"
+    }
+  ],
+  "samplingParams": {
+    "temperature": 0.1
+  },
+  "version": "1"
+}
