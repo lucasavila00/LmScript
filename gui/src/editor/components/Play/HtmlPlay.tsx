@@ -7,6 +7,7 @@ import { JSONContent } from "@tiptap/react";
 import { FC, createElement, useEffect, useState } from "react";
 import { Token, Tokens, lexer } from "marked";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui/tabs";
+import React from "react";
 
 const levelMap: Record<number, "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | undefined> = {
   1: "h1",
@@ -526,6 +527,61 @@ const HtmlPlayNoErrorInState: FC<{
   );
 };
 
+const ErrorRenderer: FC<{
+  error: unknown;
+  onRetry: () => void;
+  onOpenBackendConfig: () => void;
+}> = ({ error, onRetry, onOpenBackendConfig }) => {
+  return (
+    <>
+      <div className="flex items-center justify-center flex-col mt-12 gap-2">
+        <div className="text-lg font-medium">An Error Ocurred</div>
+        <div className="text-sm text-muted-foreground max-w-xl text-center">{String(error)}</div>
+        <Button className="mt-4" onClick={onRetry}>
+          Retry
+        </Button>
+
+        <div className="text-sm text-muted-foreground max-w-xl text-center mt-8">
+          If the error persists, please check the backend configuration.
+        </div>
+        <Button className="mt-4" onClick={onOpenBackendConfig}>
+          Open Backend Config
+        </Button>
+      </div>
+    </>
+  );
+};
+type ErrorBoundaryProps = {
+  children: React.ReactNode;
+  onRetry: () => void;
+  onOpenBackendConfig: () => void;
+};
+
+class ErrorBoundary extends React.Component<ErrorBoundaryProps, { theError: null | unknown }> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { theError: null };
+  }
+
+  static getDerivedStateFromError(error: unknown) {
+    return { theError: error };
+  }
+
+  render() {
+    if (this.state.theError != null) {
+      return (
+        <ErrorRenderer
+          error={this.state.theError}
+          onRetry={this.props.onRetry}
+          onOpenBackendConfig={this.props.onOpenBackendConfig}
+        />
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
 export const HtmlPlay: FC<{
   uiGenerationData: UiGenerationData;
   editorState: Pick<LmEditorState, "doc" | "variables">;
@@ -534,26 +590,17 @@ export const HtmlPlay: FC<{
 }> = ({ onOpenBackendConfig, uiGenerationData, editorState, onRetry }) => {
   if (uiGenerationData.state == "error") {
     return (
-      <>
-        <div className="flex items-center justify-center flex-col mt-12 gap-2">
-          <div className="text-lg font-medium">An Error Ocurred</div>
-          <div className="text-sm text-muted-foreground max-w-xl text-center">
-            {String(uiGenerationData.error)}
-          </div>
-          <Button className="mt-4" onClick={onRetry}>
-            Retry
-          </Button>
-
-          <div className="text-sm text-muted-foreground max-w-xl text-center mt-8">
-            If the error persists, please check the backend configuration.
-          </div>
-          <Button className="mt-4" onClick={onOpenBackendConfig}>
-            Open Backend Config
-          </Button>
-        </div>
-      </>
+      <ErrorRenderer
+        error={uiGenerationData.error}
+        onRetry={onRetry}
+        onOpenBackendConfig={onOpenBackendConfig}
+      />
     );
   }
-  // TODO: add error handling layer, showing the raw output
-  return <HtmlPlayNoErrorInState uiGenerationData={uiGenerationData} editorState={editorState} />;
+
+  return (
+    <ErrorBoundary onRetry={onRetry} onOpenBackendConfig={onOpenBackendConfig}>
+      <HtmlPlayNoErrorInState uiGenerationData={uiGenerationData} editorState={editorState} />;
+    </ErrorBoundary>
+  );
 };
