@@ -32,3 +32,11 @@ Use the `docker-compose.yml` file in this folder to run it locally with
 
 There are overrides in `docker-compose.override.yml` to make it run locally
 using a RTX 2070. A newer or more powerful GPU won't have these limitations.
+
+### Building
+
+```
+docker build -t degroote22/lmscript-runpod-serverless:0.0.9 .
+
+docker push docker.io/degroote22/lmscript-runpod-serverless:0.0.9
+```

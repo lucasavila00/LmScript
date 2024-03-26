@@ -25,7 +25,7 @@ There are more complete examples in the
 
 ## Do you prefer a graphical interface?
 
-[![screenshot of lmscript ui](./docs/app.png)](https://github.com/lucasavila00/LmScript/tree/main/egui)
+[![screenshot of lmscript ui](./assets/app.png)](https://github.com/lucasavila00/LmScript/tree/main/egui)
 
 ## Projects
 

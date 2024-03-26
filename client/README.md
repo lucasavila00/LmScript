@@ -129,11 +129,3 @@ The examples run in Deno and no dependency setup is required.
 - Executing the SGLang tests, local server
 
   `deno run --allow-net --allow-env examples/sglang.ts`
-
-### Building
-
-```
-docker build -t degroote22/lmscript-runpod-serverless:0.0.9 .
-
-docker push docker.io/degroote22/lmscript-runpod-serverless:0.0.9
-```
