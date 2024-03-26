@@ -1,5 +1,9 @@
 import { Backend } from "../../hooks/useBackendConfig";
-import { MessageOfAuthor, getMessagesOfAuthor } from "../../../editor/lib/playMessages";
+import {
+  MessageOfAuthor,
+  TransformError,
+  getMessagesOfAuthor,
+} from "../../../editor/lib/playMessages";
 import { LmEditorState, NamedVariable, SamplingParams } from "../../../editor/lib/types";
 import { FC, useState } from "react";
 import { useRecoilValueLoadable } from "recoil";
@@ -15,8 +19,8 @@ const PlayStream: FC<{
   editorState: LmEditorState;
   onOpenBackendConfig: () => void;
 }> = ({ variables, backend, messages, samplingParams, editorState, onOpenBackendConfig }) => {
-  const [cacheBuster, setcacheBuster] = useState(0);
-  const onRetry = () => setcacheBuster((prev) => prev + 1);
+  const [cacheBuster, setCacheBuster] = useState(0);
+  const onRetry = () => setCacheBuster((prev) => prev + 1);
   const loadable = useRecoilValueLoadable(
     generateAsyncAtom({
       samplingParams,
@@ -51,6 +55,35 @@ const PlayStream: FC<{
   }
 };
 
+export const ValidationError: FC<{ transformResult: TransformError }> = ({ transformResult }) => {
+  return (
+    <div className="flex items-center justify-center flex-col mt-8 gap-2">
+      <div className="text-lg font-medium">Validation Error</div>
+      {transformResult.value
+        .map((err) => {
+          switch (err.tag) {
+            case "variable-not-found": {
+              return `There are variable inputs unconnected`;
+            }
+            case "variable-in-choice-not-found": {
+              return `There are variable inputs unconnected in a choice generation`;
+            }
+            default: {
+              return assertIsNever(err);
+            }
+          }
+        })
+        .map((str, idx) => {
+          return (
+            <div key={idx} className="text-sm text-muted-foreground max-w-xl text-center">
+              {str}
+            </div>
+          );
+        })}
+    </div>
+  );
+};
+
 export const Play: FC<{
   backend: Backend;
   editorState: LmEditorState;
@@ -69,32 +102,5 @@ export const Play: FC<{
       />
     );
   }
-  return (
-    <>
-      <div className="flex items-center justify-center flex-col mt-8 gap-2">
-        <div className="text-lg font-medium">Validation Error</div>
-        {msgs.value
-          .map((err) => {
-            switch (err.tag) {
-              case "variable-not-found": {
-                return `There are variable inputs unconnected`;
-              }
-              case "variable-in-choice-not-found": {
-                return `There are variable inputs unconnected in a choice generation`;
-              }
-              default: {
-                return assertIsNever(err);
-              }
-            }
-          })
-          .map((str, idx) => {
-            return (
-              <div key={idx} className="text-sm text-muted-foreground max-w-xl text-center">
-                {str}
-              </div>
-            );
-          })}
-      </div>
-    </>
-  );
+  return <ValidationError transformResult={msgs} />;
 };

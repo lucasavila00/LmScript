@@ -33,7 +33,15 @@ export const EditorHeader: FC<{
   isExecuting: boolean;
   toggleExecuting: () => void;
   fileManagement: FileManagerProps;
-}> = ({ isRightSidebarOpen, toggleRightSidebar, isExecuting, toggleExecuting, fileManagement }) => {
+  onExportToTasks: () => void;
+}> = ({
+  onExportToTasks,
+  isRightSidebarOpen,
+  toggleRightSidebar,
+  isExecuting,
+  toggleExecuting,
+  fileManagement,
+}) => {
   useEffect(() => {
     const keyboardListener = (e: KeyboardEvent) => {
       if (fileManagement.filePath != null && e.key === "s" && (e.metaKey || e.ctrlKey)) {
@@ -97,6 +105,7 @@ export const EditorHeader: FC<{
                 Save as
                 {/* <DropdownMenuShortcut>⇧⌘S</DropdownMenuShortcut> */}
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={onExportToTasks}>Export to Tasks</DropdownMenuItem>
             </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
