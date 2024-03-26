@@ -7,8 +7,9 @@ export const NOOP = () => {};
 
 export const ERROR_MESSAGES = {
   missingTemplate: "Template is required.",
-  missingEosInTemplateConfig: "The template does not support eos.",
+  missingEosInTemplateConfig: (template: string) =>
+    `The template '${template}' does not support eos.`,
   cannotNestRoles: "Nesting roles is not supported.",
-  missingRoleStartInTemplateConfig: (role: string): string =>
-    `The template does not support role '${role}' start.`,
+  missingRoleStartInTemplateConfig: (template: string, role: string): string =>
+    `The template '${template}' does not support role '${role}'.`,
 } as const;

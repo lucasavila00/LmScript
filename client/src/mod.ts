@@ -124,7 +124,7 @@ export class LmScript<
     }
     const [start] = template[role];
     if (start == null) {
-      throw new Error(ERROR_MESSAGES.missingRoleStartInTemplateConfig(role));
+      throw new Error(ERROR_MESSAGES.missingRoleStartInTemplateConfig("custom", role));
     }
     clone.#state.roleCounter[role]++;
     return clone.push(start);
@@ -148,7 +148,7 @@ export class LmScript<
 
     clone.#currentRole = undefined;
     if (end == null) {
-      throw new Error(ERROR_MESSAGES.missingRoleStartInTemplateConfig(role));
+      throw new Error(ERROR_MESSAGES.missingRoleStartInTemplateConfig("custom", role));
     }
     clone.#state.roleCounter[role]++;
     return clone.push(end);
@@ -166,7 +166,7 @@ export class LmScript<
     }
     const eos = template.eos;
     if (eos === null) {
-      throw new Error(ERROR_MESSAGES.missingEosInTemplateConfig);
+      throw new Error(ERROR_MESSAGES.missingEosInTemplateConfig("custom"));
     }
     return eos as Eos;
   }

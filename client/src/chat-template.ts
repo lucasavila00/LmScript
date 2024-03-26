@@ -103,7 +103,7 @@ export const getRoleStart = (template: ChatTemplate, role: Role, countOfRole: nu
 
   const str = chatTemplates[template][role][0];
   if (str === null) {
-    throw new Error(ERROR_MESSAGES.missingRoleStartInTemplateConfig(role));
+    throw new Error(ERROR_MESSAGES.missingRoleStartInTemplateConfig(template, role));
   }
   return str;
 };
@@ -117,7 +117,7 @@ export const getRoleEnd = (template: ChatTemplate, role: Role, countOfRole: numb
 
   const str = chatTemplates[template][role][1];
   if (str === null) {
-    throw new Error(ERROR_MESSAGES.missingRoleStartInTemplateConfig(role));
+    throw new Error(ERROR_MESSAGES.missingRoleStartInTemplateConfig(template, role));
   }
   return str;
 };
@@ -125,7 +125,7 @@ export const getRoleEnd = (template: ChatTemplate, role: Role, countOfRole: numb
 export const getEos = (template: ChatTemplate): Eos => {
   const eos = chatTemplates[template].eos;
   if (eos === null) {
-    throw new Error(ERROR_MESSAGES.missingEosInTemplateConfig);
+    throw new Error(ERROR_MESSAGES.missingEosInTemplateConfig(template));
   }
   return eos as Eos;
 };

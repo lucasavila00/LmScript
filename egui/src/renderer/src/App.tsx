@@ -48,6 +48,7 @@ function App(): JSX.Element {
         }}
         onNewEmpty={() => {
           setInitialEditorData(emptyInitialContent);
+          setCurrentFilePath(undefined);
           bumpKey();
         }}
         onSaveFile={onSaveFile}

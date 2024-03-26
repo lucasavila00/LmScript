@@ -8,6 +8,7 @@ import { FC, createElement, useEffect, useState } from "react";
 import { Token, Tokens, lexer } from "marked";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui/tabs";
 import React from "react";
+import { LmGenerationJson } from "../../lib/generationsJson";
 
 const levelMap: Record<number, "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | undefined> = {
   1: "h1",
@@ -484,7 +485,8 @@ const RenderAuthorMessage: FC<{ msg: AuthorMsg; isFirst: boolean }> = ({ msg, is
 const HtmlPlayNoErrorInState: FC<{
   uiGenerationData: UiGenerationData;
   editorState: Pick<LmEditorState, "doc" | "variables">;
-}> = ({ uiGenerationData, editorState }) => {
+  generations: LmGenerationJson[];
+}> = ({ uiGenerationData, editorState, generations }) => {
   const acc = getData(uiGenerationData, editorState);
   return (
     <Tabs defaultValue="rich">
@@ -519,7 +521,7 @@ const HtmlPlayNoErrorInState: FC<{
             <></>
           )}
           <pre className="whitespace-pre-wrap">
-            {JSON.stringify(uiGenerationData.captures, null, 2)}
+            {JSON.stringify({ captures: uiGenerationData.captures, generations }, null, 2)}
           </pre>
         </div>
       </TabsContent>
@@ -581,13 +583,13 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, { theError: null
     return this.props.children;
   }
 }
-
 export const HtmlPlay: FC<{
   uiGenerationData: UiGenerationData;
   editorState: Pick<LmEditorState, "doc" | "variables">;
   onRetry: () => void;
   onOpenBackendConfig: () => void;
-}> = ({ onOpenBackendConfig, uiGenerationData, editorState, onRetry }) => {
+  generations: LmGenerationJson[];
+}> = ({ onOpenBackendConfig, uiGenerationData, editorState, onRetry, generations }) => {
   if (uiGenerationData.state == "error") {
     return (
       <ErrorRenderer
@@ -600,7 +602,11 @@ export const HtmlPlay: FC<{
 
   return (
     <ErrorBoundary onRetry={onRetry} onOpenBackendConfig={onOpenBackendConfig}>
-      <HtmlPlayNoErrorInState uiGenerationData={uiGenerationData} editorState={editorState} />
+      <HtmlPlayNoErrorInState
+        uiGenerationData={uiGenerationData}
+        editorState={editorState}
+        generations={generations}
+      />
     </ErrorBoundary>
   );
 };

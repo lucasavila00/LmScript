@@ -26,7 +26,8 @@ import { getMessagesOfAuthor } from "./lib/playMessages";
 import { messagesToTasks } from "./lib/messageToTasks";
 import { ChatTemplate } from "@lmscript/client/chat-template";
 import { SelectChatTemplate } from "./components/BackendSetup";
-import { assertIsNever } from "../lib/utils";
+import React from "react";
+import { getGenerations } from "./lib/generationsJson";
 type LoadedEditorCommonProps = {
   currentFilePath: string | undefined;
   onSaveFileAs: (content: LmEditorState) => void;
@@ -79,26 +80,7 @@ const TaskJSONWithTemplate: FC<{
   }
 
   const tasks = messagesToTasks(msgs.value, template, variables);
-  const generations = msgs.value.flatMap((it) =>
-    it.parts.flatMap((it) => {
-      switch (it.tag) {
-        case "lmGenerate": {
-          return [
-            {
-              uuid: it.nodeAttrs.id,
-              name: it.nodeAttrs.name,
-            },
-          ];
-        }
-        case "text": {
-          return [];
-        }
-        default: {
-          return assertIsNever(it);
-        }
-      }
-    }),
-  );
+  const generations = getGenerations(msgs.value);
   const data = { tasks, generations };
   return (
     <>
@@ -126,6 +108,56 @@ const TaskJSON: FC<{
     </>
   );
 };
+
+const ErrorRenderer: FC<{
+  error: unknown;
+  onOpenBackendConfig: () => void;
+}> = ({ error, onOpenBackendConfig }) => {
+  return (
+    <>
+      <div className="flex items-center justify-center flex-col mt-12 gap-2">
+        <div className="text-lg font-medium">An Error Ocurred</div>
+        <div className="text-sm text-muted-foreground max-w-xl text-center">{String(error)}</div>
+
+        <div className="text-sm text-muted-foreground max-w-xl text-center mt-8">
+          If the error persists, please check the backend configuration.
+        </div>
+        <Button className="mt-4" onClick={onOpenBackendConfig}>
+          Open Backend Config
+        </Button>
+      </div>
+    </>
+  );
+};
+
+type ErrorBoundaryProps = {
+  children: React.ReactNode;
+  onOpenBackendConfig: () => void;
+};
+
+class ErrorBoundary extends React.Component<ErrorBoundaryProps, { theError: null | unknown }> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { theError: null };
+  }
+
+  static getDerivedStateFromError(error: unknown) {
+    return { theError: error };
+  }
+
+  render() {
+    if (this.state.theError != null) {
+      return (
+        <ErrorRenderer
+          error={this.state.theError}
+          onOpenBackendConfig={this.props.onOpenBackendConfig}
+        />
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 const LoadedBlockEditor: FC<
   LoadedEditorCommonProps & {
@@ -206,11 +238,13 @@ const LoadedBlockEditor: FC<
                   </div>
                 ) : (
                   <>
-                    <Play
-                      backend={backendConfigHook.backend}
-                      editorState={getLmEditorState()}
-                      onOpenBackendConfig={sidebarState.open}
-                    />
+                    <ErrorBoundary onOpenBackendConfig={sidebarState.open}>
+                      <Play
+                        backend={backendConfigHook.backend}
+                        editorState={getLmEditorState()}
+                        onOpenBackendConfig={sidebarState.open}
+                      />
+                    </ErrorBoundary>
                   </>
                 )}
               </div>
