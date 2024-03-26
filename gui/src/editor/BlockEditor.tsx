@@ -1,20 +1,32 @@
 import { Editor, EditorContent } from "@tiptap/react";
 import { useBlockEditor } from "./hooks/useBlockEditor";
 import { ContentItemMenu } from "./components/ContentItemMenu";
-import { FC, useCallback, useEffect, useRef } from "react";
+import { FC, useCallback, useEffect, useRef, useState } from "react";
 import { RightSidebar } from "./components/RightSidebar";
 import { EditorHeader } from "./components/EditorHeader";
 import { VariablesContext } from "./context/variables";
 import { EditorContext } from "./context/editor";
 import { TextMenu } from "./components/TextMenu";
 import { useBackendConfig } from "./hooks/useBackendConfig";
-import { Play } from "./components/Play/Play";
-import { LmEditorState } from "./lib/types";
+import { Play, ValidationError } from "./components/Play/Play";
+import { LmEditorState, NamedVariable } from "./lib/types";
 import { SidebarState } from "./hooks/useSideBar";
 import { useVariables } from "./hooks/useVariables";
 import { useSamplingParams } from "./hooks/useSamplingParams";
 import stringify from "json-stable-stringify";
 import { Button } from "../components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "../components/ui/dialog";
+import { getMessagesOfAuthor } from "./lib/playMessages";
+import { messagesToTasks } from "./lib/messageToTasks";
+import { ChatTemplate } from "@lmscript/client/chat-template";
+import { SelectChatTemplate } from "./components/BackendSetup";
+import { assertIsNever } from "../lib/utils";
 type LoadedEditorCommonProps = {
   currentFilePath: string | undefined;
   onSaveFileAs: (content: LmEditorState) => void;
@@ -51,6 +63,69 @@ const useAutoSave = (
   }, [getLmEditorState, currentFilePath]);
 };
 
+const TaskJSONWithTemplate: FC<{
+  editorState: LmEditorState;
+  template: ChatTemplate | undefined;
+  variables: NamedVariable[];
+}> = ({ editorState, template, variables }) => {
+  const msgs = getMessagesOfAuthor(editorState);
+  if (msgs.tag === "error") {
+    return <ValidationError transformResult={msgs} />;
+  }
+
+  if (template == null) {
+    return <>Please select a template</>;
+  }
+
+  const tasks = messagesToTasks(msgs.value, template, variables);
+  const generations = msgs.value.flatMap((it) =>
+    it.parts.flatMap((it) => {
+      switch (it.tag) {
+        case "lmGenerate": {
+          return [
+            {
+              uuid: it.nodeAttrs.id,
+              name: it.nodeAttrs.name,
+            },
+          ];
+        }
+        case "text": {
+          return [];
+        }
+        default: {
+          return assertIsNever(it);
+        }
+      }
+    }),
+  );
+  const data = { tasks, generations };
+  return (
+    <>
+      <pre className="whitespace-pre-wrap p-4 max-w-2xl mx-auto max-h-80 overflow-auto">
+        {JSON.stringify(data, null, 2)}
+      </pre>
+      <Button onClick={() => navigator.clipboard.writeText(JSON.stringify(data, null, 2))}>
+        Copy to Clipboard
+      </Button>
+    </>
+  );
+};
+
+const TaskJSON: FC<{
+  editorState: LmEditorState;
+  variables: NamedVariable[];
+}> = ({ editorState, variables }) => {
+  const [template, setTemplate] = useState<ChatTemplate | undefined>(undefined);
+  return (
+    <>
+      <div className="flex flex-col gap-4">
+        <SelectChatTemplate value={template} onChange={(it) => setTemplate(it)} />
+        <TaskJSONWithTemplate editorState={editorState} template={template} variables={variables} />
+      </div>
+    </>
+  );
+};
+
 const LoadedBlockEditor: FC<
   LoadedEditorCommonProps & {
     editor: Editor;
@@ -74,6 +149,7 @@ const LoadedBlockEditor: FC<
 }) => {
   const menuContainerRef = useRef(null);
   const backendConfigHook = useBackendConfig();
+  const [isExporting, setIsExporting] = useState(false);
   const getLmEditorState = useCallback(
     () => ({
       doc: editor.getJSON(),
@@ -98,11 +174,22 @@ const LoadedBlockEditor: FC<
         onSaveFile: () => onSaveFile(getLmEditorState()),
         onSaveAsFile: () => onSaveFileAs(getLmEditorState()),
       }}
+      onExportToTasks={() => setIsExporting(true)}
     />
   );
 
   return (
     <>
+      <Dialog open={isExporting} onOpenChange={setIsExporting}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Export to Tasks</DialogTitle>
+            <DialogDescription>
+              <TaskJSON editorState={getLmEditorState()} variables={variablesHook.variables} />
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
       <div className="flex h-full w-full" ref={menuContainerRef}>
         {isExecuting ? (
           <>

@@ -30,9 +30,9 @@ const RunpodSglangConfigSchema = z.object({
   token: z.string(),
   template: z.enum(ALL_CHAT_TEMPLATES),
 });
-const SelectChatTemplate: FC<{
+export const SelectChatTemplate: FC<{
   value: ChatTemplate | undefined;
-  onChange: (value: string | undefined) => void;
+  onChange: (value: ChatTemplate | undefined) => void;
 }> = ({ value, onChange }) => {
   return (
     <StyledReactSelect
