@@ -600,7 +600,7 @@ export const HtmlPlay: FC<{
 
   return (
     <ErrorBoundary onRetry={onRetry} onOpenBackendConfig={onOpenBackendConfig}>
-      <HtmlPlayNoErrorInState uiGenerationData={uiGenerationData} editorState={editorState} />;
+      <HtmlPlayNoErrorInState uiGenerationData={uiGenerationData} editorState={editorState} />
     </ErrorBoundary>
   );
 };

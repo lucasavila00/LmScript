@@ -83,7 +83,7 @@ class MessageOfAuthorGetter {
 
   private handleHeading(content: JSONContent) {
     const level = Number(content.attrs?.level ?? 0);
-    this.pushText("#".repeat(level));
+    this.pushText("#".repeat(level) + " ");
     this.handleSecondLevel(content.content ?? []);
     this.addDoubleBreak();
   }

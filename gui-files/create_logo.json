@@ -1,0 +1,217 @@
+{
+  "doc": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "authorSelect",
+        "attrs": {
+          "author": "user"
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 1
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "IDENTITY and PURPOSE"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "You create simple, elegant, and impactful company logos based on the input given to you. The logos are super minimalist and without text.\""
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "Take a deep breath and think step by step about how to best accomplish this goal using the following steps."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 1
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "OUTPUT SECTIONS"
+          }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Output a prompt that can be sent to an AI image generator for a simple and elegant logo that captures and incorporates the meaning of the input sent. The prompt should take the input and create a simple, vector graphic logo description for the AI to generate."
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 1
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "OUTPUT INSTRUCTIONS"
+          }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Ensure the description asks for a simple, vector graphic logo"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Do not output anything other than the raw image description that will be sent to the image generator."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "You only output human readable Markdown."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Do not output warnings or notes—just the requested sections."
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 1
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "INPUT:"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "Input: "
+          },
+          {
+            "type": "variableSelect",
+            "attrs": {
+              "uuid": "5911d8c3-a312-4ef0-9095-033886821a8f"
+            }
+          }
+        ]
+      },
+      {
+        "type": "authorSelect",
+        "attrs": {
+          "author": "assistant"
+        }
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "Create a minimalist logo with the following elements:"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "lmGenerator",
+            "attrs": {
+              "id": "6feca0a8-1ce8-4c00-9af4-a59e0f65f9e7",
+              "choices": [],
+              "type": "regex",
+              "max_tokens": 256,
+              "name": "logo",
+              "stop": [],
+              "regex": "([0-9]+\\. [^\n]*\n)+([0-9]+\\. [^\n]*)"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "variables": [
+    {
+      "name": "input",
+      "value": "LmScript: Fast and Controllable Language Model Interactions in Typescript - Open Source, Open Models ",
+      "uuid": "5911d8c3-a312-4ef0-9095-033886821a8f"
+    }
+  ],
+  "samplingParams": {
+    "temperature": 0.1
+  },
+  "version": "1"
+}
