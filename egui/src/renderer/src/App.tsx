@@ -2,7 +2,7 @@ import { BlockEditor } from "gui/src/editor/BlockEditor";
 import { useDarkmode } from "gui/src/lib/use-dark-mode";
 import { createPortal } from "react-dom";
 import { RenderDarkModeSwitcher } from "gui/src/components/dark-mode";
-import { initialContent } from "gui/src/editor/hooks/init";
+import { emptyInitialContent, initialContent } from "gui/src/editor/hooks/init";
 import { useState } from "react";
 import { LmEditorState } from "gui/src/editor/lib/types";
 import { useSidebar } from "gui/src/editor/hooks/useSideBar";
@@ -45,6 +45,10 @@ function App(): JSX.Element {
               setCurrentFilePath(filePath);
               bumpKey();
             });
+        }}
+        onNewEmpty={() => {
+          setInitialEditorData(emptyInitialContent);
+          bumpKey();
         }}
         onSaveFile={onSaveFile}
         onOpenFile={() => {
