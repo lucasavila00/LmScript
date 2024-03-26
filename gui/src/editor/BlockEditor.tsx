@@ -33,6 +33,7 @@ type LoadedEditorCommonProps = {
   onSaveFile: (content: LmEditorState) => void;
   sidebarState: SidebarState;
   onOpenFile: () => void;
+  onNewEmpty: () => void;
   initialContent: LmEditorState;
 };
 
@@ -146,6 +147,7 @@ const LoadedBlockEditor: FC<
   sidebarState,
   onOpenFile,
   initialContent,
+  onNewEmpty,
 }) => {
   const menuContainerRef = useRef(null);
   const backendConfigHook = useBackendConfig();
@@ -173,6 +175,7 @@ const LoadedBlockEditor: FC<
         onOpenFile,
         onSaveFile: () => onSaveFile(getLmEditorState()),
         onSaveAsFile: () => onSaveFileAs(getLmEditorState()),
+        onNewEmpty,
       }}
       onExportToTasks={() => setIsExporting(true)}
     />
@@ -244,7 +247,15 @@ export const BlockEditor: FC<
   LoadedEditorCommonProps & {
     initialContent: LmEditorState;
   }
-> = ({ initialContent, onSaveFileAs, currentFilePath, onSaveFile, sidebarState, onOpenFile }) => {
+> = ({
+  onNewEmpty,
+  initialContent,
+  onSaveFileAs,
+  currentFilePath,
+  onSaveFile,
+  sidebarState,
+  onOpenFile,
+}) => {
   const { isExecuting, toggleExecuting, editor, variablesHook, samplingParamsHook } =
     useBlockEditor(initialContent);
 
@@ -266,6 +277,7 @@ export const BlockEditor: FC<
       sidebarState={sidebarState}
       onOpenFile={onOpenFile}
       initialContent={initialContent}
+      onNewEmpty={onNewEmpty}
     />
   );
 };

@@ -19,6 +19,7 @@ export type FileManagerProps = {
   onOpenFile: () => void;
   onSaveFile: () => void;
   onSaveAsFile: () => void;
+  onNewEmpty: () => void;
 };
 const getFileNameFromPath = (path: string | undefined) => {
   if (path == null) {
@@ -89,6 +90,7 @@ export const EditorHeader: FC<{
             <DropdownMenuLabel>Manage Files</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
+              <DropdownMenuItem onClick={fileManagement.onNewEmpty}>New</DropdownMenuItem>
               <DropdownMenuItem onClick={fileManagement.onOpenFile}>
                 Open
                 <DropdownMenuShortcut>⌘O</DropdownMenuShortcut>

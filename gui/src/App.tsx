@@ -35,6 +35,10 @@ export default function App() {
           // eslint-disable-next-line no-console
           console.log("open file");
         }}
+        onNewEmpty={
+          // eslint-disable-next-line no-console
+          () => console.log("new empty")
+        }
         sidebarState={sidebarState}
         initialContent={initialContent}
         onSaveFileAs={(content) => {

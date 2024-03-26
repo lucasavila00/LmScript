@@ -1,5 +1,26 @@
 import { LmEditorState } from "../lib/types";
 
+export const emptyInitialContent: LmEditorState = {
+  doc: {
+    type: "doc",
+    content: [
+      {
+        type: "authorSelect",
+        attrs: {
+          author: "system",
+        },
+      },
+      {
+        type: "paragraph",
+      },
+    ],
+  },
+  variables: [],
+  samplingParams: {
+    temperature: 0.1,
+  },
+  version: "1",
+};
 export const initialContent: LmEditorState = {
   doc: {
     type: "doc",
