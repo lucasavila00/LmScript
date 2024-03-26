@@ -1,15 +1,12 @@
 # Web GUI
 
-Prefer the Electron GUI. The webapp cannot communicate with local SGLang servers
-because of CORS, and many features are currently missing from the web version.
+Prefer the
+[Electron GUI](https://github.com/lucasavila00/LmScript/tree/main/gui). The
+webapp cannot communicate with local SGLang servers because of CORS, and many
+features are currently missing from the web version.
 
-## Installation
-
-TODO
-
-## Usage
-
-TODO
+It is used as a dependency of the
+[Electron GUI](https://github.com/lucasavila00/LmScript/tree/main/gui).
 
 ## License
 
