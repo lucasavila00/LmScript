@@ -1,14 +1,15 @@
 # Electron GUI
 
-TODO
+Fully featured user interface to create LmScript programs.
 
 ## Installation
 
-TODO
+Install from the
+[Github Releases](https://github.com/lucasavila00/LmScript/releases) page.
 
 ## Usage
 
-TODO
+Upon opening the GUI you will be shown a quick tutorial of the application.
 
 ## License
 
