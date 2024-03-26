@@ -109,7 +109,7 @@ test("handles heading", async () => {
           "parts": [
             {
               "tag": "text",
-              "text": "###Content",
+              "text": "### Content",
             },
           ],
         },
