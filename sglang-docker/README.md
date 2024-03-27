@@ -1,6 +1,6 @@
 # Runpod Serverless SGLang Docker Image
 
-Pre-built Docker image that runs SGLang
+Pre-built Docker image that runs [TheBloke/Mistral-7B-Instruct-v0.2-AWQ](https://huggingface.co/TheBloke/Mistral-7B-Instruct-v0.2-AWQ) SGLang
 
 ## Installation
 
