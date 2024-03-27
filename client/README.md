@@ -26,8 +26,8 @@ formatting for them to be assigned to their roles.
 
 ```ts
 const { captured } = await client
-  .system((m) => m.push("You are a helpful assistant."))
-  .user((m) => m.push(question1))
+  .system("You are a helpful assistant.")
+  .user(question1)
   .assistant((m) => m.gen("answer1", { maxTokens: 256 }))
   .run();
 ```
@@ -39,7 +39,8 @@ Generates the text and captures it with a name.
 ```ts
 const {
   captured: { language },
-} = await client.push("The best programming language is ").gen("language").run();
+} = await client.push("The best programming language is ").gen("language")
+  .run();
 
 console.log(language);
 ```
