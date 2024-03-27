@@ -23,7 +23,7 @@ const bench = async () => {
     },
   });
   const model = new LmScript(backend, {
-    template: "llama-2-chat",
+    template: "mistral",
     temperature: 0.1,
   });
   const batch = Array.from({ length: 1 }, (_, _i) =>

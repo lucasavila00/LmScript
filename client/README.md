@@ -24,10 +24,14 @@ Use `.push` to add text to the context.
 Use `.system`, `.user` and `.assistant` to create the messages with the required
 formatting for them to be assigned to their roles.
 
+The role functions can receive a single string that will be applied to `.push`,
+or it receives a callback that passes the client object where you can call any
+of the supported functions.
+
 ```ts
 const { captured } = await client
-  .system((m) => m.push("You are a helpful assistant."))
-  .user((m) => m.push(question1))
+  .system("You are a helpful assistant.")
+  .user(question1)
   .assistant((m) => m.gen("answer1", { maxTokens: 256 }))
   .run();
 ```
@@ -91,7 +95,7 @@ import { SGLangBackend } from "@lmscript/client/backends/sglang";
 
 const backend = new SGLangBackend(`http://localhost:30004`);
 const client = new LmScript(backend, {
-  template: "llama-2-chat",
+  template: "mistral",
   temperature: 0.1,
 });
 ```

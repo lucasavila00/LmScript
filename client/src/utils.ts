@@ -12,4 +12,6 @@ export const ERROR_MESSAGES = {
   cannotNestRoles: "Nesting roles is not supported.",
   missingRoleStartInTemplateConfig: (template: string, role: string): string =>
     `The template '${template}' does not support role '${role}'.`,
+  missingBosInTemplateConfig: (template: string): string =>
+    `The template '${template}' does not support bos.`,
 } as const;

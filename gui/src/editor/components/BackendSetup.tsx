@@ -72,7 +72,7 @@ const UrlTokenTemplateConfig: FC<{
     defaultValues: {
       url: "http://localhost:8000",
       token: "",
-      template: "llama-2-chat",
+      template: "mistral",
     },
   });
 
@@ -154,7 +154,7 @@ const VllmConfig: FC<{
     defaultValues: {
       url: "http://localhost:8000",
       token: "",
-      template: "llama-2-chat",
+      template: "mistral",
       model: "",
     },
   });
