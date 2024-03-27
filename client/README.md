@@ -39,8 +39,7 @@ Generates the text and captures it with a name.
 ```ts
 const {
   captured: { language },
-} = await client.push("The best programming language is ").gen("language")
-  .run();
+} = await client.push("The best programming language is ").gen("language").run();
 
 console.log(language);
 ```
