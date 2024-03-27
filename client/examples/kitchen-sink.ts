@@ -39,10 +39,10 @@ const toolUseMatching = async (model: InitClient, question: string) => {
 
 const multiTurnQuestion = (model: InitClient, question1: string, question2: string) =>
   model
-    .system((m) => m.push("You are a helpful assistant."))
-    .user((m) => m.push(question1))
+    .system("You are a helpful assistant.")
+    .user(question1)
     .assistant((m) => m.gen("answer1", { maxTokens: 64 }))
-    .user((m) => m.push(question2))
+    .user(question2)
     .assistant((m) => m.gen("answer2", { maxTokens: 64 }))
     .run();
 

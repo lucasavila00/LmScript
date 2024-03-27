@@ -21,7 +21,7 @@ const bench = async () => {
       },
     }),
     {
-      template: "llama-2-chat",
+      template: "mistral",
       temperature: 0.1,
     },
   );

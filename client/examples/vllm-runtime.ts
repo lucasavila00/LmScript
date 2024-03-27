@@ -14,7 +14,7 @@ const bench = async () => {
     },
   });
   const model = new LmScript(backend, {
-    template: "llama-2-chat",
+    template: "mistral",
     temperature: 0.1,
   });
   // const { captured } = await model

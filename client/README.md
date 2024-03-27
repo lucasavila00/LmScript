@@ -39,7 +39,8 @@ Generates the text and captures it with a name.
 ```ts
 const {
   captured: { language },
-} = await client.push("The best programming language is ").gen("language").run();
+} = await client.push("The best programming language is ").gen("language")
+  .run();
 
 console.log(language);
 ```
@@ -91,7 +92,7 @@ import { SGLangBackend } from "@lmscript/client/backends/sglang";
 
 const backend = new SGLangBackend(`http://localhost:30004`);
 const client = new LmScript(backend, {
-  template: "llama-2-chat",
+  template: "mistral",
   temperature: 0.1,
 });
 ```

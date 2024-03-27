@@ -7,6 +7,7 @@ import {
   ReportUsage,
   Task,
 } from "./backends/abstract.ts";
+import { isFirstMessage } from "./chat-template.ts";
 import {
   ChatTemplate,
   ChatTemplateDefinition,
@@ -63,6 +64,7 @@ const validateRegex = (regex: string) => {
 
 type ClientStateWithCounter = ClientState & {
   roleCounter: Record<Role, number>;
+  currentRole: Role | undefined;
 };
 /**
  * The client is a thread of tasks that can be executed to generate text.
@@ -77,7 +79,6 @@ export class LmScript<
   #state: ClientStateWithCounter;
   readonly #fetcher: AbstractBackend;
 
-  #currentRole: Role | undefined = undefined;
   constructor(backend: AbstractBackend, options?: CreateClientOptions) {
     this.#options = {
       ...(options ?? {}),
@@ -91,6 +92,7 @@ export class LmScript<
         system: 0,
         user: 0,
       },
+      currentRole: undefined,
     };
     this.#tasks = [];
     this.#fetcher = backend;
@@ -98,8 +100,13 @@ export class LmScript<
 
   #wrapRole<GEN2 extends Record<string, string>, SEL2 extends Record<string, string>>(
     role: Role,
-    cb: (it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>,
+    cb: string | ((it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>),
   ): LmScript<GEN2, SEL2> {
+    if (typeof cb === "string") {
+      // deno-lint-ignore no-explicit-any
+      return this.startRole(role).push(cb).endRole(role) as any;
+    }
+
     return cb(this.startRole(role)).endRole(role);
   }
 
@@ -109,25 +116,40 @@ export class LmScript<
    * Most of the time this should not be used directly, use `client.assistant`, `client.system`, or `client.user` instead.
    */
   startRole(role: Role): LmScript<GEN, SEL> {
-    if (this.#currentRole != null) {
+    if (this.#state.currentRole != null) {
       throw new Error(ERROR_MESSAGES.cannotNestRoles);
     }
     const clone = this.#clone(this.#state, this.#tasks);
 
-    clone.#currentRole = role;
+    clone.#state.currentRole = role;
     const template = clone.#options.template;
     if (template == null) {
       throw new Error(ERROR_MESSAGES.missingTemplate);
     }
     if (typeof template === "string") {
-      return clone.push(getRoleStart(template, role, clone.#state.roleCounter[role]));
+      return clone.push(getRoleStart(template, role, clone.#state.roleCounter));
     }
     const [start] = template[role];
     if (start == null) {
       throw new Error(ERROR_MESSAGES.missingRoleStartInTemplateConfig("custom", role));
     }
-    clone.#state.roleCounter[role]++;
+
+    const bos = template.bos;
+    if (bos != null && isFirstMessage(clone.#state.roleCounter)) {
+      return clone.push(bos).push(start);
+    }
+
     return clone.push(start);
+  }
+
+  #endRoleState(role: Role): LmScript<GEN, SEL> {
+    const clone = this.#clone(this.#state, this.#tasks);
+    clone.#state.currentRole = undefined;
+    clone.#state.roleCounter = {
+      ...clone.#state.roleCounter,
+      [role]: clone.#state.roleCounter[role] + 1,
+    };
+    return clone;
   }
   /**
    * Ends a role message in the conversation.
@@ -140,18 +162,14 @@ export class LmScript<
       throw new Error(ERROR_MESSAGES.missingTemplate);
     }
     if (typeof template === "string") {
-      return this.push(getRoleEnd(template, role, this.#state.roleCounter[role]));
+      return this.push(getRoleEnd(template, role, this.#state.roleCounter)).#endRoleState(role);
     }
     const [, end] = template[role];
-
-    const clone = this.#clone(this.#state, this.#tasks);
-
-    clone.#currentRole = undefined;
     if (end == null) {
       throw new Error(ERROR_MESSAGES.missingRoleStartInTemplateConfig("custom", role));
     }
-    clone.#state.roleCounter[role]++;
-    return clone.push(end);
+
+    return this.push(end).#endRoleState(role);
   }
   /**
    * Returns the token that represents the end of a message.
@@ -178,10 +196,15 @@ export class LmScript<
    *
    * If a template is not provided, an error will be thrown.
    */
+  assistant(cb: string): LmScript<GEN, SEL>;
   assistant<
     GEN2 extends Record<string, string> = Record<never, never>,
     SEL2 extends Record<string, string> = Record<never, never>,
-  >(cb: (it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>): LmScript<GEN2, SEL2> {
+  >(cb: (it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>): LmScript<GEN2, SEL2>;
+  assistant<
+    GEN2 extends Record<string, string> = Record<never, never>,
+    SEL2 extends Record<string, string> = Record<never, never>,
+  >(cb: string | ((it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>)): LmScript<GEN2, SEL2> {
     return this.#wrapRole("assistant", cb);
   }
   /**
@@ -191,10 +214,15 @@ export class LmScript<
    *
    * If a template is not provided, an error will be thrown.
    */
+  system(cb: string): LmScript<GEN, SEL>;
   system<
     GEN2 extends Record<string, string> = Record<never, never>,
     SEL2 extends Record<string, string> = Record<never, never>,
-  >(cb: (it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>): LmScript<GEN2, SEL2> {
+  >(cb: (it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>): LmScript<GEN2, SEL2>;
+  system<
+    GEN2 extends Record<string, string> = Record<never, never>,
+    SEL2 extends Record<string, string> = Record<never, never>,
+  >(cb: string | ((it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>)): LmScript<GEN2, SEL2> {
     return this.#wrapRole("system", cb);
   }
   /**
@@ -203,11 +231,16 @@ export class LmScript<
    * The client should be configured with a template to support roles.
    *
    * If a template is not provided, an error will be thrown.
-   */
+   */ user(cb: string): LmScript<GEN, SEL>;
   user<
     GEN2 extends Record<string, string> = Record<never, never>,
     SEL2 extends Record<string, string> = Record<never, never>,
-  >(cb: (it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>): LmScript<GEN2, SEL2> {
+  >(cb: (it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>): LmScript<GEN2, SEL2>;
+
+  user<
+    GEN2 extends Record<string, string> = Record<never, never>,
+    SEL2 extends Record<string, string> = Record<never, never>,
+  >(cb: string | ((it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>)): LmScript<GEN2, SEL2> {
     return this.#wrapRole("user", cb);
   }
 
