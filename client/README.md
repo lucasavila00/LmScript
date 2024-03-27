@@ -24,6 +24,10 @@ Use `.push` to add text to the context.
 Use `.system`, `.user` and `.assistant` to create the messages with the required
 formatting for them to be assigned to their roles.
 
+The role functions can receive a single string that will be applied to `.push`,
+or it receives a callback that passes the client object where you can call any
+of the supported functions.
+
 ```ts
 const { captured } = await client
   .system("You are a helpful assistant.")
