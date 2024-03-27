@@ -1,6 +1,6 @@
 # Runpod Serverless SGLang Docker Image
 
-Pre-build Docker image that runs on
+Pre-built Docker image that runs on
 [Runpod Serverless](https://www.runpod.io/serverless-gpu).
 
 ## Installation
