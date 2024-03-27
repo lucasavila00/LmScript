@@ -119,9 +119,7 @@ export class LmScript<
     if (this.#state.currentRole != null) {
       throw new Error(ERROR_MESSAGES.cannotNestRoles);
     }
-    const clone = this.#clone(this.#state, this.#tasks);
-
-    clone.#state.currentRole = role;
+    const clone = this.#clone({ ...this.#state, currentRole: role }, this.#tasks);
     const template = clone.#options.template;
     if (template == null) {
       throw new Error(ERROR_MESSAGES.missingTemplate);
@@ -143,13 +141,17 @@ export class LmScript<
   }
 
   #endRoleState(role: Role): LmScript<GEN, SEL> {
-    const clone = this.#clone(this.#state, this.#tasks);
-    clone.#state.currentRole = undefined;
-    clone.#state.roleCounter = {
-      ...clone.#state.roleCounter,
-      [role]: clone.#state.roleCounter[role] + 1,
-    };
-    return clone;
+    return this.#clone(
+      {
+        ...this.#state,
+        currentRole: undefined,
+        roleCounter: {
+          ...this.#state.roleCounter,
+          [role]: this.#state.roleCounter[role] + 1,
+        },
+      },
+      this.#tasks,
+    );
   }
   /**
    * Ends a role message in the conversation.

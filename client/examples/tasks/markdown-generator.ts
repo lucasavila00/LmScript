@@ -98,7 +98,7 @@ export const generateMarkdown = async (client: InitClient, content: string) => {
   const itemsRegex = await generateMarkdownListWithRegex(client, content);
   const {
     captured: { heading },
-  } = await generateHeading(client, content).run({
+  } = await generateHeading(client.endRole("assistant"), content).run({
     temperature: 0.01,
   });
 
