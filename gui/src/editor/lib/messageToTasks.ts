@@ -89,12 +89,12 @@ export const messagesToTasks = (
     const item: Task[] = [
       {
         tag: "AddTextTask",
-        text: getRoleStart(template, message.author, countOfRoles[message.author]),
+        text: getRoleStart(template, message.author, countOfRoles),
       },
       ...message.parts.flatMap((part) => messagePartToTasks(part, variables)),
       {
         tag: "AddTextTask",
-        text: getRoleEnd(template, message.author, countOfRoles[message.author]),
+        text: getRoleEnd(template, message.author, countOfRoles),
       },
     ];
     countOfRoles[message.author] += 1;
