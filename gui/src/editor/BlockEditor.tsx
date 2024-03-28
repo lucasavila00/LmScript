@@ -28,6 +28,7 @@ import { ChatTemplate } from "@lmscript/client/chat-template";
 import { SelectChatTemplate } from "./components/BackendSetup";
 import React from "react";
 import { getGenerations } from "./lib/generationsJson";
+import { CopyToClipboard } from "../components/copy-to-clipboard";
 type LoadedEditorCommonProps = {
   currentFilePath: string | undefined;
   onSaveFileAs: (content: LmEditorState) => void;
@@ -82,14 +83,11 @@ const TaskJSONWithTemplate: FC<{
   const tasks = messagesToTasks(msgs.value, template, variables);
   const generations = getGenerations(msgs.value);
   const data = { tasks, generations };
+  const text = JSON.stringify(data, null, 2);
   return (
     <>
-      <pre className="whitespace-pre-wrap p-4 max-w-2xl mx-auto max-h-80 overflow-auto">
-        {JSON.stringify(data, null, 2)}
-      </pre>
-      <Button onClick={() => navigator.clipboard.writeText(JSON.stringify(data, null, 2))}>
-        Copy to Clipboard
-      </Button>
+      <pre className="whitespace-pre-wrap p-4 max-w-2xl mx-auto max-h-80 overflow-auto">{text}</pre>
+      <CopyToClipboard text={text} />
     </>
   );
 };
@@ -232,9 +230,11 @@ const LoadedBlockEditor: FC<
               {header}
               <div className="flex-1 overflow-y-auto">
                 {backendConfigHook.backend == null ? (
-                  <div className="mt-8">
+                  <div className="mt-8 flex flex-col items-center">
                     Configure a backend to execute the editor content.
-                    <Button onClick={sidebarState.open}>Open Backend Config</Button>
+                    <Button className="mt-4" onClick={sidebarState.open}>
+                      Open Backend Config
+                    </Button>
                   </div>
                 ) : (
                   <>

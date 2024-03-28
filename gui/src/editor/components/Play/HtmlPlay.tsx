@@ -9,6 +9,7 @@ import { Token, Tokens, lexer } from "marked";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui/tabs";
 import React from "react";
 import { LmGenerationJson } from "../../lib/generationsJson";
+import { CopyToClipboard } from "../../../components/copy-to-clipboard";
 
 const levelMap: Record<number, "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | undefined> = {
   1: "h1",
@@ -488,6 +489,7 @@ const HtmlPlayNoErrorInState: FC<{
   generations: LmGenerationJson[];
 }> = ({ uiGenerationData, editorState, generations }) => {
   const acc = getData(uiGenerationData, editorState);
+  const jsonText = JSON.stringify({ captures: uiGenerationData.captures, generations }, null, 2);
   return (
     <Tabs defaultValue="rich">
       <div className="p-2 sticky top-0 z-10 bg-white dark:bg-black">
@@ -505,24 +507,32 @@ const HtmlPlayNoErrorInState: FC<{
         </div>
       </TabsContent>
       <TabsContent value="raw">
-        <pre className="whitespace-pre-wrap p-4 max-w-2xl mx-auto">
-          {uiGenerationData.state == "loading" || uiGenerationData.state === "initialized" ? (
+        {uiGenerationData.state == "loading" || uiGenerationData.state === "initialized" ? (
+          <pre className="whitespace-pre-wrap p-4 max-w-2xl mx-auto">
             <>Loading...</>
-          ) : (
-            uiGenerationData.finalText
-          )}
-        </pre>
+          </pre>
+        ) : (
+          <>
+            <div className="flex w-full justify-center">
+              <CopyToClipboard className="mx-auto" text={uiGenerationData.finalText ?? ""} />
+            </div>
+            <pre className="whitespace-pre-wrap p-4 max-w-2xl mx-auto">
+              {uiGenerationData.finalText ?? ""}
+            </pre>
+          </>
+        )}
       </TabsContent>
       <TabsContent value="json">
+        <div className="flex w-full justify-center">
+          <CopyToClipboard text={jsonText} />
+        </div>
         <div className="p-4">
           {uiGenerationData.state == "loading" || uiGenerationData.state === "initialized" ? (
             <>Loading...</>
           ) : (
             <></>
           )}
-          <pre className="whitespace-pre-wrap">
-            {JSON.stringify({ captures: uiGenerationData.captures, generations }, null, 2)}
-          </pre>
+          <pre className="whitespace-pre-wrap">{jsonText}</pre>
         </div>
       </TabsContent>
     </Tabs>
