@@ -1,10 +1,10 @@
-import { LmScript } from "../src/mod.ts";
-import { RunpodServerlessBackend } from "../src/backends/runpod-serverless-sglang.ts";
-import { kitchenSink } from "./kitchen-sink.ts";
-import { delay } from "../src/utils.ts";
+import { LmScript } from "@lmscript/client";
+import { RunpodServerlessBackend } from "@lmscript/client/backends/runpod-serverless-sglang";
+import { kitchenSink } from "./kitchen-sink";
+import { delay } from "../src/utils";
 
 const getEnvVarOrThrow = (name: string): string => {
-  const value = Deno.env.get(name);
+  const value = process.env[name];
   if (!value) {
     throw new Error(`Environment variable ${name} not set`);
   }

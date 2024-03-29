@@ -1,7 +1,7 @@
-import { InitClient } from "../src/mod.ts";
-import { assertIsNever } from "../src/utils.ts";
-import { getIllustrationPrompt } from "./tasks/illustrator-agent.ts";
-import { generateMarkdown } from "./tasks/markdown-generator.ts";
+import { InitClient } from "@lmscript/client";
+import { assertIsNever } from "./utils";
+import { getIllustrationPrompt } from "./tasks/illustrator-agent";
+import { generateMarkdown } from "./tasks/markdown-generator";
 const toolUse = async (model: InitClient, question: string) => {
   const { captured, state: thread } = await model
     .push(`To answer this question: ${question}. `)

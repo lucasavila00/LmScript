@@ -1,5 +1,5 @@
-import { InitClient } from "../../src/mod.ts";
-import { assertIsNever } from "../../src/utils.ts";
+import { InitClient } from "@lmscript/client";
+import { assertIsNever } from "../utils";
 
 const PERSON_ILLUSTRATOR = "A person." as const;
 const OBJECT_ILLUSTRATOR = "An object." as const;

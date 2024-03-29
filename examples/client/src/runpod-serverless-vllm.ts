@@ -1,9 +1,9 @@
-import { LmScript } from "../src/mod.ts";
-import { kitchenSink } from "./kitchen-sink.ts";
-import { VllmBackend } from "../src/backends/vllm.ts";
+import { LmScript } from "@lmscript/client";
+import { kitchenSink } from "./kitchen-sink";
+import { VllmBackend } from "@lmscript/client/backends/vllm";
 
 const getEnvVarOrThrow = (name: string): string => {
-  const value = Deno.env.get(name);
+  const value = process.env[name];
   if (!value) {
     throw new Error(`Environment variable ${name} not set`);
   }

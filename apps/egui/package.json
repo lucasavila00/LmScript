@@ -1,6 +1,6 @@
 {
   "name": "egui",
-  "version": "0.0.14",
+  "version": "0.0.1",
   "description": "An Electron application with React and TypeScript",
   "main": "./out/main/index.mjs",
   "author": "example.com",
@@ -26,9 +26,9 @@
     "@electron-toolkit/preload": "^3.0.0",
     "@electron-toolkit/utils": "^3.0.0",
     "@fontsource/inter": "^5.0.17",
-    "@lmscript/client": "npm:@jsr/lmscript__client@^0.0.27",
+    "@lmscript/client": "workspace:^0.0.27",
     "cal-sans": "^1.0.1",
-    "gui": "file:../gui",
+    "@lmscript/gui": "workspace:^0.0.1",
     "recoil": "^0.7.7"
   },
   "devDependencies": {

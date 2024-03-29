@@ -1,0 +1,15 @@
+{
+  "name": "lmscript",
+  "version": "1.0.0",
+  "description": "LmScript: Fast and Controllable Language Model Interactions",
+  "main": "index.js",
+  "directories": {},
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "static": "pnpm run -r static",
+    "build": "pnpm run -r build"
+  },
+  "author": "",
+  "license": "ISC"
+}

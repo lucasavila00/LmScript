@@ -1,5 +1,6 @@
-import { InitClient, LmScript } from "../src/mod.ts";
-import { SGLangBackend } from "../src/backends/sglang.ts";
+import { InitClient, LmScript } from "@lmscript/client";
+import { SGLangBackend } from "@lmscript/client/backends/sglang";
+import { createInterface } from "node:readline";
 
 class InfiniteChat {
   readonly #client: InitClient;
@@ -38,7 +39,17 @@ class InfiniteChat {
   }
 
   async loop() {
-    const msg = prompt("User:");
+    const msg = await new Promise<string | null>((rs) => {
+      const readline = createInterface({
+        input: process.stdin,
+        output: process.stdout,
+      });
+      return readline.question("User:", (msg) => {
+        rs(msg);
+        readline.close();
+      });
+    });
+
     if (msg == null) {
       return;
     }

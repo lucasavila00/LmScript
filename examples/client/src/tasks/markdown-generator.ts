@@ -1,4 +1,4 @@
-import { InitClient } from "../../src/mod.ts";
+import { InitClient } from "@lmscript/client";
 
 const listItemOrStop = (ai: InitClient) =>
   ai
