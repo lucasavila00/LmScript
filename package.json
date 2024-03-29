@@ -10,7 +10,7 @@
   "scripts": {
     "static": "pnpm run -r static",
     "test": "pnpm run -r test",
-    "build-packages": "(cd packages/client && npm run build) && (cd packages/server && npm run build)"
+    "build-packages": "(cd packages/client && npm run build) && (cd packages/editor-tools && npm run build)"
   },
   "author": "",
   "license": "ISC"
