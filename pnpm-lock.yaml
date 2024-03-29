@@ -20,10 +20,10 @@ importers:
         specifier: ^5.0.17
         version: 5.0.17
       '@lmscript/client':
-        specifier: workspace:^0.0.27
+        specifier: workspace:^
         version: link:../../packages/client
       '@lmscript/gui':
-        specifier: workspace:^0.0.1
+        specifier: workspace:^
         version: link:../gui
       cal-sans:
         specifier: ^1.0.1
@@ -93,7 +93,7 @@ importers:
         specifier: ^3.3.4
         version: 3.3.4(react-hook-form@7.51.2)
       '@lmscript/client':
-        specifier: workspace:^0.0.27
+        specifier: workspace:^
         version: link:../../packages/client
       '@radix-ui/react-avatar':
         specifier: ^1.0.4
