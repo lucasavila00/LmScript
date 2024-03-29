@@ -31,7 +31,7 @@ export const printCustomError = (error: CustomError): string => {
 };
 export class MessageOfAuthorGetter {
   private currentAuthor: Author;
-  private messageParts: Task[] = [];
+  private messageTasks: Task[] = [];
   private acc: MessageOfAuthor[] = [];
   private errors: CustomError[] = [];
   private inListItem = false;
@@ -56,18 +56,18 @@ export class MessageOfAuthorGetter {
     this.pushText("\n");
   }
   private handleAuthorSelect(content: JSONContent) {
-    this.acc.push({ author: this.currentAuthor, tasks: this.messageParts });
-    this.messageParts = [];
+    this.acc.push({ author: this.currentAuthor, tasks: this.messageTasks });
+    this.messageTasks = [];
     this.currentAuthor = content.attrs?.author;
   }
 
   private pushText(text: string) {
-    const last = this.messageParts[this.messageParts.length - 1];
+    const last = this.messageTasks[this.messageTasks.length - 1];
     if (last?.tag === "AddTextTask") {
       last.text += text;
       return;
     }
-    this.messageParts.push({ tag: "AddTextTask", text });
+    this.messageTasks.push({ tag: "AddTextTask", text });
   }
 
   private handleHeading(content: JSONContent) {
@@ -172,7 +172,7 @@ export class MessageOfAuthorGetter {
               }
             });
           }
-          this.messageParts.push(this.noteAttrToTask(nodeAttrs, this.editorState.variables));
+          this.messageTasks.push(this.noteAttrToTask(nodeAttrs, this.editorState.variables));
           break;
         }
 
@@ -254,7 +254,7 @@ export class MessageOfAuthorGetter {
       }
     }
 
-    this.acc.push({ author: this.currentAuthor, tasks: this.messageParts });
+    this.acc.push({ author: this.currentAuthor, tasks: this.messageTasks });
   }
 
   getErrors(): CustomError[] {
