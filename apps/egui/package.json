@@ -26,9 +26,9 @@
     "@electron-toolkit/preload": "^3.0.0",
     "@electron-toolkit/utils": "^3.0.0",
     "@fontsource/inter": "^5.0.17",
-    "@lmscript/client": "workspace:^0.0.27",
+    "@lmscript/client": "workspace:^",
     "cal-sans": "^1.0.1",
-    "@lmscript/gui": "workspace:^0.0.1",
+    "@lmscript/gui": "workspace:^",
     "recoil": "^0.7.7"
   },
   "devDependencies": {

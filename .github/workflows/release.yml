@@ -33,6 +33,7 @@ jobs:
           npm config set "@tiptap-pro:registry" https://registry.tiptap.dev/
           npm config set "//registry.tiptap.dev/:_authToken" ${{ secrets.TIPTAP_TOKEN }}
           pnpm i
+          pnpm run build
           cd apps/gui && npm run tw
 
       - name: build-linux
