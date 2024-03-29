@@ -246,18 +246,17 @@ test("handles lmGenerator", async () => {
               "text": "Explanation: ",
             },
             {
-              "nodeAttrs": {
-                "choices": [],
-                "id": "720ddbc0-12e6-4583-83b6-d0229a60445b",
+              "tag": "lmGenerate",
+              "task": {
                 "max_tokens": 256,
-                "name": "_explanation",
+                "name": "720ddbc0-12e6-4583-83b6-d0229a60445b",
+                "regex": undefined,
                 "stop": [
                   "
     ",
                 ],
-                "type": "generation",
+                "tag": "GenerateTask",
               },
-              "tag": "lmGenerate",
             },
             {
               "tag": "text",

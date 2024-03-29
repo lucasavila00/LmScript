@@ -1,4 +1,6 @@
-import { JSONContent, Author, LmEditorState, GenerationNodeAttrs } from "./types";
+import { Task } from "@lmscript/client/backends/abstract";
+import { JSONContent, Author, LmEditorState, GenerationNodeAttrs, NamedVariable } from "./types";
+import { assertIsNever } from "./utils";
 
 export type MessagePartText = {
   tag: "text";
@@ -7,7 +9,7 @@ export type MessagePartText = {
 
 export type MessagePartGenerate = {
   tag: "lmGenerate";
-  nodeAttrs: GenerationNodeAttrs;
+  task: Task;
 };
 
 export type MessagePart = MessagePartText | MessagePartGenerate;
@@ -87,6 +89,64 @@ export class MessageOfAuthorGetter {
     this.addDoubleBreak();
   }
 
+  private noteAttrToTask(nodeAttrs: GenerationNodeAttrs, variables: NamedVariable[]): Task {
+    switch (nodeAttrs.type) {
+      case "generation": {
+        return {
+          tag: "GenerateTask",
+          name: nodeAttrs.id,
+          stop: nodeAttrs.stop,
+          max_tokens: nodeAttrs.max_tokens,
+          regex: undefined,
+        };
+      }
+      case "regex": {
+        return {
+          tag: "GenerateTask",
+          name: nodeAttrs.id,
+          stop: [],
+          max_tokens: 256,
+          regex: nodeAttrs.regex,
+        };
+      }
+      case "selection": {
+        return {
+          tag: "SelectTask",
+          name: nodeAttrs.id,
+          choices: nodeAttrs.choices.map((choice) => {
+            switch (choice.tag) {
+              case "variable": {
+                const item = variables.find((v) => v.uuid === choice.value);
+                if (item == null) {
+                  // We just throw here and assume this was checked before.
+                  throw new Error(`Variable ${choice.value} not found`);
+                }
+                return item.value;
+              }
+              case "typed": {
+                const val = choice.value;
+                if (val.startsWith("{") && val.endsWith("}")) {
+                  const inner = val.slice(1, -1);
+                  const foundVariable = variables.find((v) => v.name === inner);
+                  if (foundVariable != null) {
+                    return foundVariable.value;
+                  }
+                }
+                return val;
+              }
+              default: {
+                return assertIsNever(choice);
+              }
+            }
+          }),
+        };
+      }
+      default: {
+        return assertIsNever(nodeAttrs.type);
+      }
+    }
+  }
+
   private handleSecondLevel(arr: JSONContent[]) {
     for (const content of arr) {
       switch (content.type) {
@@ -126,7 +186,7 @@ export class MessageOfAuthorGetter {
           }
           this.messageParts.push({
             tag: "lmGenerate",
-            nodeAttrs,
+            task: this.noteAttrToTask(nodeAttrs, this.editorState.variables),
           });
           break;
         }

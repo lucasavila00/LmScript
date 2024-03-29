@@ -1,11 +1,27 @@
 import { type Task } from "@lmscript/client/backends/abstract";
 import { LmEditorState } from "./types";
 import { MessageOfAuthorGetter } from "./messages-of-author";
-import { messagesToTasks } from "./message-to-tasks";
+import { applyChatTemplate } from "./apply-chat-template";
 import { ChatTemplate } from "@lmscript/client/chat-template";
 
-export const compileEditorState = (editorState: LmEditorState, template: ChatTemplate): Task[] => {
-  const state = new MessageOfAuthorGetter(editorState);
+export const compileEditorState = (
+  editorState: LmEditorState,
+  template: ChatTemplate,
+  variableOverrides?: Record<string, string>,
+): Task[] => {
+  const overrides = variableOverrides ?? {};
+
+  const newVariables = editorState.variables.map((variable) => {
+    if (variable.name in overrides) {
+      return {
+        ...variable,
+        value: overrides[variable.name],
+      };
+    }
+    return variable;
+  });
+
+  const state = new MessageOfAuthorGetter({ ...editorState, variables: newVariables });
 
   const errors = state.getErrors();
   if (errors.length > 0) {
@@ -14,5 +30,5 @@ export const compileEditorState = (editorState: LmEditorState, template: ChatTem
   }
   const messages = state.getAcc();
 
-  return messagesToTasks(messages, template, editorState.variables);
+  return applyChatTemplate(messages, template);
 };
