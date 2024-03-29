@@ -8,9 +8,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: denoland/setup-deno@v1
+      - uses: pnpm/action-setup@v3
         with:
-          deno-version: v1.41.2
+          version: 8
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: "pnpm"
       - run: npm config set "@tiptap-pro:registry" https://registry.tiptap.dev/
       - run: npm config set "@jsr:registry" https://npm.jsr.io
       - run: npm config set "//registry.tiptap.dev/:_authToken" ${{ secrets.TIPTAP_TOKEN }}
