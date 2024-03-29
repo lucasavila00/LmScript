@@ -1,5 +1,13 @@
 # @lmscript/gui
 
+## 0.0.30
+
+### Patch Changes
+
+- Fix electron app build
+- Updated dependencies
+  - @lmscript/client@0.0.30
+
 ## 0.0.29
 
 ### Patch Changes
