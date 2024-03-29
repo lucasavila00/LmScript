@@ -13,7 +13,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@lmscript/client": "workspace:^"
+    "@lmscript/client": "workspace:^",
+    "tsx": "^4.7.1"
   },
   "devDependencies": {
     "@types/node": "^20.11.30",
