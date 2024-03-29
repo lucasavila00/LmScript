@@ -1,5 +1,14 @@
 # @lmscript/gui
 
+## 0.0.33
+
+### Patch Changes
+
+- Fix electron windows build
+- Updated dependencies
+  - @lmscript/editor-tools@0.0.33
+  - @lmscript/client@0.0.33
+
 ## 0.0.32
 
 ### Patch Changes

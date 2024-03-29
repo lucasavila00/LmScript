@@ -1,0 +1,11 @@
+{
+  "extends": ["../../typedoc.base.json"],
+  "entryPoints": [
+    "src/mod.ts",
+    "src/backends/abstract.ts",
+    "src/backends/sglang.ts",
+    "src/backends/vllm.ts",
+    "src/backends/runpod-serverless-sglang.ts",
+    "src/chat-template.ts"
+  ]
+}
