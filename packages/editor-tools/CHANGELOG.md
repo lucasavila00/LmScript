@@ -1,5 +1,13 @@
 # @lmscript/client
 
+## 0.0.32
+
+### Patch Changes
+
+- Improve editor-tools
+- Updated dependencies
+  - @lmscript/client@0.0.32
+
 ## 0.0.31
 
 ### Patch Changes

@@ -1,20 +1,10 @@
-import { JSONContent, Author, LmEditorState, GenerationNodeAttrs } from "./types";
-
-export type MessagePartText = {
-  tag: "text";
-  text: string;
-};
-
-export type MessagePartGenerate = {
-  tag: "lmGenerate";
-  nodeAttrs: GenerationNodeAttrs;
-};
-
-export type MessagePart = MessagePartText | MessagePartGenerate;
+import { Task } from "@lmscript/client/backends/abstract";
+import { JSONContent, Author, LmEditorState, GenerationNodeAttrs, NamedVariable } from "./types";
+import { assertIsNever } from "./utils";
 
 export type MessageOfAuthor = {
   author: Author;
-  parts: MessagePart[];
+  tasks: Task[];
 };
 
 export type CustomError =
@@ -26,26 +16,31 @@ export type CustomError =
       tag: "variable-in-choice-not-found";
       variableId: string;
     };
-
-export type TransformSuccess = {
-  tag: "success";
-  value: MessageOfAuthor[];
+export const printCustomError = (error: CustomError): string => {
+  switch (error.tag) {
+    case "variable-not-found": {
+      return `Variable with id ${error.variableId} not found`;
+    }
+    case "variable-in-choice-not-found": {
+      return `Variable in choice with id ${error.variableId} not found`;
+    }
+    default: {
+      return assertIsNever(error);
+    }
+  }
 };
-
-export type TransformError = {
-  tag: "error";
-  value: CustomError[];
-};
-
-export type TransformResult = TransformSuccess | TransformError;
-
 export class MessageOfAuthorGetter {
   private currentAuthor: Author;
-  private messageParts: MessagePart[] = [];
+  private messageTasks: Task[] = [];
   private acc: MessageOfAuthor[] = [];
   private errors: CustomError[] = [];
   private inListItem = false;
-  constructor(private readonly editorState: Pick<LmEditorState, "doc" | "variables">) {
+  private readonly useGenerationUuids: boolean;
+  constructor(
+    private readonly editorState: Pick<LmEditorState, "doc" | "variables">,
+    useGenerationUuids: boolean,
+  ) {
+    this.useGenerationUuids = useGenerationUuids;
     const root = this.editorState.doc;
     if (root.type !== "doc") {
       throw new Error("Expected doc as root");
@@ -66,18 +61,18 @@ export class MessageOfAuthorGetter {
     this.pushText("\n");
   }
   private handleAuthorSelect(content: JSONContent) {
-    this.acc.push({ author: this.currentAuthor, parts: this.messageParts });
-    this.messageParts = [];
+    this.acc.push({ author: this.currentAuthor, tasks: this.messageTasks });
+    this.messageTasks = [];
     this.currentAuthor = content.attrs?.author;
   }
 
   private pushText(text: string) {
-    const last = this.messageParts[this.messageParts.length - 1];
-    if (last?.tag === "text") {
+    const last = this.messageTasks[this.messageTasks.length - 1];
+    if (last?.tag === "AddTextTask") {
       last.text += text;
       return;
     }
-    this.messageParts.push({ tag: "text", text });
+    this.messageTasks.push({ tag: "AddTextTask", text });
   }
 
   private handleHeading(content: JSONContent) {
@@ -85,6 +80,64 @@ export class MessageOfAuthorGetter {
     this.pushText("#".repeat(level) + " ");
     this.handleSecondLevel(content.content ?? []);
     this.addDoubleBreak();
+  }
+
+  private noteAttrToTask(nodeAttrs: GenerationNodeAttrs, variables: NamedVariable[]): Task {
+    switch (nodeAttrs.type) {
+      case "generation": {
+        return {
+          tag: "GenerateTask",
+          name: this.useGenerationUuids ? nodeAttrs.id : nodeAttrs.name,
+          stop: nodeAttrs.stop,
+          max_tokens: nodeAttrs.max_tokens,
+          regex: undefined,
+        };
+      }
+      case "regex": {
+        return {
+          tag: "GenerateTask",
+          name: this.useGenerationUuids ? nodeAttrs.id : nodeAttrs.name,
+          stop: [],
+          max_tokens: 256,
+          regex: nodeAttrs.regex,
+        };
+      }
+      case "selection": {
+        return {
+          tag: "SelectTask",
+          name: this.useGenerationUuids ? nodeAttrs.id : nodeAttrs.name,
+          choices: nodeAttrs.choices.map((choice) => {
+            switch (choice.tag) {
+              case "variable": {
+                const item = variables.find((v) => v.uuid === choice.value);
+                if (item == null) {
+                  // We just throw here and assume this was checked before.
+                  throw new Error(`Variable ${choice.value} not found`);
+                }
+                return item.value;
+              }
+              case "typed": {
+                const val = choice.value;
+                if (val.startsWith("{") && val.endsWith("}")) {
+                  const inner = val.slice(1, -1);
+                  const foundVariable = variables.find((v) => v.name === inner);
+                  if (foundVariable != null) {
+                    return foundVariable.value;
+                  }
+                }
+                return val;
+              }
+              default: {
+                return assertIsNever(choice);
+              }
+            }
+          }),
+        };
+      }
+      default: {
+        return assertIsNever(nodeAttrs.type);
+      }
+    }
   }
 
   private handleSecondLevel(arr: JSONContent[]) {
@@ -124,10 +177,7 @@ export class MessageOfAuthorGetter {
               }
             });
           }
-          this.messageParts.push({
-            tag: "lmGenerate",
-            nodeAttrs,
-          });
+          this.messageTasks.push(this.noteAttrToTask(nodeAttrs, this.editorState.variables));
           break;
         }
 
@@ -209,7 +259,7 @@ export class MessageOfAuthorGetter {
       }
     }
 
-    this.acc.push({ author: this.currentAuthor, parts: this.messageParts });
+    this.acc.push({ author: this.currentAuthor, tasks: this.messageTasks });
   }
 
   getErrors(): CustomError[] {
@@ -217,19 +267,19 @@ export class MessageOfAuthorGetter {
   }
   getAcc(): MessageOfAuthor[] {
     return this.acc.map((data) => {
-      const parts = [...data.parts];
+      const tasks = [...data.tasks];
       // trim left first, trim right last
-      const first = parts[0];
-      if (first != null && first.tag === "text") {
+      const first = tasks[0];
+      if (first != null && first.tag === "AddTextTask") {
         first.text = first.text.trimStart();
       }
 
-      const last = parts[parts.length - 1];
-      if (last != null && last.tag === "text") {
+      const last = tasks[tasks.length - 1];
+      if (last != null && last.tag === "AddTextTask") {
         last.text = last.text.trimEnd();
       }
 
-      return { ...data, parts };
+      return { ...data, tasks };
     });
   }
 }

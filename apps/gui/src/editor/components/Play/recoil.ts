@@ -25,7 +25,10 @@ export const generateAsyncAtom = atomFamily<
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const getter = (window as any).getBackendInstance as GetBackendInstance;
       const instance = getter(param.backend);
-      const tasks = compileEditorState(param.editorState, param.backend.template);
+      const tasks = compileEditorState(param.editorState, {
+        template: param.backend.template,
+        useGenerationUuids: true,
+      });
 
       instance
         .executeJSON(

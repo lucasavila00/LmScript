@@ -1,10 +1,10 @@
 {
   "name": "@lmscript/client",
-  "version": "0.0.31",
+  "version": "0.0.32",
   "description": "Dependency-Free Typescript client for LmScript.",
   "main": "index.js",
   "scripts": {
-    "build-package": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
+    "build": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
     "ts": "tsc --noEmit",
     "tsw": "tsc --noEmit --watch",
     "format": "prettier --write .",
