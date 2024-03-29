@@ -60,7 +60,6 @@ test("empty state", async () => {
       "value": [
         {
           "author": "user",
-          "parts": [],
           "tasks": [],
         },
       ],
@@ -95,12 +94,6 @@ test("handles paragraph", async () => {
       "value": [
         {
           "author": "user",
-          "parts": [
-            {
-              "tag": "AddTextTask",
-              "text": "What is the best subject for the illustration to accompany the following?",
-            },
-          ],
           "tasks": [
             {
               "tag": "AddTextTask",
@@ -136,12 +129,6 @@ test("handles heading", async () => {
       "value": [
         {
           "author": "user",
-          "parts": [
-            {
-              "tag": "AddTextTask",
-              "text": "### Content",
-            },
-          ],
           "tasks": [
             {
               "tag": "AddTextTask",
@@ -189,12 +176,6 @@ test("handles variableSelect", async () => {
       "value": [
         {
           "author": "user",
-          "parts": [
-            {
-              "tag": "AddTextTask",
-              "text": ""Question: "What is the person doing?" Answer: "The person is happy""",
-            },
-          ],
           "tasks": [
             {
               "tag": "AddTextTask",
@@ -271,26 +252,6 @@ test("handles lmGenerator", async () => {
       "value": [
         {
           "author": "user",
-          "parts": [
-            {
-              "tag": "AddTextTask",
-              "text": "Explanation: ",
-            },
-            {
-              "max_tokens": 256,
-              "name": "720ddbc0-12e6-4583-83b6-d0229a60445b",
-              "regex": undefined,
-              "stop": [
-                "
-    ",
-              ],
-              "tag": "GenerateTask",
-            },
-            {
-              "tag": "AddTextTask",
-              "text": "",
-            },
-          ],
           "tasks": [
             {
               "tag": "AddTextTask",

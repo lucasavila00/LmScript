@@ -262,19 +262,19 @@ export class MessageOfAuthorGetter {
   }
   getAcc(): MessageOfAuthor[] {
     return this.acc.map((data) => {
-      const parts = [...data.tasks];
+      const tasks = [...data.tasks];
       // trim left first, trim right last
-      const first = parts[0];
+      const first = tasks[0];
       if (first != null && first.tag === "AddTextTask") {
         first.text = first.text.trimStart();
       }
 
-      const last = parts[parts.length - 1];
+      const last = tasks[tasks.length - 1];
       if (last != null && last.tag === "AddTextTask") {
         last.text = last.text.trimEnd();
       }
 
-      return { ...data, parts };
+      return { ...data, tasks };
     });
   }
 }
