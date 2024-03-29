@@ -22,6 +22,6 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           pnpm install
-          pnpm build-package
+          pnpm build-packages
           (cd packages/client && pnpm publish --no-git-checks --access public)
           (cd packages/editor-tools && pnpm publish --no-git-checks --access public)

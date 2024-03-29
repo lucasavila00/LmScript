@@ -6,10 +6,15 @@ import { ChatTemplate } from "@lmscript/client/chat-template";
 
 export const compileEditorState = (
   editorState: LmEditorState,
-  template: ChatTemplate,
-  variableOverrides?: Record<string, string>,
+  options: {
+    template: ChatTemplate;
+    variableOverrides?: Record<string, string>;
+    useGenerationUuids?: boolean;
+  },
 ): Task[] => {
-  const overrides = variableOverrides ?? {};
+  const overrides = options.variableOverrides ?? {};
+
+  const useGenerationUuids = options.useGenerationUuids ?? false;
 
   const newVariables = editorState.variables.map((variable) => {
     if (variable.name in overrides) {
@@ -21,7 +26,10 @@ export const compileEditorState = (
     return variable;
   });
 
-  const state = new MessageOfAuthorGetter({ ...editorState, variables: newVariables });
+  const state = new MessageOfAuthorGetter(
+    { ...editorState, variables: newVariables },
+    useGenerationUuids,
+  );
 
   const errors = state.getErrors();
   if (errors.length > 0) {
@@ -29,5 +37,5 @@ export const compileEditorState = (
   }
   const messages = state.getAcc();
 
-  return applyChatTemplate(messages, template);
+  return applyChatTemplate(messages, options.template);
 };

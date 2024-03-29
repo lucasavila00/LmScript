@@ -27,7 +27,7 @@ test("handles paragraph", async () => {
         ],
       },
     },
-    "mistral",
+    { template: "mistral" },
   );
   expect(msgs).toMatchInlineSnapshot(`
     [
@@ -77,7 +77,7 @@ test("handles variable override", async () => {
         ],
       },
     },
-    "mistral",
+    { template: "mistral" },
   );
   expect(msgs).toMatchInlineSnapshot(`
     [
@@ -126,9 +126,11 @@ test("handles variable override", async () => {
         ],
       },
     },
-    "mistral",
     {
-      content: "The new content",
+      template: "mistral",
+      variableOverrides: {
+        content: "The new content",
+      },
     },
   );
   expect(msgs).toMatchInlineSnapshot(`
@@ -140,6 +142,138 @@ test("handles variable override", async () => {
       {
         "tag": "AddTextTask",
         "text": ""The new content"",
+      },
+      {
+        "tag": "AddTextTask",
+        "text": " [/INST]",
+      },
+    ]
+  `);
+});
+
+test("handles lmGenerator, use names", async () => {
+  const msgs = compileEditorState(
+    {
+      version: "1",
+      variables: [],
+      samplingParams: SAMPLING_PARAMS,
+      doc: {
+        type: "doc",
+        content: [
+          { type: "authorSelect", attrs: { author: "user" } },
+          {
+            type: "paragraph",
+            content: [
+              { type: "text", text: "Explanation: " },
+              {
+                type: "lmGenerator",
+                attrs: {
+                  id: "720ddbc0-12e6-4583-83b6-d0229a60445b",
+                  choices: [],
+                  type: "generation",
+                  max_tokens: 256,
+                  name: "_explanation",
+                  stop: ["\n"],
+                },
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      template: "mistral",
+    },
+  );
+  expect(msgs).toMatchInlineSnapshot(`
+    [
+      {
+        "tag": "AddTextTask",
+        "text": "<s>[INST] ",
+      },
+      {
+        "tag": "AddTextTask",
+        "text": "Explanation: ",
+      },
+      {
+        "max_tokens": 256,
+        "name": "_explanation",
+        "regex": undefined,
+        "stop": [
+          "
+    ",
+        ],
+        "tag": "GenerateTask",
+      },
+      {
+        "tag": "AddTextTask",
+        "text": "",
+      },
+      {
+        "tag": "AddTextTask",
+        "text": " [/INST]",
+      },
+    ]
+  `);
+});
+test("handles lmGenerator, use uuids", async () => {
+  const msgs = compileEditorState(
+    {
+      version: "1",
+      variables: [],
+      samplingParams: SAMPLING_PARAMS,
+      doc: {
+        type: "doc",
+        content: [
+          { type: "authorSelect", attrs: { author: "user" } },
+          {
+            type: "paragraph",
+            content: [
+              { type: "text", text: "Explanation: " },
+              {
+                type: "lmGenerator",
+                attrs: {
+                  id: "720ddbc0-12e6-4583-83b6-d0229a60445b",
+                  choices: [],
+                  type: "generation",
+                  max_tokens: 256,
+                  name: "_explanation",
+                  stop: ["\n"],
+                },
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      template: "mistral",
+      useGenerationUuids: true,
+    },
+  );
+  expect(msgs).toMatchInlineSnapshot(`
+    [
+      {
+        "tag": "AddTextTask",
+        "text": "<s>[INST] ",
+      },
+      {
+        "tag": "AddTextTask",
+        "text": "Explanation: ",
+      },
+      {
+        "max_tokens": 256,
+        "name": "720ddbc0-12e6-4583-83b6-d0229a60445b",
+        "regex": undefined,
+        "stop": [
+          "
+    ",
+        ],
+        "tag": "GenerateTask",
+      },
+      {
+        "tag": "AddTextTask",
+        "text": "",
       },
       {
         "tag": "AddTextTask",

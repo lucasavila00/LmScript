@@ -35,7 +35,12 @@ export class MessageOfAuthorGetter {
   private acc: MessageOfAuthor[] = [];
   private errors: CustomError[] = [];
   private inListItem = false;
-  constructor(private readonly editorState: Pick<LmEditorState, "doc" | "variables">) {
+  private readonly useGenerationUuids: boolean;
+  constructor(
+    private readonly editorState: Pick<LmEditorState, "doc" | "variables">,
+    useGenerationUuids: boolean,
+  ) {
+    this.useGenerationUuids = useGenerationUuids;
     const root = this.editorState.doc;
     if (root.type !== "doc") {
       throw new Error("Expected doc as root");
@@ -82,7 +87,7 @@ export class MessageOfAuthorGetter {
       case "generation": {
         return {
           tag: "GenerateTask",
-          name: nodeAttrs.id,
+          name: this.useGenerationUuids ? nodeAttrs.id : nodeAttrs.name,
           stop: nodeAttrs.stop,
           max_tokens: nodeAttrs.max_tokens,
           regex: undefined,
@@ -91,7 +96,7 @@ export class MessageOfAuthorGetter {
       case "regex": {
         return {
           tag: "GenerateTask",
-          name: nodeAttrs.id,
+          name: this.useGenerationUuids ? nodeAttrs.id : nodeAttrs.name,
           stop: [],
           max_tokens: 256,
           regex: nodeAttrs.regex,
@@ -100,7 +105,7 @@ export class MessageOfAuthorGetter {
       case "selection": {
         return {
           tag: "SelectTask",
-          name: nodeAttrs.id,
+          name: this.useGenerationUuids ? nodeAttrs.id : nodeAttrs.name,
           choices: nodeAttrs.choices.map((choice) => {
             switch (choice.tag) {
               case "variable": {

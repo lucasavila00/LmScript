@@ -14,8 +14,11 @@ type TransformError = {
 
 type TransformResult = TransformSuccess | TransformError;
 
-const getMessagesOfAuthor = (editorState: LmEditorState): TransformResult => {
-  const state = new MessageOfAuthorGetter(editorState);
+const getMessagesOfAuthor = (
+  editorState: LmEditorState,
+  useGenerationUuids = true,
+): TransformResult => {
+  const state = new MessageOfAuthorGetter(editorState, useGenerationUuids);
 
   const errors = state.getErrors();
   if (errors.length > 0) {
@@ -260,6 +263,70 @@ test("handles lmGenerator", async () => {
             {
               "max_tokens": 256,
               "name": "720ddbc0-12e6-4583-83b6-d0229a60445b",
+              "regex": undefined,
+              "stop": [
+                "
+    ",
+              ],
+              "tag": "GenerateTask",
+            },
+            {
+              "tag": "AddTextTask",
+              "text": "",
+            },
+          ],
+        },
+      ],
+    }
+  `);
+});
+
+test("handles lmGenerator, use names", async () => {
+  const msgs = getMessagesOfAuthor(
+    {
+      version: "1",
+      variables: [],
+      samplingParams: SAMPLING_PARAMS,
+      doc: {
+        type: "doc",
+        content: [
+          { type: "authorSelect", attrs: { author: "user" } },
+          {
+            type: "paragraph",
+            content: [
+              { type: "text", text: "Explanation: " },
+              {
+                type: "lmGenerator",
+                attrs: {
+                  id: "720ddbc0-12e6-4583-83b6-d0229a60445b",
+                  choices: [],
+                  type: "generation",
+                  max_tokens: 256,
+                  name: "_explanation",
+                  stop: ["\n"],
+                },
+              },
+            ],
+          },
+        ],
+      },
+    },
+    false,
+  );
+  expect(msgs).toMatchInlineSnapshot(`
+    {
+      "tag": "success",
+      "value": [
+        {
+          "author": "user",
+          "tasks": [
+            {
+              "tag": "AddTextTask",
+              "text": "Explanation: ",
+            },
+            {
+              "max_tokens": 256,
+              "name": "_explanation",
               "regex": undefined,
               "stop": [
                 "

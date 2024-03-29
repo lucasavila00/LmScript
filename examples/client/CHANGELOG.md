@@ -1,5 +1,12 @@
 # @lmscript/examples_client
 
+## 1.0.5
+
+### Patch Changes
+
+- Updated dependencies
+  - @lmscript/client@0.0.32
+
 ## 1.0.4
 
 ### Patch Changes

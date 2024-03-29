@@ -1,6 +1,6 @@
 {
   "name": "egui",
-  "version": "0.0.31",
+  "version": "0.0.32",
   "description": "An Electron application with React and TypeScript",
   "main": "./out/main/index.mjs",
   "author": "example.com",
