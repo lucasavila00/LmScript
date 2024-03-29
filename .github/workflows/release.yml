@@ -18,44 +18,50 @@ jobs:
       - name: Check out Git repository
         uses: actions/checkout@v3
 
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 8
+
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 20
+          cache: "pnpm"
 
       - name: Install Dependencies
         run: |
           npm config set "@tiptap-pro:registry" https://registry.tiptap.dev/
           npm config set "//registry.tiptap.dev/:_authToken" ${{ secrets.TIPTAP_TOKEN }}
-          cd gui && npm install && npm run tw
-          cd ../egui && npm install
+          pnpm i
+          pnpm run build-package
+          cd apps/gui && npm run tw
 
       - name: build-linux
         if: matrix.os == 'ubuntu-latest'
-        run: cd egui && npm run build:linux
+        run: cd apps/egui && npm run build:linux
 
       - name: build-mac
         if: matrix.os == 'macos-latest'
-        run: cd egui && npm run build:mac
+        run: cd apps/egui && npm run build:mac
 
       - name: build-win
         if: matrix.os == 'windows-latest'
-        run: cd egui && npm run build:win
+        run: cd apps/egui && npm run build:win
 
       - name: release
         uses: softprops/action-gh-release@v1
         with:
           draft: true
           files: |
-            egui/dist/*.exe
-            egui/dist/*.zip
-            egui/dist/*.dmg
-            egui/dist/*.AppImage
-            egui/dist/*.snap
-            egui/dist/*.deb
-            egui/dist/*.rpm
-            egui/dist/*.tar.gz
-            egui/dist/*.yml
-            egui/dist/*.blockmap
+            apps/egui/dist/*.exe
+            apps/egui/dist/*.zip
+            apps/egui/dist/*.dmg
+            apps/egui/dist/*.AppImage
+            apps/egui/dist/*.snap
+            apps/egui/dist/*.deb
+            apps/egui/dist/*.rpm
+            apps/egui/dist/*.tar.gz
+            apps/egui/dist/*.yml
+            apps/egui/dist/*.blockmap
         env:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}

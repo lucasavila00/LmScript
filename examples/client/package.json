@@ -1,0 +1,23 @@
+{
+  "name": "@lmscript/examples_client",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "ts": "tsc --noEmit",
+    "tsw": "tsc --noEmit --watch",
+    "format": "prettier --write .",
+    "format-check": "prettier --check .",
+    "static": "npm run format-check && npm run ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@lmscript/client": "workspace:^"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.3"
+  }
+}
