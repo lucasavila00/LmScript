@@ -2,10 +2,13 @@ import { app, shell, BrowserWindow, ipcMain, dialog } from "electron";
 import { join } from "path";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
 import icon from "../../resources/icon.png?asset";
-import { SGLangBackend } from "@lmscript/client/backends/sglang";
-import { AbstractBackend } from "@lmscript/client/backends/abstract";
-import { VllmBackend } from "@lmscript/client/backends/vllm";
-import { RunpodServerlessBackend } from "@lmscript/client/backends/runpod-serverless-sglang";
+import type { AbstractBackend } from "@lmscript/client/backends/abstract";
+// import { RunpodServerlessBackend } from "@lmscript/client/backends/runpod-serverless-sglang";
+const { RunpodServerlessBackend } = require("@lmscript/client/backends/runpod-serverless-sglang");
+// import { SGLangBackend } from "@lmscript/client/backends/sglang";
+const { SGLangBackend } = require("@lmscript/client/backends/sglang");
+// import { VllmBackend } from "@lmscript/client/backends/vllm";
+const { VllmBackend } = require("@lmscript/client/backends/vllm");
 import type { Backend } from "@lmscript/gui/src/editor/hooks/useBackendConfig";
 import fs from "node:fs";
 
