@@ -2,15 +2,9 @@
 
 Dependency-Free Typescript client for LmScript.
 
-The Complete API documentation is available at the project's
-[JSR page](https://jsr.io/@lmscript/client).
-
 ## Installation
 
-### Installing from JSR
-
-Follow the instructions on the project's
-[JSR page](https://jsr.io/@lmscript/client).
+TODO
 
 ## Usage
 

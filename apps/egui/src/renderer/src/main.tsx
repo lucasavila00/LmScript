@@ -26,7 +26,7 @@ const GetBackendInstanceElectron: GetBackendInstance = (backendConfig) => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (window as any).getBackendInstance = GetBackendInstanceElectron;
 
-import "gui/out/tailwind.css";
+import "@lmscript/gui/out/tailwind.css";
 
 import "cal-sans";
 
