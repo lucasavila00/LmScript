@@ -4,7 +4,7 @@
   "description": "Dependency-Free Typescript client for LmScript.",
   "main": "index.js",
   "scripts": {
-    "build": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
+    "build-package": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
     "ts": "tsc --noEmit",
     "tsw": "tsc --noEmit --watch",
     "format": "prettier --write .",

@@ -20,5 +20,5 @@ jobs:
       - run: npm config set "@jsr:registry" https://npm.jsr.io
       - run: npm config set "//registry.tiptap.dev/:_authToken" ${{ secrets.TIPTAP_TOKEN }}
       - run: pnpm i
-      - run: pnpm run build
+      - run: pnpm run build-package
       - run: pnpm run static
