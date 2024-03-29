@@ -9,6 +9,7 @@
   },
   "scripts": {
     "static": "pnpm run -r static",
+    "test": "pnpm run -r test",
     "build-package": "pnpm run -r build-package"
   },
   "author": "",
