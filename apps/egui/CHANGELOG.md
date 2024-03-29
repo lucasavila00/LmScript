@@ -1,5 +1,14 @@
 # egui
 
+## 0.0.31
+
+### Patch Changes
+
+- reusable editor tools
+- Updated dependencies
+  - @lmscript/gui@0.0.31
+  - @lmscript/client@0.0.31
+
 ## 0.0.30
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @lmscript/client
 
+## 0.0.31
+
+### Patch Changes
+
+- reusable editor tools
+
 ## 0.0.30
 
 ### Patch Changes
