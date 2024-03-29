@@ -26,6 +26,9 @@ importers:
       '@lmscript/client':
         specifier: workspace:^
         version: link:../../packages/client
+      '@lmscript/editor-tools':
+        specifier: workspace:^
+        version: link:../../packages/editor-tools
       '@lmscript/gui':
         specifier: workspace:^
         version: link:../gui
