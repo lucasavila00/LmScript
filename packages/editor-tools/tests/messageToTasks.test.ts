@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { messagePartToTasks } from "../src/editor/lib/messageToTasks";
+import { messagePartToTasks } from "../src/message-to-tasks";
 test("messagePartToTasks handles typed variable in choices", () => {
   const res = messagePartToTasks(
     {

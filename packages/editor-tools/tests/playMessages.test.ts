@@ -1,6 +1,17 @@
 import { test, expect } from "vitest";
-import { getMessagesOfAuthor } from "../src/editor/lib/playMessages";
-import { SamplingParams } from "../src/editor/lib/types";
+import { MessageOfAuthorGetter, TransformResult } from "../src/messages-of-author";
+import { SamplingParams, LmEditorState } from "../src/types";
+
+const getMessagesOfAuthor = (editorState: LmEditorState): TransformResult => {
+  const state = new MessageOfAuthorGetter(editorState);
+
+  const errors = state.getErrors();
+  if (errors.length > 0) {
+    return { tag: "error", value: errors };
+  }
+  const acc = state.getAcc();
+  return { tag: "success", value: acc };
+};
 
 const SAMPLING_PARAMS: SamplingParams = {
   temperature: 0.1,

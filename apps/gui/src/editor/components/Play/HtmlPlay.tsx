@@ -1,14 +1,13 @@
 import { Avatar, AvatarFallback } from "../../../components/ui/avatar";
 import { Button } from "../../../components/ui/button";
 import { avatarLabel, avatarFullLabel } from "../../../editor/lib/avatar";
-import { LmEditorState, GenerationNodeAttrs, UiGenerationData } from "../../../editor/lib/types";
+import { LmEditorState, GenerationNodeAttrs, UiGenerationData } from "@lmscript/editor-tools/types";
 import { assertIsNever } from "../../../lib/utils";
 import { JSONContent } from "@tiptap/react";
 import { FC, createElement, useEffect, useState } from "react";
 import { Token, Tokens, lexer } from "marked";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui/tabs";
 import React from "react";
-import { LmGenerationJson } from "../../lib/generationsJson";
 import { CopyToClipboard } from "../../../components/copy-to-clipboard";
 
 const levelMap: Record<number, "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | undefined> = {
@@ -486,10 +485,9 @@ const RenderAuthorMessage: FC<{ msg: AuthorMsg; isFirst: boolean }> = ({ msg, is
 const HtmlPlayNoErrorInState: FC<{
   uiGenerationData: UiGenerationData;
   editorState: Pick<LmEditorState, "doc" | "variables">;
-  generations: LmGenerationJson[];
-}> = ({ uiGenerationData, editorState, generations }) => {
+}> = ({ uiGenerationData, editorState }) => {
   const acc = getData(uiGenerationData, editorState);
-  const jsonText = JSON.stringify({ captures: uiGenerationData.captures, generations }, null, 2);
+  const jsonText = JSON.stringify({ captures: uiGenerationData.captures }, null, 2);
   return (
     <Tabs defaultValue="rich">
       <div className="p-2 sticky top-0 z-10 bg-white dark:bg-black">
@@ -598,8 +596,7 @@ export const HtmlPlay: FC<{
   editorState: Pick<LmEditorState, "doc" | "variables">;
   onRetry: () => void;
   onOpenBackendConfig: () => void;
-  generations: LmGenerationJson[];
-}> = ({ onOpenBackendConfig, uiGenerationData, editorState, onRetry, generations }) => {
+}> = ({ onOpenBackendConfig, uiGenerationData, editorState, onRetry }) => {
   if (uiGenerationData.state == "error") {
     return (
       <ErrorRenderer
@@ -612,11 +609,7 @@ export const HtmlPlay: FC<{
 
   return (
     <ErrorBoundary onRetry={onRetry} onOpenBackendConfig={onOpenBackendConfig}>
-      <HtmlPlayNoErrorInState
-        uiGenerationData={uiGenerationData}
-        editorState={editorState}
-        generations={generations}
-      />
+      <HtmlPlayNoErrorInState uiGenerationData={uiGenerationData} editorState={editorState} />
     </ErrorBoundary>
   );
 };

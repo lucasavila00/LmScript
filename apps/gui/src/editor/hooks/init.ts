@@ -1,4 +1,4 @@
-import { LmEditorState } from "../lib/types";
+import { LmEditorState } from "@lmscript/editor-tools/types";
 
 export const emptyInitialContent: LmEditorState = {
   doc: {

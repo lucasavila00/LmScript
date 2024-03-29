@@ -10,7 +10,7 @@ import {
   GenerationNodeAttrs,
   GenerationNodeTypeLabels,
   ALL_GENERATION_NODE_TYPES,
-} from "../../../editor/lib/types";
+} from "@lmscript/editor-tools/types";
 import { assertIsNever } from "../../../lib/utils";
 
 type ChoicesOption = {

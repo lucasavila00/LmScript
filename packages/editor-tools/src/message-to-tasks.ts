@@ -1,8 +1,8 @@
 import { type Task } from "@lmscript/client/backends/abstract";
 import { getRoleEnd, getRoleStart, ChatTemplate } from "@lmscript/client/chat-template";
-import { MessageOfAuthor, MessagePart } from "./playMessages";
-import { assertIsNever } from "../../lib/utils";
+import { MessageOfAuthor, MessagePart } from "./messages-of-author";
 import { Author, NamedVariable } from "./types";
+import { assertIsNever } from "./utils";
 
 // exported for testing
 export const messagePartToTasks = (part: MessagePart, variables: NamedVariable[]): Task => {

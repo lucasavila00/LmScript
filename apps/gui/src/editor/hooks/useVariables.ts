@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NamedVariable } from "../lib/types";
+import { NamedVariable } from "@lmscript/editor-tools/types";
 import { newUuid } from "../../lib/utils";
 
 export const useVariables = (initialVariables: NamedVariable[]) => {

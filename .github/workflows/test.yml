@@ -22,3 +22,4 @@ jobs:
       - run: pnpm i
       - run: pnpm run build-package
       - run: pnpm run static
+      - run: pnpm run test
