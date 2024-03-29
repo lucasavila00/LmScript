@@ -4,8 +4,9 @@
   "description": "LmScript: Fast and Controllable Language Model Interactions",
   "main": "index.js",
   "directories": {},
-  "dependencies": {},
-  "devDependencies": {},
+  "devDependencies": {
+    "@changesets/cli": "^2.27.1"
+  },
   "scripts": {
     "static": "pnpm run -r static",
     "build-package": "pnpm run -r build-package"
