@@ -1,5 +1,11 @@
 # @lmscript/client
 
+## 0.0.33
+
+### Patch Changes
+
+- Fix electron windows build
+
 ## 0.0.32
 
 ### Patch Changes
