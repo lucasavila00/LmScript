@@ -6,8 +6,8 @@ import {
   OnCapture,
   ReportUsage,
   Task,
-} from "./backends/abstract.ts";
-import { isFirstMessage } from "./chat-template.ts";
+} from "./backends/abstract";
+import { isFirstMessage } from "./chat-template";
 import {
   ChatTemplate,
   ChatTemplateDefinition,
@@ -16,8 +16,8 @@ import {
   getRoleEnd,
   getRoleStart,
   Role,
-} from "./chat-template.ts";
-import { ERROR_MESSAGES, NOOP } from "./utils.ts";
+} from "./chat-template";
+import { ERROR_MESSAGES, NOOP } from "./utils";
 
 type EmptyRecord = Record<never, string>;
 type AnyRecord = Record<string, string>;

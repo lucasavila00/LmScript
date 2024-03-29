@@ -1,4 +1,4 @@
-import { ERROR_MESSAGES } from "./utils.ts";
+import { ERROR_MESSAGES } from "./utils";
 
 /**
  * One of possible roles in a conversation.

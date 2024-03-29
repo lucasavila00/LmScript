@@ -1,4 +1,4 @@
-import { assertIsNever, delay, NOOP } from "../utils.ts";
+import { assertIsNever, delay, NOOP } from "../utils";
 import {
   AbstractBackend,
   ExecutionCallbacks,
@@ -6,7 +6,7 @@ import {
   ReportUsage,
   Task,
   TasksOutput,
-} from "./abstract.ts";
+} from "./abstract";
 
 /**
  * Backend for the VLLM OpenAI API.

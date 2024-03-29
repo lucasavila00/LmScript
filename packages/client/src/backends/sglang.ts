@@ -3,8 +3,8 @@
  * @module
  */
 
-import { delay, NOOP } from "../utils.ts";
-import { assertIsNever } from "../utils.ts";
+import { delay, NOOP } from "../utils";
+import { assertIsNever } from "../utils";
 import {
   AbstractBackend,
   ClientState,
@@ -14,7 +14,7 @@ import {
   ReportUsage,
   Task,
   TasksOutput,
-} from "./abstract.ts";
+} from "./abstract";
 
 type SglSamplingParams = FetcherSamplingParams & {
   max_new_tokens?: number;

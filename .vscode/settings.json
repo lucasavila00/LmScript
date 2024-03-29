@@ -19,6 +19,5 @@
     "Tiptap",
     "Vllm"
   ],
-  "python.analysis.typeCheckingMode": "basic",
-  "deno.enablePaths": ["./client"]
+  "python.analysis.typeCheckingMode": "basic"
 }

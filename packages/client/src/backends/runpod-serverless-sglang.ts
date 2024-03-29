@@ -3,9 +3,9 @@
  * @module
  */
 
-import { delay, NOOP } from "../utils.ts";
-import { ExecutionCallbacks, ReportUsage } from "./abstract.ts";
-import { AbstractBackend, GenerationThread, TasksOutput } from "./abstract.ts";
+import { delay, NOOP } from "../utils";
+import { ExecutionCallbacks, ReportUsage } from "./abstract";
+import { AbstractBackend, GenerationThread, TasksOutput } from "./abstract";
 
 type RunpodStreamResponse =
   | RunpodCompletedResponse
