@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build-package": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
-    "ts": "tsc --noEmit",
+    "ts": "tsc --noEmit && tsc --noEmit -p ./tsconfig.tests.json",
     "tsw": "tsc --noEmit --watch",
     "format": "prettier --write .",
     "format-check": "prettier --check .",

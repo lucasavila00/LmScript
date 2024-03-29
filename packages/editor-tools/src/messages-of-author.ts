@@ -2,21 +2,9 @@ import { Task } from "@lmscript/client/backends/abstract";
 import { JSONContent, Author, LmEditorState, GenerationNodeAttrs, NamedVariable } from "./types";
 import { assertIsNever } from "./utils";
 
-export type MessagePartText = {
-  tag: "text";
-  text: string;
-};
-
-export type MessagePartGenerate = {
-  tag: "lmGenerate";
-  task: Task;
-};
-
-export type MessagePart = MessagePartText | MessagePartGenerate;
-
 export type MessageOfAuthor = {
   author: Author;
-  parts: MessagePart[];
+  tasks: Task[];
 };
 
 export type CustomError =
@@ -28,22 +16,22 @@ export type CustomError =
       tag: "variable-in-choice-not-found";
       variableId: string;
     };
-
-export type TransformSuccess = {
-  tag: "success";
-  value: MessageOfAuthor[];
+export const printCustomError = (error: CustomError): string => {
+  switch (error.tag) {
+    case "variable-not-found": {
+      return `Variable with id ${error.variableId} not found`;
+    }
+    case "variable-in-choice-not-found": {
+      return `Variable in choice with id ${error.variableId} not found`;
+    }
+    default: {
+      return assertIsNever(error);
+    }
+  }
 };
-
-export type TransformError = {
-  tag: "error";
-  value: CustomError[];
-};
-
-export type TransformResult = TransformSuccess | TransformError;
-
 export class MessageOfAuthorGetter {
   private currentAuthor: Author;
-  private messageParts: MessagePart[] = [];
+  private messageParts: Task[] = [];
   private acc: MessageOfAuthor[] = [];
   private errors: CustomError[] = [];
   private inListItem = false;
@@ -68,18 +56,18 @@ export class MessageOfAuthorGetter {
     this.pushText("\n");
   }
   private handleAuthorSelect(content: JSONContent) {
-    this.acc.push({ author: this.currentAuthor, parts: this.messageParts });
+    this.acc.push({ author: this.currentAuthor, tasks: this.messageParts });
     this.messageParts = [];
     this.currentAuthor = content.attrs?.author;
   }
 
   private pushText(text: string) {
     const last = this.messageParts[this.messageParts.length - 1];
-    if (last?.tag === "text") {
+    if (last?.tag === "AddTextTask") {
       last.text += text;
       return;
     }
-    this.messageParts.push({ tag: "text", text });
+    this.messageParts.push({ tag: "AddTextTask", text });
   }
 
   private handleHeading(content: JSONContent) {
@@ -184,10 +172,7 @@ export class MessageOfAuthorGetter {
               }
             });
           }
-          this.messageParts.push({
-            tag: "lmGenerate",
-            task: this.noteAttrToTask(nodeAttrs, this.editorState.variables),
-          });
+          this.messageParts.push(this.noteAttrToTask(nodeAttrs, this.editorState.variables));
           break;
         }
 
@@ -269,7 +254,7 @@ export class MessageOfAuthorGetter {
       }
     }
 
-    this.acc.push({ author: this.currentAuthor, parts: this.messageParts });
+    this.acc.push({ author: this.currentAuthor, tasks: this.messageParts });
   }
 
   getErrors(): CustomError[] {
@@ -277,15 +262,15 @@ export class MessageOfAuthorGetter {
   }
   getAcc(): MessageOfAuthor[] {
     return this.acc.map((data) => {
-      const parts = [...data.parts];
+      const parts = [...data.tasks];
       // trim left first, trim right last
       const first = parts[0];
-      if (first != null && first.tag === "text") {
+      if (first != null && first.tag === "AddTextTask") {
         first.text = first.text.trimStart();
       }
 
       const last = parts[parts.length - 1];
-      if (last != null && last.tag === "text") {
+      if (last != null && last.tag === "AddTextTask") {
         last.text = last.text.trimEnd();
       }
 

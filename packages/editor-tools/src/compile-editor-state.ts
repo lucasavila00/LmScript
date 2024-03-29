@@ -1,6 +1,6 @@
 import { type Task } from "@lmscript/client/backends/abstract";
 import { LmEditorState } from "./types";
-import { MessageOfAuthorGetter } from "./messages-of-author";
+import { MessageOfAuthorGetter, printCustomError } from "./messages-of-author";
 import { applyChatTemplate } from "./apply-chat-template";
 import { ChatTemplate } from "@lmscript/client/chat-template";
 
@@ -25,8 +25,7 @@ export const compileEditorState = (
 
   const errors = state.getErrors();
   if (errors.length > 0) {
-    // TODO: serialize errors
-    throw new Error(JSON.stringify(errors));
+    throw new Error(errors.map(printCustomError).join("\n"));
   }
   const messages = state.getAcc();
 

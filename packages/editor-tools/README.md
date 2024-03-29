@@ -4,7 +4,11 @@ TODO
 
 ## Installation
 
-TODO
+Install from [NPM](https://www.npmjs.com/package/@lmscript/editor-tools)
+
+```shell
+npm i @lmscript/editor-tools
+```
 
 ## Usage
 

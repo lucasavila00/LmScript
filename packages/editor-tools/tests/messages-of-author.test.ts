@@ -1,6 +1,18 @@
 import { test, expect } from "vitest";
-import { MessageOfAuthorGetter, TransformResult } from "../src/messages-of-author";
+import { CustomError, MessageOfAuthor, MessageOfAuthorGetter } from "../src/messages-of-author";
 import { SamplingParams, LmEditorState } from "../src/types";
+
+type TransformSuccess = {
+  tag: "success";
+  value: MessageOfAuthor[];
+};
+
+type TransformError = {
+  tag: "error";
+  value: CustomError[];
+};
+
+type TransformResult = TransformSuccess | TransformError;
 
 const getMessagesOfAuthor = (editorState: LmEditorState): TransformResult => {
   const state = new MessageOfAuthorGetter(editorState);
@@ -49,6 +61,7 @@ test("empty state", async () => {
         {
           "author": "user",
           "parts": [],
+          "tasks": [],
         },
       ],
     }
@@ -84,7 +97,13 @@ test("handles paragraph", async () => {
           "author": "user",
           "parts": [
             {
-              "tag": "text",
+              "tag": "AddTextTask",
+              "text": "What is the best subject for the illustration to accompany the following?",
+            },
+          ],
+          "tasks": [
+            {
+              "tag": "AddTextTask",
               "text": "What is the best subject for the illustration to accompany the following?",
             },
           ],
@@ -119,7 +138,13 @@ test("handles heading", async () => {
           "author": "user",
           "parts": [
             {
-              "tag": "text",
+              "tag": "AddTextTask",
+              "text": "### Content",
+            },
+          ],
+          "tasks": [
+            {
+              "tag": "AddTextTask",
               "text": "### Content",
             },
           ],
@@ -166,7 +191,13 @@ test("handles variableSelect", async () => {
           "author": "user",
           "parts": [
             {
-              "tag": "text",
+              "tag": "AddTextTask",
+              "text": ""Question: "What is the person doing?" Answer: "The person is happy""",
+            },
+          ],
+          "tasks": [
+            {
+              "tag": "AddTextTask",
               "text": ""Question: "What is the person doing?" Answer: "The person is happy""",
             },
           ],
@@ -242,24 +273,41 @@ test("handles lmGenerator", async () => {
           "author": "user",
           "parts": [
             {
-              "tag": "text",
+              "tag": "AddTextTask",
               "text": "Explanation: ",
             },
             {
-              "tag": "lmGenerate",
-              "task": {
-                "max_tokens": 256,
-                "name": "720ddbc0-12e6-4583-83b6-d0229a60445b",
-                "regex": undefined,
-                "stop": [
-                  "
+              "max_tokens": 256,
+              "name": "720ddbc0-12e6-4583-83b6-d0229a60445b",
+              "regex": undefined,
+              "stop": [
+                "
     ",
-                ],
-                "tag": "GenerateTask",
-              },
+              ],
+              "tag": "GenerateTask",
             },
             {
-              "tag": "text",
+              "tag": "AddTextTask",
+              "text": "",
+            },
+          ],
+          "tasks": [
+            {
+              "tag": "AddTextTask",
+              "text": "Explanation: ",
+            },
+            {
+              "max_tokens": 256,
+              "name": "720ddbc0-12e6-4583-83b6-d0229a60445b",
+              "regex": undefined,
+              "stop": [
+                "
+    ",
+              ],
+              "tag": "GenerateTask",
+            },
+            {
+              "tag": "AddTextTask",
               "text": "",
             },
           ],
