@@ -4,9 +4,15 @@ Dependency-Free Typescript client for LmScript.
 
 ## Installation
 
-TODO
+Install from [NPM](https://www.npmjs.com/package/@lmscript/client)
+
+```shell
+npm i @lmscript/client
+```
 
 ## Usage
+
+TODO docs
 
 There are more complete examples in the
 [client's examples folder](https://github.com/lucasavila00/LmScript/tree/main/client/examples).
