@@ -5,7 +5,7 @@ import { SGLangBackend } from "@lmscript/client/backends/sglang";
 const bench = async () => {
   let promptTokens = 0;
   let completionTokens = 0;
-  const backend = new SGLangBackend(`http://localhost:30004`, {
+  const backend = new SGLangBackend(`http://localhost:30000`, {
     reportUsage: ({ promptTokens: pt, completionTokens: ct }) => {
       promptTokens += pt;
       completionTokens += ct;

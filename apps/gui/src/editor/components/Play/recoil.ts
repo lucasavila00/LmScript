@@ -1,7 +1,6 @@
 import { Backend } from "../../hooks/useBackendConfig";
-import { MessageOfAuthor } from "../../../editor/lib/playMessages";
-import { NamedVariable, SamplingParams, UiGenerationData } from "../../../editor/lib/types";
-import { messagesToTasks } from "../../../editor/lib/messageToTasks";
+import { LmEditorState, UiGenerationData } from "@lmscript/editor-tools/types";
+import { compileEditorState } from "@lmscript/editor-tools";
 import { atomFamily } from "recoil";
 import { GetBackendInstance } from "../../../lib/get-lmscript-backend";
 
@@ -9,9 +8,7 @@ export const generateAsyncAtom = atomFamily<
   UiGenerationData,
   {
     backend: Backend;
-    messages: MessageOfAuthor[];
-    samplingParams: SamplingParams;
-    variables: NamedVariable[];
+    editorState: LmEditorState;
     cacheBuster: number;
   }
 >({
@@ -28,13 +25,13 @@ export const generateAsyncAtom = atomFamily<
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const getter = (window as any).getBackendInstance as GetBackendInstance;
       const instance = getter(param.backend);
-      const tasks = messagesToTasks(param.messages, param.backend.template, param.variables);
+      const tasks = compileEditorState(param.editorState, param.backend.template);
 
       instance
         .executeJSON(
           {
             tasks,
-            sampling_params: param.samplingParams,
+            sampling_params: param.editorState.samplingParams,
             initial_state: {
               text: "",
               captured: {},

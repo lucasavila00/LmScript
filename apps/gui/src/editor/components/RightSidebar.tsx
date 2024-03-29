@@ -16,7 +16,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "../../components/ui/input";
 import { useSamplingParams } from "../hooks/useSamplingParams";
-import { SamplingParams } from "../lib/types";
+import { SamplingParams } from "@lmscript/editor-tools/types";
 import { BackendSetup } from "./BackendSetup";
 import { useBackendConfig } from "../hooks/useBackendConfig";
 

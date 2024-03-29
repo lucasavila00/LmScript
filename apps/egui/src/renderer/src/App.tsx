@@ -4,7 +4,7 @@ import { createPortal } from "react-dom";
 import { RenderDarkModeSwitcher } from "@lmscript/gui/src/components/dark-mode";
 import { emptyInitialContent, initialContent } from "@lmscript/gui/src/editor/hooks/init";
 import { useState } from "react";
-import { LmEditorState } from "@lmscript/gui/src/editor/lib/types";
+import { LmEditorState } from "@lmscript/editor-tools/types";
 import { useSidebar } from "@lmscript/gui/src/editor/hooks/useSideBar";
 
 const serializeFile = (content: LmEditorState): string => JSON.stringify(content, null, 2);

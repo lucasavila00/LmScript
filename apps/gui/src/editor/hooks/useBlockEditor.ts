@@ -16,7 +16,7 @@ import { LmGenerator } from "../extensions/LmGenerator/LmGenerator";
 import { useSamplingParams } from "./useSamplingParams";
 import { useCallback, useState } from "react";
 import { ListItem } from "@tiptap/extension-list-item";
-import { LmEditorState } from "../lib/types";
+import { LmEditorState } from "@lmscript/editor-tools/types";
 
 const CustomListItem = ListItem.extend({
   content: "paragraph",

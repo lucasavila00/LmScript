@@ -1,5 +1,4 @@
-import { JSONContent } from "@tiptap/react";
-import { Author, LmEditorState, GenerationNodeAttrs } from "./types";
+import { JSONContent, Author, LmEditorState, GenerationNodeAttrs } from "./types";
 
 export type MessagePartText = {
   tag: "text";
@@ -18,7 +17,7 @@ export type MessageOfAuthor = {
   parts: MessagePart[];
 };
 
-export type Error =
+export type CustomError =
   | {
       tag: "variable-not-found";
       variableId: string;
@@ -35,16 +34,16 @@ export type TransformSuccess = {
 
 export type TransformError = {
   tag: "error";
-  value: Error[];
+  value: CustomError[];
 };
 
 export type TransformResult = TransformSuccess | TransformError;
 
-class MessageOfAuthorGetter {
+export class MessageOfAuthorGetter {
   private currentAuthor: Author;
   private messageParts: MessagePart[] = [];
   private acc: MessageOfAuthor[] = [];
-  private errors: Error[] = [];
+  private errors: CustomError[] = [];
   private inListItem = false;
   constructor(private readonly editorState: Pick<LmEditorState, "doc" | "variables">) {
     const root = this.editorState.doc;
@@ -213,7 +212,7 @@ class MessageOfAuthorGetter {
     this.acc.push({ author: this.currentAuthor, parts: this.messageParts });
   }
 
-  getErrors(): Error[] {
+  getErrors(): CustomError[] {
     return this.errors;
   }
   getAcc(): MessageOfAuthor[] {
@@ -234,14 +233,3 @@ class MessageOfAuthorGetter {
     });
   }
 }
-
-export const getMessagesOfAuthor = (editorState: LmEditorState): TransformResult => {
-  const state = new MessageOfAuthorGetter(editorState);
-
-  const errors = state.getErrors();
-  if (errors.length > 0) {
-    return { tag: "error", value: errors };
-  }
-  const acc = state.getAcc();
-  return { tag: "success", value: acc };
-};

@@ -1,5 +1,5 @@
 import { HtmlPlay } from "../editor/components/Play/HtmlPlay";
-import { LmEditorState } from "../editor/lib/types";
+import { LmEditorState } from "@lmscript/editor-tools/types";
 
 const meta = {
   title: "HtmlPlay",
@@ -258,7 +258,6 @@ export const LoadingAll = () => {
       onRetry={() => {}}
       editorState={editorState}
       onOpenBackendConfig={() => {}}
-      generations={[]}
     />
   );
 };
@@ -276,7 +275,6 @@ export const LoadingSecond = () => {
       onRetry={() => {}}
       editorState={editorState}
       onOpenBackendConfig={() => {}}
-      generations={[]}
     />
   );
 };
@@ -307,7 +305,6 @@ Paragraph 2`,
       onRetry={() => {}}
       editorState={editorState}
       onOpenBackendConfig={() => {}}
-      generations={[]}
     />
   );
 };

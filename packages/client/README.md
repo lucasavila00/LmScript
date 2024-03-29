@@ -15,7 +15,7 @@ npm i @lmscript/client
 TODO docs
 
 There are more complete examples in the
-[client's examples folder](https://github.com/lucasavila00/LmScript/tree/main/client/examples).
+[client's examples folder](https://github.com/lucasavila00/LmScript/tree/main/examples/client).
 
 ### Adding text to context
 
@@ -102,8 +102,8 @@ const client = new LmScript(backend, {
 
 ### Runpod Serverless Backend
 
-Use it LmScript's
-[Runpod Serverless Docker Image](https://github.com/lucasavila00/LmScript/tree/main/runpod-serverless-sglang).
+Use it with LmScript's
+[Runpod Serverless Docker Image](https://github.com/lucasavila00/LmScript/tree/main/docker/runpod-serverless-sglang).
 
 ```ts
 import { LmScript } from "@lmscript/client";

@@ -9,7 +9,7 @@ import { EditorContext } from "./context/editor";
 import { TextMenu } from "./components/TextMenu";
 import { useBackendConfig } from "./hooks/useBackendConfig";
 import { Play } from "./components/Play/Play";
-import { LmEditorState } from "./lib/types";
+import { LmEditorState } from "@lmscript/editor-tools/types";
 import { SidebarState } from "./hooks/useSideBar";
 import { useVariables } from "./hooks/useVariables";
 import { useSamplingParams } from "./hooks/useSamplingParams";

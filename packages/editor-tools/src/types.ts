@@ -1,5 +1,18 @@
 import { z } from "zod";
-import { JSONContent } from "@tiptap/react";
+
+// Copied from 'import { JSONContent } from "@tiptap/react"'
+export declare type JSONContent = {
+  type?: string;
+  attrs?: Record<string, any>;
+  content?: JSONContent[];
+  marks?: {
+    type: string;
+    attrs?: Record<string, any>;
+    [key: string]: any;
+  }[];
+  text?: string;
+  [key: string]: any;
+};
 export type NamedVariable = {
   uuid: string;
   name: string;

@@ -1,33 +1,22 @@
 import { Backend } from "../../hooks/useBackendConfig";
-import {
-  MessageOfAuthor,
-  TransformError,
-  getMessagesOfAuthor,
-} from "../../../editor/lib/playMessages";
-import { LmEditorState, NamedVariable, SamplingParams } from "../../../editor/lib/types";
+import { LmEditorState } from "@lmscript/editor-tools/types";
 import { FC, useState } from "react";
 import { useRecoilValueLoadable } from "recoil";
 import { generateAsyncAtom } from "./recoil";
 import { assertIsNever } from "../../../lib/utils";
 import { HtmlPlay } from "./HtmlPlay";
-import { getGenerations } from "../../lib/generationsJson";
 
 const PlayStream: FC<{
   backend: Backend;
-  messages: MessageOfAuthor[];
-  samplingParams: SamplingParams;
-  variables: NamedVariable[];
   editorState: LmEditorState;
   onOpenBackendConfig: () => void;
-}> = ({ variables, backend, messages, samplingParams, editorState, onOpenBackendConfig }) => {
+}> = ({ backend, editorState, onOpenBackendConfig }) => {
   const [cacheBuster, setCacheBuster] = useState(0);
   const onRetry = () => setCacheBuster((prev) => prev + 1);
   const loadable = useRecoilValueLoadable(
     generateAsyncAtom({
-      samplingParams,
+      editorState,
       backend,
-      messages,
-      variables,
       cacheBuster,
     }),
   );
@@ -47,7 +36,6 @@ const PlayStream: FC<{
           editorState={editorState}
           onRetry={onRetry}
           onOpenBackendConfig={onOpenBackendConfig}
-          generations={getGenerations(messages)}
         />
       );
     }
@@ -57,52 +45,16 @@ const PlayStream: FC<{
   }
 };
 
-export const ValidationError: FC<{ transformResult: TransformError }> = ({ transformResult }) => {
-  return (
-    <div className="flex items-center justify-center flex-col mt-8 gap-2">
-      <div className="text-lg font-medium">Validation Error</div>
-      {transformResult.value
-        .map((err) => {
-          switch (err.tag) {
-            case "variable-not-found": {
-              return `There are variable inputs unconnected`;
-            }
-            case "variable-in-choice-not-found": {
-              return `There are variable inputs unconnected in a choice generation`;
-            }
-            default: {
-              return assertIsNever(err);
-            }
-          }
-        })
-        .map((str, idx) => {
-          return (
-            <div key={idx} className="text-sm text-muted-foreground max-w-xl text-center">
-              {str}
-            </div>
-          );
-        })}
-    </div>
-  );
-};
-
 export const Play: FC<{
   backend: Backend;
   editorState: LmEditorState;
   onOpenBackendConfig: () => void;
 }> = ({ editorState, backend, onOpenBackendConfig }) => {
-  const msgs = getMessagesOfAuthor(editorState);
-  if (msgs.tag === "success") {
-    return (
-      <PlayStream
-        backend={backend}
-        messages={msgs.value}
-        samplingParams={editorState.samplingParams}
-        variables={editorState.variables}
-        editorState={editorState}
-        onOpenBackendConfig={onOpenBackendConfig}
-      />
-    );
-  }
-  return <ValidationError transformResult={msgs} />;
+  return (
+    <PlayStream
+      backend={backend}
+      editorState={editorState}
+      onOpenBackendConfig={onOpenBackendConfig}
+    />
+  );
 };

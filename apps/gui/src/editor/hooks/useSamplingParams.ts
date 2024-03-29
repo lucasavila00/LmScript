@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { SamplingParams } from "../lib/types";
+import { SamplingParams } from "@lmscript/editor-tools/types";
 
 export const useSamplingParams = (initialState: SamplingParams) => {
   const [samplingParams, setSamplingParams] = useState<SamplingParams>(initialState);

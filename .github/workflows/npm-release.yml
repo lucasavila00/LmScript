@@ -24,3 +24,4 @@ jobs:
           pnpm install
           pnpm build-package
           (cd packages/client && pnpm publish --no-git-checks --access public)
+          (cd packages/editor-tools && pnpm publish --no-git-checks --access public)
