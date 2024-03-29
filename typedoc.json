@@ -1,0 +1,9 @@
+{
+  "entryPoints": ["packages/*"],
+  "name": "LmScript",
+  "entryPointStrategy": "packages",
+  "includeVersion": false
+
+  // Potentially useful for debugging
+  // "logLevel": "Verbose"
+}
