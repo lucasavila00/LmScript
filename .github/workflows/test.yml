@@ -11,9 +11,9 @@ jobs:
       - uses: denoland/setup-deno@v1
         with:
           deno-version: v1.41.2
-      - run: cd packages/client && npm ci && npm run static
       - run: npm config set "@tiptap-pro:registry" https://registry.tiptap.dev/
       - run: npm config set "@jsr:registry" https://npm.jsr.io
       - run: npm config set "//registry.tiptap.dev/:_authToken" ${{ secrets.TIPTAP_TOKEN }}
-      - run: cd gui && npm ci && npm run static && npm run test -- --run && npm run tw
-      - run: cd egui && npm ci && npm run static
+      - run: pnpm i
+      - run: pnpm run static
+      - run: pnpm run build

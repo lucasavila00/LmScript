@@ -6,6 +6,8 @@ settings:
 
 importers:
 
+  .: {}
+
   apps/egui:
     dependencies:
       '@electron-toolkit/preload':
@@ -132,9 +134,27 @@ importers:
       '@tiptap-pro/extension-drag-handle-react':
         specifier: ^2.7.6
         version: 2.7.7(@tiptap-pro/extension-drag-handle@2.7.7)(@tiptap/pm@2.2.4)(@tiptap/react@2.2.4)(react-dom@18.2.0)(react@18.2.0)
+      '@tiptap/core':
+        specifier: ^2.2.4
+        version: 2.2.4(@tiptap/pm@2.2.4)
+      '@tiptap/extension-document':
+        specifier: ^2.2.4
+        version: 2.2.4(@tiptap/core@2.2.4)
+      '@tiptap/extension-dropcursor':
+        specifier: ^2.2.4
+        version: 2.2.4(@tiptap/core@2.2.4)(@tiptap/pm@2.2.4)
       '@tiptap/extension-focus':
         specifier: ^2.2.4
         version: 2.2.4(@tiptap/core@2.2.4)(@tiptap/pm@2.2.4)
+      '@tiptap/extension-heading':
+        specifier: ^2.2.4
+        version: 2.2.4(@tiptap/core@2.2.4)
+      '@tiptap/extension-horizontal-rule':
+        specifier: ^2.2.4
+        version: 2.2.4(@tiptap/core@2.2.4)(@tiptap/pm@2.2.4)
+      '@tiptap/extension-list-item':
+        specifier: ^2.2.4
+        version: 2.2.4(@tiptap/core@2.2.4)
       '@tiptap/extension-placeholder':
         specifier: ^2.2.4
         version: 2.2.4(@tiptap/core@2.2.4)(@tiptap/pm@2.2.4)
@@ -204,6 +224,9 @@ importers:
       tailwindcss-animate:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@3.4.3)
+      tippy.js:
+        specifier: ^6.3.7
+        version: 6.3.7
       zod:
         specifier: ^3.22.4
         version: 3.22.4

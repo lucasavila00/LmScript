@@ -6,7 +6,7 @@ import { SGLangBackend } from "@lmscript/client/backends/sglang";
 import { AbstractBackend } from "@lmscript/client/backends/abstract";
 import { VllmBackend } from "@lmscript/client/backends/vllm";
 import { RunpodServerlessBackend } from "@lmscript/client/backends/runpod-serverless-sglang";
-import type { Backend } from "gui/src/editor/hooks/useBackendConfig";
+import type { Backend } from "@lmscript/gui/src/editor/hooks/useBackendConfig";
 import fs from "node:fs";
 
 const assertIsNever = (x: never): never => {
