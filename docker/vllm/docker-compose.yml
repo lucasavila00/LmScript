@@ -1,0 +1,17 @@
+services:
+  sv:
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    image: vllm/vllm-openai:v0.4.0
+    command: "--model TheBloke/Mistral-7B-Instruct-v0.2-AWQ --gpu-memory-utilization 0.8 --max-model-len 4096 --quantization awq"
+    ports:
+      - 8000:8000
+    network_mode: host
+    ipc: "host"
+    volumes:
+      - ~/.cache/huggingface:/root/.cache/huggingface

@@ -9,3 +9,5 @@ Running all examples tests all features of the client.
 - Executing the SGLang tests, local server
 
   `npx tsx src/sg-runtime.ts`
+
+  `npx tsx src/vllm-runtime.ts`

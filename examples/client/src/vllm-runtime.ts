@@ -7,7 +7,7 @@ const bench = async () => {
   let completionTokens = 0;
   const backend = new VllmBackend({
     url: `http://localhost:8000`,
-    model: "TheBloke/Mistral-7B-Instruct-v0.2-GPTQ",
+    model: "TheBloke/Mistral-7B-Instruct-v0.2-AWQ",
     reportUsage: ({ promptTokens: pt, completionTokens: ct }) => {
       promptTokens += pt;
       completionTokens += ct;
