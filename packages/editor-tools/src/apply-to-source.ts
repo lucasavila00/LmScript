@@ -3,7 +3,7 @@ import { NamedVariable } from "./types";
 import { assertIsNever } from "./utils";
 
 export const applyToSource = (messages: MessageOfAuthor[], variables: NamedVariable[]): string => {
-  let usedVariables: string[] = [];
+  let usedVariables: NamedVariable[] = [];
   const actions = messages
     .map((message): string => {
       let acc = "";
@@ -39,7 +39,7 @@ export const applyToSource = (messages: MessageOfAuthor[], variables: NamedVaria
                         // We just throw here and assume this was checked before.
                         throw new Error(`Variable ${choice.value} not found`);
                       }
-                      usedVariables.push(item.name);
+                      usedVariables.push(item);
                       return item.name;
                     }
                     case "typed": {
@@ -48,7 +48,7 @@ export const applyToSource = (messages: MessageOfAuthor[], variables: NamedVaria
                         const inner = val.slice(1, -1);
                         const foundVariable = variables.find((v) => v.name === inner);
                         if (foundVariable != null) {
-                          usedVariables.push(foundVariable.name);
+                          usedVariables.push(foundVariable);
                           return foundVariable.name;
                         }
                       }
@@ -66,7 +66,7 @@ export const applyToSource = (messages: MessageOfAuthor[], variables: NamedVaria
               return `${spaces}.select(${JSON.stringify(task.name)}, {choices: [${choices}]})`;
             }
             case "VariableSelectExtension": {
-              usedVariables.push(task.data.name);
+              usedVariables.push(task.data);
               return `${spaces}.push(${task.data.name})`;
             }
             default: {
@@ -79,5 +79,5 @@ export const applyToSource = (messages: MessageOfAuthor[], variables: NamedVaria
       return acc;
     })
     .join("\n");
-  return `export default (client: InitClient, ${usedVariables.map((it) => it + ": string").join(", ")}) => client${actions}`;
+  return `export default (client: InitClient, {${usedVariables.map((it) => it.name + " = " + JSON.stringify(it.value)).join(", ")}}) => client${actions}`;
 };

@@ -1,5 +1,5 @@
 import type { InitClient } from "@lmscript/client";
-export default (client: InitClient, variable1: string) =>
+export default (client: InitClient, { variable1 = "The content of the first variable." }) =>
   client
     .user((m) =>
       m

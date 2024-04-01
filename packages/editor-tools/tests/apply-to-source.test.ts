@@ -31,7 +31,7 @@ test("empty state", async () => {
     },
   });
   expect(msgs).toMatchInlineSnapshot(`
-    "export default (client: InitClient, ) => client.user(m => m
+    "export default (client: InitClient, {}) => client.user(m => m
 
     )"
   `);
@@ -59,7 +59,7 @@ test("handles paragraph", async () => {
     },
   });
   expect(msgs).toMatchInlineSnapshot(`
-    "export default (client: InitClient, ) => client.user(m => m
+    "export default (client: InitClient, {}) => client.user(m => m
        .push("What is the best subject for the illustration to accompany the following?")
     )"
   `);
@@ -83,7 +83,7 @@ test("handles heading", async () => {
     },
   });
   expect(msgs).toMatchInlineSnapshot(`
-    "export default (client: InitClient, ) => client.user(m => m
+    "export default (client: InitClient, {}) => client.user(m => m
        .push("### Content")
     )"
   `);
@@ -119,7 +119,7 @@ test("handles variableSelect", async () => {
     },
   });
   expect(msgs).toMatchInlineSnapshot(`
-    "export default (client: InitClient, content: string) => client.user(m => m
+    "export default (client: InitClient, {content = "Question: \\"What is the person doing?\\" Answer: \\"The person is happy\\""}) => client.user(m => m
        .push("\\"")
        .push(content)
        .push("\\"")
@@ -157,7 +157,7 @@ test("handles lmGenerator", async () => {
     },
   });
   expect(msgs).toMatchInlineSnapshot(`
-    "export default (client: InitClient, ) => client.user(m => m
+    "export default (client: InitClient, {}) => client.user(m => m
        .push("Explanation: ")
        .gen("_explanation", {"maxTokens":256,"stop":["\\n"]})
        .push("")

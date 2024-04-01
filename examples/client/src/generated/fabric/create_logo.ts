@@ -1,5 +1,10 @@
 import type { InitClient } from "@lmscript/client";
-export default (client: InitClient, input: string) =>
+export default (
+  client: InitClient,
+  {
+    input = "LmScript: Fast and Controllable Language Model Interactions in Typescript - Open Source, Open Models ",
+  },
+) =>
   client
     .user((m) =>
       m
