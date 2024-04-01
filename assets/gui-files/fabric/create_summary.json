@@ -274,19 +274,240 @@
         ]
       },
       {
-        "type": "paragraph",
+        "type": "orderedList",
+        "attrs": {
+          "start": 1
+        },
         "content": [
           {
-            "type": "lmGenerator",
-            "attrs": {
-              "id": "0fb92e55-49d9-4162-bf9d-131e3e9f4d7a",
-              "choices": [],
-              "type": "regex",
-              "max_tokens": 512,
-              "name": "main_points",
-              "stop": [],
-              "regex": "([0-9]+\\. [^\n]*\n)+([0-9]+\\. [^\n]*)"
-            }
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "lmGenerator",
+                    "attrs": {
+                      "id": "4c501651-598f-4535-a2a5-2878d5fa7ce1",
+                      "choices": [],
+                      "type": "generation",
+                      "max_tokens": 100,
+                      "name": "mp1",
+                      "stop": [
+                        "\n"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "lmGenerator",
+                    "attrs": {
+                      "id": "53875333-4804-4c66-9ccb-0b49c2131f7e",
+                      "choices": [],
+                      "type": "generation",
+                      "max_tokens": 100,
+                      "name": "mp2",
+                      "stop": [
+                        "\n"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "lmGenerator",
+                    "attrs": {
+                      "id": "fe991e9e-203b-41d0-b694-fc536cb65556",
+                      "choices": [],
+                      "type": "generation",
+                      "max_tokens": 100,
+                      "name": "mp3",
+                      "stop": [
+                        "\n"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "lmGenerator",
+                    "attrs": {
+                      "id": "6be2f785-0611-472b-83de-218a3dcdd7cf",
+                      "choices": [],
+                      "type": "generation",
+                      "max_tokens": 100,
+                      "name": "mp4",
+                      "stop": [
+                        "\n"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "lmGenerator",
+                    "attrs": {
+                      "id": "4476ab20-473b-4b79-a8af-3ecb7b5374ef",
+                      "choices": [],
+                      "type": "generation",
+                      "max_tokens": 100,
+                      "name": "mp5",
+                      "stop": [
+                        "\n"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "lmGenerator",
+                    "attrs": {
+                      "id": "164cd861-bf49-41f8-b138-ae0db4c32f16",
+                      "choices": [],
+                      "type": "generation",
+                      "max_tokens": 100,
+                      "name": "mp6",
+                      "stop": [
+                        "\n"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "lmGenerator",
+                    "attrs": {
+                      "id": "d9af76dc-739e-420a-9c59-05b75abb91d4",
+                      "choices": [],
+                      "type": "generation",
+                      "max_tokens": 100,
+                      "name": "mp7",
+                      "stop": [
+                        "\n"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "lmGenerator",
+                    "attrs": {
+                      "id": "ba17a319-efdb-4c31-b3ef-ee32a6f40816",
+                      "choices": [],
+                      "type": "generation",
+                      "max_tokens": 100,
+                      "name": "mp8",
+                      "stop": [
+                        "\n"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "lmGenerator",
+                    "attrs": {
+                      "id": "d399b12d-9f26-4e23-8ed5-279929129ed4",
+                      "choices": [],
+                      "type": "generation",
+                      "max_tokens": 100,
+                      "name": "mp9",
+                      "stop": [
+                        "\n"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "lmGenerator",
+                    "attrs": {
+                      "id": "5351d1e1-7376-4360-b487-d7666200b329",
+                      "choices": [],
+                      "type": "generation",
+                      "max_tokens": 100,
+                      "name": "mp10",
+                      "stop": [
+                        "\n"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
           }
         ]
       },
@@ -303,28 +524,137 @@
         ]
       },
       {
-        "type": "paragraph",
+        "type": "orderedList",
+        "attrs": {
+          "start": 1
+        },
         "content": [
           {
-            "type": "lmGenerator",
-            "attrs": {
-              "id": "8453a647-7b4c-4d9e-86db-49da0c53bc6b",
-              "choices": [],
-              "type": "regex",
-              "max_tokens": 512,
-              "name": "takeaways",
-              "stop": [],
-              "regex": "([0-9]+\\. [^\n]*\n)+([0-9]+\\. [^\n]*)"
-            }
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "lmGenerator",
+                    "attrs": {
+                      "id": "12bed642-c0a2-4949-8529-916c28540dbf",
+                      "choices": [],
+                      "type": "generation",
+                      "max_tokens": 100,
+                      "name": "take1",
+                      "stop": [
+                        "\n"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "lmGenerator",
+                    "attrs": {
+                      "id": "e62fb8e1-d2f8-49f8-ba86-11759983a542",
+                      "choices": [],
+                      "type": "generation",
+                      "max_tokens": 100,
+                      "name": "take2",
+                      "stop": [
+                        "\n"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "lmGenerator",
+                    "attrs": {
+                      "id": "9d4652da-cb09-45cb-8e05-bed3495ffc8d",
+                      "choices": [],
+                      "type": "generation",
+                      "max_tokens": 100,
+                      "name": "take3",
+                      "stop": [
+                        "\n"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "lmGenerator",
+                    "attrs": {
+                      "id": "40efca70-c5d8-4315-81d5-4a8ca9cdd903",
+                      "choices": [],
+                      "type": "generation",
+                      "max_tokens": 100,
+                      "name": "take4",
+                      "stop": [
+                        "\n"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "lmGenerator",
+                    "attrs": {
+                      "id": "3b7fce5b-22ce-46da-8924-431bf8f7c06e",
+                      "choices": [],
+                      "type": "generation",
+                      "max_tokens": 100,
+                      "name": "take5",
+                      "stop": [
+                        "\n"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
           }
         ]
+      },
+      {
+        "type": "paragraph"
       }
     ]
   },
   "variables": [
     {
       "name": "input",
-      "value": "Felix of Burgundy (died 647 or 648) was a saint and the first bishop of the kingdom of the East Angles. He is widely credited as the man who introduced Christianity to the kingdom. Felix came from the Frankish kingdom of Burgundy, and may have been a priest at one of the monasteries in Francia founded by the Irish missionary Columbanus—Felix may have been Bishop of Châlons, before being forced to seek refuge elsewhere. Felix travelled from Burgundy to Canterbury before being sent by Archbishop Honorius of Canterbury to the kingdom of Sigeberht of East Anglia in about 630. Upon Felix's arrival in East Anglia, Sigeberht gave him a see at Dommoc, possibly in Suffolk, either at Walton, near Felixstowe, or at Dunwich. According to Bede, Felix helped Sigeberht to establish a school in his kingdom. Felix died on 8 March 647 or 648, having been bishop for 17 years. His relics were translated from Dommoc to Soham Abbey and then to the abbey at Ramsey. Several English churches are dedicated to him. ",
+      "value": "A Turing machine is a mathematical model of computation describing an abstract machine[1] that manipulates symbols on a strip of tape according to a table of rules.[2] Despite the model's simplicity, it is capable of implementing any computer algorithm.[3]\n\nThe machine operates on an infinite[4] memory tape divided into discrete cells,[5] each of which can hold a single symbol drawn from a finite set of symbols called the alphabet of the machine. It has a \"head\" that, at any point in the machine's operation, is positioned over one of these cells, and a \"state\" selected from a finite set of states. At each step of its operation, the head reads the symbol in its cell. Then, based on the symbol and the machine's own present state, the machine writes a symbol into the same cell, and moves the head one step to the left or the right,[6] or halts the computation. The choice of which replacement symbol to write, which direction to move the head, and whether to halt is based on a finite table that specifies what to do for each combination of the current state and the symbol that is read. Like a real computer program, it is possible for a Turing machine to go into an infinite loop which will never halt.\n\nThe Turing machine was invented in 1936 by Alan Turing,[7][8] who called it an \"a-machine\" (automatic machine).[9] It was Turing's doctoral advisor, Alonzo Church, who later coined the term \"Turing machine\" in a review.[10] With this model, Turing was able to answer two questions in the negative:\n\n    Does a machine exist that can determine whether any arbitrary machine on its tape is \"circular\" (e.g., freezes, or fails to continue its computational task)?\n    Does a machine exist that can determine whether any arbitrary machine on its tape ever prints a given symbol?[11][12]\n\nThus by providing a mathematical description of a very simple device capable of arbitrary computations, he was able to prove properties of computation in general—and in particular, the uncomputability of the Entscheidungsproblem ('decision problem').[13]\n\nTuring machines proved the existence of fundamental limitations on the power of mechanical computation.[14] While they can express arbitrary computations, their minimalist design makes them too slow for computation in practice: real-world computers are based on different designs that, unlike Turing machines, use random-access memory.\n\nTuring completeness is the ability for a computational model or a system of instructions to simulate a Turing machine. A programming language that is Turing complete is theoretically capable of expressing all tasks accomplishable by computers; nearly all programming languages are Turing complete if the limitations of finite memory are ignored.",
       "uuid": "6f1f1cff-5940-4ca9-9924-22f041986a27"
     }
   ],
