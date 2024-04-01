@@ -2,6 +2,7 @@ import { InitClient } from "@lmscript/client";
 import { assertIsNever } from "./utils";
 import { getIllustrationPrompt } from "./tasks/illustrator-agent";
 import { generateMarkdown } from "./tasks/markdown-generator";
+import createSummary from "./generated/fabric/create_summary";
 const toolUse = async (model: InitClient, question: string) => {
   const { captured, state: thread } = await model
     .push(`To answer this question: ${question}. `)
@@ -71,6 +72,14 @@ const characterGen = (model: InitClient, name: string) =>
     )
     .gen("json_output", { maxTokens: 256, regex: characterRegex });
 export const kitchenSink = async (client: InitClient) => {
+  const { rawText: conversation6 } = await createSummary(
+    client,
+    "Charles Richardson (c.10 March 1769 - 10 November 1850) was an English Royal Navy officer. He joined HMS Vestal in 1787, where he made an aborted journey to China before serving on the East Indies Station. He transferred to HMS Phoenix and fought in the Battle of Tellicherry. With HMS Circe he combated the Nore mutiny and fought in the Battle of Camperdown, capturing Jan Willem de Winter. He fought in the Battle of Callantsoog and the Vlieter incident, sailed to Egypt, and fought in the battles of Abukir, Mandora, and Alexandria. Commanding HMS Alligator, he was sent to the Leeward Islands Station during the Napoleonic Wars, where he captured three Dutch settlements. He transferred to HMS Topaze in 1821 and sailed to China, where his crew killed two locals in self-defence. The resulting diplomatic incident strained Richardson's health and he was invalided home, where he was appointed Knight Commander of the Order of the Bath and promoted to vice-admiral. He died of influenza in Painsthorpe.",
+  ).run({
+    temperature: 0.1,
+  });
+
+  console.log(conversation6);
   const { rawText: conversation4 } = await multiTurnQuestion(
     client,
     "What is 2 + 2?",

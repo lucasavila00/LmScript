@@ -37,5 +37,5 @@ export const compileEditorState = (
   }
   const messages = state.getAcc();
 
-  return applyChatTemplate(messages, options.template);
+  return applyChatTemplate(messages, editorState.variables, options.template);
 };

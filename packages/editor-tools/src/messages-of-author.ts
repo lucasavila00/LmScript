@@ -1,10 +1,32 @@
-import { Task } from "@lmscript/client/backends/abstract";
-import { JSONContent, Author, LmEditorState, GenerationNodeAttrs, NamedVariable } from "./types";
+import { AddTextTask, GenerateTask } from "@lmscript/client/backends/abstract";
+import {
+  JSONContent,
+  Author,
+  LmEditorState,
+  GenerationNodeAttrs,
+  NamedVariable,
+  StoredChoice,
+} from "./types";
 import { assertIsNever } from "./utils";
 
+export type ExtendedSelectTask = {
+  tag: "ExtendedSelectTask";
+  name: string | undefined;
+  choices: StoredChoice[];
+};
+
+export type VariableSelectExtension = {
+  tag: "VariableSelectExtension";
+  data: NamedVariable;
+};
+export type ExtendedTask =
+  | AddTextTask
+  | GenerateTask
+  | ExtendedSelectTask
+  | VariableSelectExtension;
 export type MessageOfAuthor = {
   author: Author;
-  tasks: Task[];
+  tasks: ExtendedTask[];
 };
 
 export type CustomError =
@@ -29,9 +51,10 @@ export const printCustomError = (error: CustomError): string => {
     }
   }
 };
+
 export class MessageOfAuthorGetter {
   private currentAuthor: Author;
-  private messageTasks: Task[] = [];
+  private messageTasks: ExtendedTask[] = [];
   private acc: MessageOfAuthor[] = [];
   private errors: CustomError[] = [];
   private inListItem = false;
@@ -82,7 +105,7 @@ export class MessageOfAuthorGetter {
     this.addDoubleBreak();
   }
 
-  private noteAttrToTask(nodeAttrs: GenerationNodeAttrs, variables: NamedVariable[]): Task {
+  private noteAttrToTask(nodeAttrs: GenerationNodeAttrs): ExtendedTask {
     switch (nodeAttrs.type) {
       case "generation": {
         return {
@@ -98,40 +121,15 @@ export class MessageOfAuthorGetter {
           tag: "GenerateTask",
           name: this.useGenerationUuids ? nodeAttrs.id : nodeAttrs.name,
           stop: [],
-          max_tokens: 256,
+          max_tokens: nodeAttrs.max_tokens,
           regex: nodeAttrs.regex,
         };
       }
       case "selection": {
         return {
-          tag: "SelectTask",
+          tag: "ExtendedSelectTask",
           name: this.useGenerationUuids ? nodeAttrs.id : nodeAttrs.name,
-          choices: nodeAttrs.choices.map((choice) => {
-            switch (choice.tag) {
-              case "variable": {
-                const item = variables.find((v) => v.uuid === choice.value);
-                if (item == null) {
-                  // We just throw here and assume this was checked before.
-                  throw new Error(`Variable ${choice.value} not found`);
-                }
-                return item.value;
-              }
-              case "typed": {
-                const val = choice.value;
-                if (val.startsWith("{") && val.endsWith("}")) {
-                  const inner = val.slice(1, -1);
-                  const foundVariable = variables.find((v) => v.name === inner);
-                  if (foundVariable != null) {
-                    return foundVariable.value;
-                  }
-                }
-                return val;
-              }
-              default: {
-                return assertIsNever(choice);
-              }
-            }
-          }),
+          choices: nodeAttrs.choices,
         };
       }
       default: {
@@ -156,7 +154,11 @@ export class MessageOfAuthorGetter {
               variableId: variableUuid,
             });
           } else {
-            this.pushText(fromVariables.value);
+            this.messageTasks.push({
+              tag: "VariableSelectExtension",
+              data: fromVariables,
+            });
+            // this.pushText(fromVariables.value);
           }
           break;
         }
@@ -177,7 +179,7 @@ export class MessageOfAuthorGetter {
               }
             });
           }
-          this.messageTasks.push(this.noteAttrToTask(nodeAttrs, this.editorState.variables));
+          this.messageTasks.push(this.noteAttrToTask(nodeAttrs));
           break;
         }
 

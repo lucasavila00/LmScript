@@ -182,7 +182,19 @@ test("handles variableSelect", async () => {
           "tasks": [
             {
               "tag": "AddTextTask",
-              "text": ""Question: "What is the person doing?" Answer: "The person is happy""",
+              "text": """,
+            },
+            {
+              "data": {
+                "name": "content",
+                "uuid": "e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e5",
+                "value": "Question: "What is the person doing?" Answer: "The person is happy"",
+              },
+              "tag": "VariableSelectExtension",
+            },
+            {
+              "tag": "AddTextTask",
+              "text": """,
             },
           ],
         },

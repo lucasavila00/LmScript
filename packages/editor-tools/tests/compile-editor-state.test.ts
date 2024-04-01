@@ -87,7 +87,15 @@ test("handles variable override", async () => {
       },
       {
         "tag": "AddTextTask",
-        "text": ""Question: "What is the person doing?" Answer: "The person is happy""",
+        "text": """,
+      },
+      {
+        "tag": "AddTextTask",
+        "text": "Question: "What is the person doing?" Answer: "The person is happy"",
+      },
+      {
+        "tag": "AddTextTask",
+        "text": """,
       },
       {
         "tag": "AddTextTask",
@@ -141,7 +149,15 @@ test("handles variable override", async () => {
       },
       {
         "tag": "AddTextTask",
-        "text": ""The new content"",
+        "text": """,
+      },
+      {
+        "tag": "AddTextTask",
+        "text": "The new content",
+      },
+      {
+        "tag": "AddTextTask",
+        "text": """,
       },
       {
         "tag": "AddTextTask",
