@@ -23,3 +23,5 @@ jobs:
       - run: pnpm run build-packages
       - run: pnpm run static
       - run: pnpm run test
+      # assert no file were changed
+      - run: git diff --exit-code
