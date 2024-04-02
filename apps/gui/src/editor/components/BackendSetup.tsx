@@ -70,7 +70,7 @@ const UrlTokenTemplateConfig: FC<{
   const form = useForm<z.infer<typeof RunpodSglangConfigSchema>>({
     resolver: zodResolver(RunpodSglangConfigSchema),
     defaultValues: {
-      url: "http://localhost:8000",
+      url: "http://localhost:30000",
       token: "",
       template: "mistral",
     },
@@ -95,7 +95,7 @@ const UrlTokenTemplateConfig: FC<{
             <FormItem>
               <FormLabel>URL</FormLabel>
               <FormControl>
-                <Input placeholder="http://localhost:8000" {...field} />
+                <Input placeholder="http://localhost:30000" {...field} />
               </FormControl>
               <FormDescription>The URL of the Endpoint.</FormDescription>
               <FormMessage />
@@ -155,7 +155,7 @@ const VllmConfig: FC<{
       url: "http://localhost:8000",
       token: "",
       template: "mistral",
-      model: "",
+      model: "TheBloke/Mistral-7B-Instruct-v0.2-AWQ",
     },
   });
 

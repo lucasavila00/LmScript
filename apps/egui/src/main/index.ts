@@ -92,6 +92,8 @@ app.whenReady().then(() => {
   });
   ipcMain.handle("executeJSON", async (_, config, data) => {
     const backend = getBackendInstance(config);
+    // eslint-disable-next-line no-console
+    console.log("Executing JSON", JSON.stringify(data));
     return backend.executeJSON(data, {
       onCapture: (captured) => {
         mainWindow.webContents.send("onCapture", captured);
