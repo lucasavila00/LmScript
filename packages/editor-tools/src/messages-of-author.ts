@@ -127,12 +127,10 @@ export class MessageOfAuthorGetter {
         };
       }
       case "regex": {
-        // TODO: remove removeLastSpace when backends support token healing
-        this.removeLastSpace();
         return {
           tag: "GenerateTask",
           name: this.useGenerationUuids ? nodeAttrs.id : nodeAttrs.name,
-          stop: [],
+          stop: nodeAttrs.stop,
           max_tokens: nodeAttrs.max_tokens,
           regex: nodeAttrs.regex,
         };

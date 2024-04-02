@@ -11,7 +11,7 @@ import {
   GenerationNodeTypeLabels,
   ALL_GENERATION_NODE_TYPES,
 } from "@lmscript/editor-tools/types";
-import { assertIsNever } from "../../../lib/utils";
+import { assertIsNever, cn } from "../../../lib/utils";
 
 type ChoicesOption = {
   label: string;
@@ -121,12 +121,14 @@ const STOP_AT_OPTIONS: ReactSelectOption[] = [
 const StopEditor: FC<{
   stop: string[];
   onChange: (choices: readonly string[]) => void;
-}> = ({ stop, onChange }) => {
+  leftMargin: boolean;
+  placeholder: string;
+}> = ({ leftMargin, placeholder, stop, onChange }) => {
   return (
     <StyledCreatableReactSelect
       classNames={{
         container: () => "inline-block",
-        control: () => "rounded-none",
+        control: () => cn("rounded-none", !leftMargin && "border-0 border-y border-r"),
       }}
       isMulti={true}
       value={stop.map((it) => ({
@@ -134,7 +136,7 @@ const StopEditor: FC<{
         value: it,
       }))}
       options={STOP_AT_OPTIONS}
-      placeholder="Type to create. Always includes end of message."
+      placeholder={placeholder}
       noOptionsMessage={() => "Type to create..."}
       isClearable={false}
       onChange={(newOptions) => {
@@ -201,7 +203,12 @@ const InnerGenerator: FC<{
   switch (attrs.type) {
     case "generation":
       return (
-        <StopEditor stop={attrs.stop} onChange={(stop) => updateAttributes({ ...attrs, stop })} />
+        <StopEditor
+          leftMargin={true}
+          stop={attrs.stop}
+          onChange={(stop) => updateAttributes({ ...attrs, stop })}
+          placeholder="Select stop sequence..."
+        />
       );
     case "selection":
       return (
@@ -217,10 +224,18 @@ const InnerGenerator: FC<{
       );
     case "regex":
       return (
-        <RegexEditor
-          regex={attrs.regex}
-          onChange={(regex) => updateAttributes({ ...attrs, regex })}
-        />
+        <>
+          <RegexEditor
+            regex={attrs.regex}
+            onChange={(regex) => updateAttributes({ ...attrs, regex })}
+          />
+          <StopEditor
+            leftMargin={false}
+            stop={attrs.stop}
+            placeholder="Stop?"
+            onChange={(stop) => updateAttributes({ ...attrs, stop })}
+          />
+        </>
       );
     default: {
       throw new Error("Invalid type" + attrs.type);
