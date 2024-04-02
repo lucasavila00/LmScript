@@ -118,6 +118,13 @@ const STOP_AT_OPTIONS: ReactSelectOption[] = [
   },
 ];
 
+const escapeStop = (stop: string): string => {
+  return stop.replace(/\n/g, "\\n");
+};
+const unescapeStop = (stop: string): string => {
+  return stop.replace(/\\n/g, "\n");
+};
+
 const StopEditor: FC<{
   stop: string[];
   onChange: (choices: readonly string[]) => void;
@@ -132,7 +139,7 @@ const StopEditor: FC<{
       }}
       isMulti={true}
       value={stop.map((it) => ({
-        label: STOP_AT_OPTIONS.find((option) => option.value === it)?.label ?? it,
+        label: STOP_AT_OPTIONS.find((option) => option.value === it)?.label ?? escapeStop(it),
         value: it,
       }))}
       options={STOP_AT_OPTIONS}
@@ -140,7 +147,8 @@ const StopEditor: FC<{
       noOptionsMessage={() => "Type to create..."}
       isClearable={false}
       onChange={(newOptions) => {
-        onChange(newOptions.map((it) => it.value));
+        const unescaped = newOptions.map((it) => unescapeStop(it.value));
+        onChange(unescaped);
       }}
     />
   );
@@ -149,11 +157,11 @@ const StopEditor: FC<{
 const REGEX_OPTIONS: ReactSelectOption[] = [
   {
     label: "Bullet List",
-    value: "(- [^\n]*\n)+(- [^\n]*)",
+    value: "(- [^\n]*\n)+(- [^\n]*)(\n\n)?",
   },
   {
     label: "Numbered List",
-    value: "([0-9]+\\. [^\n]*\n)+([0-9]+\\. [^\n]*)",
+    value: "([0-9]+\\. [^\n]*\n)+([0-9]+\\. [^\n]*)(\n\n)?",
   },
   {
     label: "Integer",

@@ -154,13 +154,15 @@ async def generate_task(
         state.prompt_tokens += res["meta_info"]["prompt_tokens"]
         state.completion_tokens += res["meta_info"]["completion_tokens"]
 
-        state.text += res["text"]
+        captured = res["text"]
+
+        state.text += captured
         if t.name is not None:
-            state.captured[t.name] = res["text"]
+            state.captured[t.name] = captured
             yield {
                 "tag": "Capture",
                 "name": t.name,
-                "value": res["text"],
+                "value": captured,
             }
     elif isinstance(t, SelectTask):
         # Cache common prefix

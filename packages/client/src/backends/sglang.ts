@@ -154,12 +154,13 @@ class SglServerExecutor {
             regex: task.regex,
           },
         });
-        this.#state.text += out.text;
+        const captured = out.text;
+        this.#state.text += captured;
         if (task.name != null) {
-          this.#state.captured[task.name] = out.text;
+          this.#state.captured[task.name] = captured;
           this.#callbacks.onCapture({
             name: task.name,
-            value: out.text,
+            value: captured,
           });
         }
         break;

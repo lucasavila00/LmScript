@@ -92,6 +92,7 @@ app.whenReady().then(() => {
   });
   ipcMain.handle("executeJSON", async (_, config, data) => {
     const backend = getBackendInstance(config);
+    console.log("Executing JSON", JSON.stringify(data));
     return backend.executeJSON(data, {
       onCapture: (captured) => {
         mainWindow.webContents.send("onCapture", captured);
