@@ -3,6 +3,7 @@ import { assertIsNever } from "./utils";
 import { getIllustrationPrompt } from "./tasks/illustrator-agent";
 import { generateMarkdown } from "./tasks/markdown-generator";
 import createSummary from "./generated/fabric/create_summary";
+import jsonGeneration from "./json-generation";
 const toolUse = async (model: InitClient, question: string) => {
   const { captured, state: thread } = await model
     .push(`To answer this question: ${question}. `)
@@ -72,6 +73,13 @@ const characterGen = (model: InitClient, name: string) =>
     )
     .gen("json_output", { maxTokens: 256, regex: characterRegex });
 export const kitchenSink = async (client: InitClient) => {
+  const { rawText: conversation9, captured } = await jsonGeneration(client).run({
+    temperature: 0.0,
+  });
+  console.log(conversation9);
+  console.log(captured.profile.email);
+  console.log(captured.profile.name);
+
   const start1 = Date.now();
   const { rawText: conversation7 } = await client
     .user((m) => m.push("Write a markdown list of 5 funny names for a cat."))

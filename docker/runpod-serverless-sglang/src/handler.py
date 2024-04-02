@@ -3,6 +3,7 @@ import httpx
 import runpod
 from sglang.srt.server import Runtime
 from sglang.srt.utils import handle_port_init
+from outlines.fsm.json_schema import build_regex_from_schema
 import os
 from pydantic import BaseModel
 import numpy as np
@@ -94,6 +95,13 @@ class SelectTask(BaseModel):
     choices: list[str]
 
 
+class JsonSchemaTask(BaseModel):
+    tag: Literal["JsonSchemaTask"]
+    name: Optional[str]
+    schema: dict
+    max_tokens: int
+
+
 class RepeatTask(BaseModel):
     tag: Literal["RepeatTask"]
     variable: str
@@ -105,7 +113,9 @@ class MatchTask(BaseModel):
     choices: dict[str, List["Task"]]
 
 
-Task = Union[AddTextTask, GenerateTask, SelectTask, MatchTask, RepeatTask]
+Task = Union[
+    AddTextTask, GenerateTask, SelectTask, MatchTask, RepeatTask, JsonSchemaTask
+]
 
 
 class ClientState(BaseModel):
@@ -210,6 +220,31 @@ async def generate_task(
                 "tag": "Capture",
                 "name": t.name,
                 "value": decision,
+            }
+    elif isinstance(t, JsonSchemaTask):
+        regex = build_regex_from_schema(json.dumps(t.schema))
+        params = {
+            **{k: v for k, v in sampling_params.dict().items() if v is not None},
+            "max_new_tokens": t.max_tokens,
+        }
+        params["regex"] = regex
+        res = await generate(
+            {"text": state.text, "sampling_params": params},
+            timeout=BASE_TIMEOUT * 6,
+        )
+
+        state.prompt_tokens += res["meta_info"]["prompt_tokens"]
+        state.completion_tokens += res["meta_info"]["completion_tokens"]
+
+        captured = res["text"]
+
+        state.text += captured
+        if t.name is not None:
+            state.captured[t.name] = captured
+            yield {
+                "tag": "Capture",
+                "name": t.name,
+                "value": captured,
             }
     elif isinstance(t, RepeatTask):
         state.text += state.captured[t.variable]

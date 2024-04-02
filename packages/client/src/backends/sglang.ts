@@ -230,6 +230,11 @@ class SglServerExecutor {
         }
         break;
       }
+      case "JsonSchemaTask": {
+        throw new Error(`JsonSchemaTask not implemented for the SGLang backend.
+The server API exposed by SGLang only supports regex, and we need to run python code to transform the JSON Schema into regex.
+Use the VLLM backend instead, or the SGLang Runpod adapter.`);
+      }
       default: {
         return assertIsNever(task);
       }

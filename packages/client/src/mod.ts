@@ -17,6 +17,7 @@ import {
   getRoleStart,
   Role,
 } from "./chat-template";
+import { Schema, toJsonSchema } from "./schema";
 import { ERROR_MESSAGES, NOOP } from "./utils";
 
 type EmptyRecord = Record<never, string>;
@@ -41,6 +42,10 @@ export type GeneratorOptions = {
   stop?: string | string[];
   maxTokens?: number;
   regex?: string;
+};
+
+export type JsonSchemaOptions = {
+  maxTokens?: number;
 };
 
 /**
@@ -71,7 +76,7 @@ type ClientStateWithCounter = ClientState & {
  */
 
 export class LmScript<
-  GEN extends Record<string, string> = EmptyRecord,
+  GEN extends Record<string, any> = EmptyRecord,
   SEL extends Record<string, string> = EmptyRecord,
 > {
   #tasks: Task[];
@@ -200,7 +205,7 @@ export class LmScript<
    */
   assistant(cb: string): LmScript<GEN, SEL>;
   assistant<
-    GEN2 extends Record<string, string> = Record<never, never>,
+    GEN2 extends Record<string, any> = Record<never, never>,
     SEL2 extends Record<string, string> = Record<never, never>,
   >(cb: (it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>): LmScript<GEN2, SEL2>;
   assistant<
@@ -218,11 +223,11 @@ export class LmScript<
    */
   system(cb: string): LmScript<GEN, SEL>;
   system<
-    GEN2 extends Record<string, string> = Record<never, never>,
+    GEN2 extends Record<string, any> = Record<never, never>,
     SEL2 extends Record<string, string> = Record<never, never>,
   >(cb: (it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>): LmScript<GEN2, SEL2>;
   system<
-    GEN2 extends Record<string, string> = Record<never, never>,
+    GEN2 extends Record<string, any> = Record<never, never>,
     SEL2 extends Record<string, string> = Record<never, never>,
   >(cb: string | ((it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>)): LmScript<GEN2, SEL2> {
     return this.#wrapRole("system", cb);
@@ -235,12 +240,12 @@ export class LmScript<
    * If a template is not provided, an error will be thrown.
    */ user(cb: string): LmScript<GEN, SEL>;
   user<
-    GEN2 extends Record<string, string> = Record<never, never>,
+    GEN2 extends Record<string, any> = Record<never, never>,
     SEL2 extends Record<string, string> = Record<never, never>,
   >(cb: (it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>): LmScript<GEN2, SEL2>;
 
   user<
-    GEN2 extends Record<string, string> = Record<never, never>,
+    GEN2 extends Record<string, any> = Record<never, never>,
     SEL2 extends Record<string, string> = Record<never, never>,
   >(cb: string | ((it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>)): LmScript<GEN2, SEL2> {
     return this.#wrapRole("user", cb);
@@ -290,7 +295,7 @@ export class LmScript<
    */
   match<K extends keyof SEL>(
     variable: K,
-  ): <GEN2 extends Record<string, string>, SEL2 extends Record<string, string>>(choices: {
+  ): <GEN2 extends Record<string, any>, SEL2 extends Record<string, string>>(choices: {
     [P in SEL[K]]: (client: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>;
   }) => LmScript<GEN2, SEL2> {
     return (choices) => {
@@ -429,6 +434,27 @@ export class LmScript<
     } else {
       return this.#doGeneration(undefined, arg1);
     }
+  }
+
+  json<const N extends string, T>(
+    name: N,
+    schema: Schema<T>,
+    opts?: JsonSchemaOptions,
+  ): LmScript<
+    {
+      [K in keyof GEN | N]: K extends N ? T : K extends keyof GEN ? GEN[K] : never;
+    },
+    SEL
+  > {
+    return this.#clone(this.#state, [
+      ...this.#tasks,
+      {
+        tag: "JsonSchemaTask",
+        name,
+        jsonSchema: toJsonSchema(schema),
+        max_tokens: opts?.maxTokens ?? 1024,
+      },
+    ]) as any;
   }
 
   #executeJSONJustText(): Promise<{

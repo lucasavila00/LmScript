@@ -50,6 +50,8 @@ export class VllmBackend implements AbstractBackend {
         }
         return await this.#fetchJSONNoRet<T>(body);
       } catch (e) {
+        console.error(e);
+        console.log("Retrying...");
         lastError = e;
       }
     }
@@ -158,6 +160,34 @@ export class VllmBackend implements AbstractBackend {
           }
           for (const innerTask of tasks) {
             await handleTask(innerTask);
+          }
+          break;
+        }
+        case "JsonSchemaTask": {
+          // deno-lint-ignore no-explicit-any
+          const json = await this.#fetchJSON<any>({
+            model: this.#model,
+            prompt: state.text,
+            guided_json: task.jsonSchema,
+            temperature: data.sampling_params.temperature,
+            top_p: data.sampling_params.top_p,
+            top_k: data.sampling_params.top_k,
+            frequency_penalty: data.sampling_params.frequency_penalty,
+            presence_penalty: data.sampling_params.presence_penalty,
+            max_tokens: task.max_tokens,
+          });
+          this.#reportUsage({
+            promptTokens: json.usage.prompt_tokens,
+            completionTokens: json.usage.completion_tokens,
+          });
+          const captured = json.choices[0].text;
+          state.text += captured;
+          if (task.name != null) {
+            state.captured[task.name] = JSON.parse(captured);
+            callbacks.onCapture({
+              name: task.name,
+              value: captured,
+            });
           }
           break;
         }
