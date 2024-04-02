@@ -1,6 +1,6 @@
 {
   "name": "@lmscript/editor-tools",
-  "version": "0.0.33",
+  "version": "0.0.34",
   "description": "Dependency-Free Typescript client for LmScript.",
   "main": "index.js",
   "scripts": {
