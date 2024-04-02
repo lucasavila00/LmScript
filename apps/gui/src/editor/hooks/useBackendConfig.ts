@@ -16,7 +16,7 @@ const useLocalStorageState = <T>(key: string, defaultValue: T): [T, (value: T) =
 };
 
 export const useBackendConfig = () => {
-  const [backend, setBackend] = useLocalStorageState<Backend | null>("backend-config-v1", null);
+  const [backend, setBackend] = useLocalStorageState<Backend | null>("backend-config-v2", null);
   return {
     backend,
     setBackend,
