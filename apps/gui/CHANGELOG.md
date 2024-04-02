@@ -1,5 +1,14 @@
 # @lmscript/gui
 
+## 0.0.34
+
+### Patch Changes
+
+- Generation bug fixes
+- Updated dependencies
+  - @lmscript/editor-tools@0.0.34
+  - @lmscript/client@0.0.34
+
 ## 0.0.33
 
 ### Patch Changes

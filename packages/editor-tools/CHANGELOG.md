@@ -1,5 +1,13 @@
 # @lmscript/client
 
+## 0.0.34
+
+### Patch Changes
+
+- Generation bug fixes
+- Updated dependencies
+  - @lmscript/client@0.0.34
+
 ## 0.0.33
 
 ### Patch Changes
