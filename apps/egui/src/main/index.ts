@@ -2,41 +2,11 @@ import { app, shell, BrowserWindow, ipcMain, dialog } from "electron";
 import { join } from "path";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
 import icon from "../../resources/icon.png?asset";
-import type { AbstractBackend } from "@lmscript/client/backends/abstract";
-// import { RunpodServerlessBackend } from "@lmscript/client/backends/runpod-serverless-sglang";
-const { RunpodServerlessBackend } = require("@lmscript/client/backends/runpod-serverless-sglang");
-// import { SGLangBackend } from "@lmscript/client/backends/sglang";
-const { SGLangBackend } = require("@lmscript/client/backends/sglang");
-// import { VllmBackend } from "@lmscript/client/backends/vllm";
-const { VllmBackend } = require("@lmscript/client/backends/vllm");
-import type { Backend } from "@lmscript/gui/src/editor/hooks/useBackendConfig";
 import fs from "node:fs";
 
-const assertIsNever = (x: never): never => {
-  throw new Error(`Unexpected: ${x}`);
-};
-
-// MAKE SURE ELECTRON COPY MATCHES
-const getBackendInstance = (backend: Backend): AbstractBackend => {
-  switch (backend.tag) {
-    case "runpod-serverless-sglang": {
-      return new RunpodServerlessBackend(backend.url, backend.token);
-    }
-    case "runpod-serverless-vllm": {
-      return new VllmBackend({
-        url: backend.url,
-        auth: backend.token,
-        model: backend.model,
-      });
-    }
-    case "sglang": {
-      return new SGLangBackend(backend.url);
-    }
-    default: {
-      return assertIsNever(backend);
-    }
-  }
-};
+import type { getBackendInstance as getBackendInstanceT } from "@lmscript/editor-tools/get-lmscript-backend";
+const tools = require("@lmscript/editor-tools/get-lmscript-backend");
+const getBackendInstance: typeof getBackendInstanceT = tools.getBackendInstance;
 
 function createWindow(): BrowserWindow {
   // Create the browser window.

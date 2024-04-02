@@ -1,12 +1,6 @@
 import { assertIsNever } from "../../lib/utils";
 import { FC, memo, useState } from "react";
-import {
-  ALL_BACKENDS_TAGS,
-  Backend,
-  BackendLabels,
-  BackendTag,
-  useBackendConfig,
-} from "../hooks/useBackendConfig";
+import { useBackendConfig } from "../hooks/useBackendConfig";
 import { StyledReactSelect } from "../../components/ui/react-select";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -25,6 +19,12 @@ import { Input } from "../../components/ui/input";
 import { useForm } from "react-hook-form";
 import { ALL_CHAT_TEMPLATES, ChatTemplate } from "@lmscript/client/chat-template";
 import { Label } from "../../components/ui/label";
+import {
+  ALL_BACKENDS_TAGS,
+  Backend,
+  BackendLabels,
+  BackendTag,
+} from "@lmscript/editor-tools/backend-config";
 const RunpodSglangConfigSchema = z.object({
   url: z.string().min(4),
   token: z.string(),
@@ -147,7 +147,7 @@ const VllmConfigSchema = z.object({
 
 const VllmConfig: FC<{
   setBackend: (backend: Backend) => void;
-  tag: "runpod-serverless-vllm";
+  tag: "vllm-openai";
 }> = ({ setBackend, tag }) => {
   const form = useForm<z.infer<typeof VllmConfigSchema>>({
     resolver: zodResolver(VllmConfigSchema),
@@ -246,8 +246,8 @@ const BackendConfig: FC<{
     case "runpod-serverless-sglang": {
       return <UrlTokenTemplateConfig setBackend={setBackend} tag="runpod-serverless-sglang" />;
     }
-    case "runpod-serverless-vllm": {
-      return <VllmConfig setBackend={setBackend} tag="runpod-serverless-vllm" />;
+    case "vllm-openai": {
+      return <VllmConfig setBackend={setBackend} tag="vllm-openai" />;
     }
     case "sglang": {
       return <UrlTokenTemplateConfig setBackend={setBackend} tag="sglang" />;

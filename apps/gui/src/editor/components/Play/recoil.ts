@@ -1,8 +1,8 @@
-import { Backend } from "../../hooks/useBackendConfig";
 import { LmEditorState, UiGenerationData } from "@lmscript/editor-tools/types";
 import { compileEditorState } from "@lmscript/editor-tools";
 import { atomFamily } from "recoil";
-import { GetBackendInstance } from "../../../lib/get-lmscript-backend";
+import { Backend } from "@lmscript/editor-tools/backend-config";
+import type { GetBackendInstance } from "@lmscript/editor-tools/get-lmscript-backend";
 
 export const generateAsyncAtom = atomFamily<
   UiGenerationData,

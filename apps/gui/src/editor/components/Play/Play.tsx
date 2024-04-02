@@ -1,10 +1,10 @@
-import { Backend } from "../../hooks/useBackendConfig";
 import { LmEditorState } from "@lmscript/editor-tools/types";
 import { FC, useState } from "react";
 import { useRecoilValueLoadable } from "recoil";
 import { generateAsyncAtom } from "./recoil";
 import { assertIsNever } from "../../../lib/utils";
 import { HtmlPlay } from "./HtmlPlay";
+import { Backend } from "@lmscript/editor-tools/backend-config";
 
 const PlayStream: FC<{
   backend: Backend;

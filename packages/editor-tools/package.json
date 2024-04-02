@@ -25,6 +25,18 @@
       "import": "./dist/esm/types.js",
       "default": "./dist/esm/types.js"
     },
+    "./backend-config": {
+      "types": "./dist/types/backend-config.d.ts",
+      "require": "./dist/cjs/backend-config.js",
+      "import": "./dist/esm/backend-config.js",
+      "default": "./dist/esm/backend-config.js"
+    },
+    "./get-lmscript-backend": {
+      "types": "./dist/types/get-lmscript-backend.d.ts",
+      "require": "./dist/cjs/get-lmscript-backend.js",
+      "import": "./dist/esm/get-lmscript-backend.js",
+      "default": "./dist/esm/get-lmscript-backend.js"
+    },
     ".": {
       "types": "./dist/types/mod.d.ts",
       "require": "./dist/cjs/mod.js",
