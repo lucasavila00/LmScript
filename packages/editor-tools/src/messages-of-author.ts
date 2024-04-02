@@ -105,9 +105,19 @@ export class MessageOfAuthorGetter {
     this.addDoubleBreak();
   }
 
+  // TODO: remove removeLastSpace when backends support token healing
+  private removeLastSpace() {
+    const last = this.messageTasks[this.messageTasks.length - 1];
+    if (last?.tag === "AddTextTask" && last.text.endsWith(" ")) {
+      last.text = last.text.slice(0, -1);
+    }
+  }
+
   private noteAttrToTask(nodeAttrs: GenerationNodeAttrs): ExtendedTask {
     switch (nodeAttrs.type) {
       case "generation": {
+        // TODO: remove removeLastSpace when backends support token healing
+        this.removeLastSpace();
         return {
           tag: "GenerateTask",
           name: this.useGenerationUuids ? nodeAttrs.id : nodeAttrs.name,
@@ -117,6 +127,8 @@ export class MessageOfAuthorGetter {
         };
       }
       case "regex": {
+        // TODO: remove removeLastSpace when backends support token healing
+        this.removeLastSpace();
         return {
           tag: "GenerateTask",
           name: this.useGenerationUuids ? nodeAttrs.id : nodeAttrs.name,

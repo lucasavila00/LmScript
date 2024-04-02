@@ -12,7 +12,7 @@ export default (client: InitClient, { variable1 = "The content of the first vari
     .assistant((m) =>
       m
         .push(
-          "We can use AI to generate content, ending on a new line, or any stop pattern we'd like:\n\nWe can start the line and ",
+          "We can use AI to generate content, ending on a new line, or any stop pattern we'd like:\n\nWe can start the line and",
         )
         .gen("generation2", { maxTokens: 16, stop: ["\n"] })
         .push('\n\nAnd we can choose among a set of options:\n\n"The best programming language is ')

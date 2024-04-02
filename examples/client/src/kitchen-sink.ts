@@ -72,6 +72,33 @@ const characterGen = (model: InitClient, name: string) =>
     )
     .gen("json_output", { maxTokens: 256, regex: characterRegex });
 export const kitchenSink = async (client: InitClient) => {
+  const start1 = Date.now();
+  const { rawText: conversation7 } = await client
+    .user((m) => m.push("Write a markdown list of 5 funny names for a cat."))
+    .assistant((m) =>
+      m.gen("markdown_list", { regex: `(\\- [\\w\\d ]{1,32}\\n){5}`, maxTokens: 64 }),
+    )
+    .run({
+      temperature: 0.0,
+    });
+
+  const end1 = Date.now();
+  console.log(`Time taken: ${end1 - start1}ms`);
+  console.log(conversation7);
+
+  const start2 = Date.now();
+  const { rawText: conversation8 } = await client
+    .user((m) => m.push("Write a markdown list of 5 funny names for a cat."))
+    .assistant((m) => m.push("-").gen({ maxTokens: 64 }))
+    .run({
+      temperature: 0.0,
+    });
+
+  const end2 = Date.now();
+
+  console.log(`Time taken: ${end2 - start2}ms`);
+  console.log(conversation8);
+
   const { rawText: conversation6 } = await createSummary(client, {
     input:
       "Charles Richardson (c.10 March 1769 - 10 November 1850) was an English Royal Navy officer. He joined HMS Vestal in 1787, where he made an aborted journey to China before serving on the East Indies Station. He transferred to HMS Phoenix and fought in the Battle of Tellicherry. With HMS Circe he combated the Nore mutiny and fought in the Battle of Camperdown, capturing Jan Willem de Winter. He fought in the Battle of Callantsoog and the Vlieter incident, sailed to Egypt, and fought in the battles of Abukir, Mandora, and Alexandria. Commanding HMS Alligator, he was sent to the Leeward Islands Station during the Napoleonic Wars, where he captured three Dutch settlements. He transferred to HMS Topaze in 1821 and sailed to China, where his crew killed two locals in self-defence. The resulting diplomatic incident strained Richardson's health and he was invalided home, where he was appointed Knight Commander of the Order of the Bath and promoted to vice-admiral. He died of influenza in Painsthorpe.",

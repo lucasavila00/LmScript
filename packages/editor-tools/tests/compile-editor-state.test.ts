@@ -209,7 +209,7 @@ test("handles lmGenerator, use names", async () => {
       },
       {
         "tag": "AddTextTask",
-        "text": "Explanation: ",
+        "text": "Explanation:",
       },
       {
         "max_tokens": 256,
@@ -275,7 +275,7 @@ test("handles lmGenerator, use uuids", async () => {
       },
       {
         "tag": "AddTextTask",
-        "text": "Explanation: ",
+        "text": "Explanation:",
       },
       {
         "max_tokens": 256,

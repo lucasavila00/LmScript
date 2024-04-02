@@ -270,7 +270,7 @@ test("handles lmGenerator", async () => {
           "tasks": [
             {
               "tag": "AddTextTask",
-              "text": "Explanation: ",
+              "text": "Explanation:",
             },
             {
               "max_tokens": 256,
@@ -334,7 +334,7 @@ test("handles lmGenerator, use names", async () => {
           "tasks": [
             {
               "tag": "AddTextTask",
-              "text": "Explanation: ",
+              "text": "Explanation:",
             },
             {
               "max_tokens": 256,
