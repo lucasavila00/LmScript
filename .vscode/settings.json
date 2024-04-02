@@ -13,6 +13,7 @@
     "lmscript",
     "logprob",
     "lucide",
+    "openai",
     "runpod",
     "sglang",
     "Textmenu",

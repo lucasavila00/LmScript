@@ -2,8 +2,8 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import { RecoilRoot } from "recoil";
-import { GetBackendInstance, AbstractBackend } from "@lmscript/gui/src/lib/get-lmscript-backend";
-import { OnCapture } from "@lmscript/client/backends/abstract";
+import { GetBackendInstance } from "@lmscript/editor-tools/get-lmscript-backend";
+import { AbstractBackend, OnCapture } from "@lmscript/client/backends/abstract";
 
 let onCaptureListeners: OnCapture[] = [];
 
