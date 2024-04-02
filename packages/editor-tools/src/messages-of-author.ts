@@ -115,10 +115,18 @@ export class MessageOfAuthorGetter {
 
   private noteAttrToTask(nodeAttrs: GenerationNodeAttrs): ExtendedTask {
     switch (nodeAttrs.type) {
-      case "generation":
-      case "regex": {
+      case "generation": {
         // TODO: remove removeLastSpace when backends support token healing
         this.removeLastSpace();
+        return {
+          tag: "GenerateTask",
+          name: this.useGenerationUuids ? nodeAttrs.id : nodeAttrs.name,
+          stop: nodeAttrs.stop,
+          max_tokens: nodeAttrs.max_tokens,
+          regex: undefined,
+        };
+      }
+      case "regex": {
         return {
           tag: "GenerateTask",
           name: this.useGenerationUuids ? nodeAttrs.id : nodeAttrs.name,
