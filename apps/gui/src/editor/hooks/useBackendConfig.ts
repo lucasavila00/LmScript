@@ -9,7 +9,7 @@ export const ALL_BACKENDS_TAGS: BackendTag[] = [
 
 export const BackendLabels: Record<BackendTag, string> = {
   "runpod-serverless-sglang": "Runpod Serverless SGLang",
-  "runpod-serverless-vllm": "Runpod Serverless vLLM",
+  "runpod-serverless-vllm": "vLLM OpenAI Compatible",
   sglang: "SGLang",
 };
 
