@@ -380,6 +380,13 @@ const SpanLoading = () => {
   return <span className={GENERATED_CN}>Loading{".".repeat(counter)}</span>;
 };
 
+// TODO: remove removeStartingSpace when backends support token healing
+const removeStartingSpace = (text: string) => {
+  if (text.startsWith(" ")) {
+    return text.slice(1);
+  }
+  return text;
+};
 const RenderSpanLike: FC<{ part: SpanLike }> = ({ part }) => {
   switch (part.tag) {
     case "text": {
@@ -388,7 +395,7 @@ const RenderSpanLike: FC<{ part: SpanLike }> = ({ part }) => {
 
       return (
         <span className={className} title={title}>
-          {part.text}
+          {part.capturedAs == null ? part.text : removeStartingSpace(part.text)}
         </span>
       );
     }

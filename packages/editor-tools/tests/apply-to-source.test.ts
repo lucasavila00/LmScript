@@ -158,7 +158,7 @@ test("handles lmGenerator", async () => {
   });
   expect(msgs).toMatchInlineSnapshot(`
     "export default (client: InitClient, {}) => client.user(m => m
-       .push("Explanation: ")
+       .push("Explanation:")
        .gen("_explanation", {"maxTokens":256,"stop":["\\n"]})
        .push("")
     )"
