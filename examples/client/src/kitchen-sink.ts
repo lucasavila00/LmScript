@@ -78,7 +78,7 @@ export const kitchenSink = async (client: InitClient) => {
     temperature: 0.0,
   });
   console.log(conversation10);
-  console.log(captured10);
+  console.log(JSON.stringify(captured10, null, 2));
 
   const { rawText: conversation9, captured: captured9 } = await jsonGeneration(client).run({
     temperature: 0.0,

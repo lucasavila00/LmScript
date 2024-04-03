@@ -1,25 +1,24 @@
-import { ObjectSchemaData, SchemaData } from "../schema";
 import { assertIsNever, delay, NOOP } from "../utils";
 import {
   AbstractBackend,
-  ClientState,
   ExecutionCallbacks,
   GenerateTask,
   GenerationThread,
   ReportUsage,
+  SelectTask,
   Task,
   TasksOutput,
   XmlTask,
 } from "./abstract";
+import { BaseExecutor } from "./executor";
 
-class VllmBackendExecutor {
+class VllmBackendExecutor extends BaseExecutor {
   readonly #url: string;
   readonly #model: string;
   readonly #reportUsage: ReportUsage;
   readonly #auth: string | undefined;
-  readonly data: GenerationThread;
   readonly callbacks: ExecutionCallbacks;
-  state: ClientState;
+
   constructor(options: {
     url: string;
     auth?: string;
@@ -28,13 +27,11 @@ class VllmBackendExecutor {
     data: GenerationThread;
     callbacks: ExecutionCallbacks;
   }) {
+    super(options.data);
     this.#url = options.url;
     this.#model = options.model;
     this.#reportUsage = options?.reportUsage ?? NOOP;
     this.#auth = options.auth;
-
-    this.data = options.data;
-    this.state = JSON.parse(JSON.stringify(this.data.initial_state));
     this.callbacks = options.callbacks;
   }
   async #fetchJSONNoRet<T>(body: object): Promise<T> {
@@ -72,111 +69,7 @@ class VllmBackendExecutor {
     throw new Error(`HTTP request failed: ${lastError}`);
   }
 
-  async #handleXmlField(path: string[], key: string, data: SchemaData) {
-    const newFullPath = [...path, key];
-    switch (data.type) {
-      case "array":
-        throw new Error("Not implemented");
-      case "enum":
-        throw new Error("Not implemented");
-      case "literal":
-        throw new Error("Not implemented");
-      case "null":
-        this.state.text += `<${key} type="null">null</${key}>\n`;
-        this.#writeToPath(newFullPath, null);
-        break;
-      case "object":
-        await this.#handleXmlObject(newFullPath, data);
-        break;
-      case "boolean":
-        throw new Error("Not implemented");
-      case "number":
-        this.state.text += `<${key} type="${data.type}">`;
-        await this.#handleGeneratePath({ stop: ["</"] }, newFullPath);
-
-        let current = this.state.captured;
-        for (const key of path) {
-          if (current[key] == null) {
-            current[key] = {};
-          }
-          current = current[key] as any;
-        }
-        current[key] = parseFloat(current[key] as any);
-        this.state.text += `</${key}>\n`;
-        break;
-      case "string":
-        this.state.text += `<${key} type="${data.type}">`;
-        await this.#handleGeneratePath({ stop: ["</"] }, newFullPath);
-        this.state.text += `</${key}>\n`;
-        break;
-      case "discriminatedUnion":
-        throw new Error("Not implemented");
-      default:
-        return assertIsNever(data);
-    }
-  }
-  async #handleXmlObject(path: string[], schema: ObjectSchemaData) {
-    this.state.text += `<${schema.title}>\n`;
-    for (const key of Object.keys(schema.children)) {
-      const field = schema.children[key];
-      await this.#handleXmlField(path, key, field);
-    }
-    this.state.text += `</${schema.title}>\n`;
-  }
-  async #handleXmlTask(task: XmlTask) {
-    switch (task.schema.type) {
-      case "discriminatedUnion": {
-        throw new Error("Not implemented");
-      }
-      case "object": {
-        await this.#handleXmlObject([task.name], task.schema);
-        this.callbacks.onCapture({
-          name: task.name,
-          value: this.state.captured[task.name],
-        });
-        break;
-      }
-      default: {
-        return assertIsNever(task.schema);
-      }
-    }
-  }
-  async #writeToPath(path: string[], captured: unknown) {
-    // create empty objects for each path element
-    let current = this.state.captured;
-
-    for (const key of path.slice(0, -1)) {
-      if (current[key] == null) {
-        current[key] = {};
-      }
-      current = current[key] as any;
-    }
-
-    const lastPath = path[path.length - 1];
-    current[lastPath] = captured;
-  }
-  async #handleGeneratePath(task: { stop: string[] }, path: string[]) {
-    const json = await this.#fetchJSON<any>({
-      model: this.#model,
-      prompt: this.state.text,
-      max_tokens: 1024,
-      stop: task.stop,
-      guided_regex: undefined,
-      temperature: this.data.sampling_params.temperature,
-      top_p: this.data.sampling_params.top_p,
-      top_k: this.data.sampling_params.top_k,
-      frequency_penalty: this.data.sampling_params.frequency_penalty,
-      presence_penalty: this.data.sampling_params.presence_penalty,
-    });
-    this.#reportUsage({
-      promptTokens: json.usage.prompt_tokens,
-      completionTokens: json.usage.completion_tokens,
-    });
-    const captured = json.choices[0].text;
-    this.state.text += captured;
-    this.#writeToPath(path, captured);
-  }
-  async #handleGenerateTask(task: GenerateTask) {
+  override async doGeneration(task: GenerateTask): Promise<string> {
     const json = await this.#fetchJSON<any>({
       model: this.#model,
       prompt: this.state.text,
@@ -195,6 +88,64 @@ class VllmBackendExecutor {
     });
     const captured = json.choices[0].text;
     this.state.text += captured;
+    return captured;
+  }
+  override async doSelect(task: SelectTask): Promise<string> {
+    const json = await this.#fetchJSON<any>({
+      model: this.#model,
+      prompt: this.state.text,
+      guided_choice: task.choices,
+      temperature: this.data.sampling_params.temperature,
+      top_p: this.data.sampling_params.top_p,
+      top_k: this.data.sampling_params.top_k,
+      frequency_penalty: this.data.sampling_params.frequency_penalty,
+      presence_penalty: this.data.sampling_params.presence_penalty,
+    });
+    this.#reportUsage({
+      promptTokens: json.usage.prompt_tokens,
+      completionTokens: json.usage.completion_tokens,
+    });
+    const captured = json.choices[0].text;
+    this.state.text += captured;
+    return captured;
+  }
+  async #handleXmlTask(task: XmlTask) {
+    switch (task.schema.type) {
+      case "discriminatedUnion": {
+        await this.handleXmlDiscriminatedUnion([task.name], task.schema);
+        this.callbacks.onCapture({
+          name: task.name,
+          value: this.state.captured[task.name],
+        });
+        break;
+      }
+      case "object": {
+        await this.handleXmlObject([task.name], task.schema);
+        this.callbacks.onCapture({
+          name: task.name,
+          value: this.state.captured[task.name],
+        });
+        break;
+      }
+      default: {
+        return assertIsNever(task.schema);
+      }
+    }
+  }
+
+  async #handleGenerateTask(task: GenerateTask) {
+    const captured = await this.doGeneration(task);
+    if (task.name != null) {
+      this.state.captured[task.name] = captured;
+      this.callbacks.onCapture({
+        name: task.name,
+        value: captured,
+      });
+    }
+  }
+
+  async #handleSelectTask(task: SelectTask) {
+    const captured = await this.doSelect(task);
     if (task.name != null) {
       this.state.captured[task.name] = captured;
       this.callbacks.onCapture({
@@ -214,30 +165,7 @@ class VllmBackendExecutor {
         break;
       }
       case "SelectTask": {
-        // deno-lint-ignore no-explicit-any
-        const json = await this.#fetchJSON<any>({
-          model: this.#model,
-          prompt: this.state.text,
-          guided_choice: task.choices,
-          temperature: this.data.sampling_params.temperature,
-          top_p: this.data.sampling_params.top_p,
-          top_k: this.data.sampling_params.top_k,
-          frequency_penalty: this.data.sampling_params.frequency_penalty,
-          presence_penalty: this.data.sampling_params.presence_penalty,
-        });
-        this.#reportUsage({
-          promptTokens: json.usage.prompt_tokens,
-          completionTokens: json.usage.completion_tokens,
-        });
-        const captured = json.choices[0].text;
-        this.state.text += captured;
-        if (task.name != null) {
-          this.state.captured[task.name] = captured;
-          this.callbacks.onCapture({
-            name: task.name,
-            value: captured,
-          });
-        }
+        await this.#handleSelectTask(task);
         break;
       }
       case "RepeatTask": {

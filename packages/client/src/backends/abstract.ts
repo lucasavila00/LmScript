@@ -3,7 +3,7 @@
  * @module
  */
 
-import { ObjectSchemaData, UnionSchemaData } from "../schema";
+import { ObjectSchemaData, DiscriminatedUnionSchemaData } from "../schema";
 
 export type TasksOutput = { text: string; captured: Record<string, unknown> };
 
@@ -64,7 +64,7 @@ export type JsonSchemaTask = {
 export type XmlTask = {
   tag: "XmlTask";
   name: string;
-  schema: UnionSchemaData | ObjectSchemaData;
+  schema: DiscriminatedUnionSchemaData | ObjectSchemaData;
 };
 export type Task =
   | AddTextTask

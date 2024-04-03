@@ -7,14 +7,17 @@ import { delay, NOOP } from "../utils";
 import { assertIsNever } from "../utils";
 import {
   AbstractBackend,
-  ClientState,
   ExecutionCallbacks,
   FetcherSamplingParams,
+  GenerateTask,
   GenerationThread,
   ReportUsage,
+  SelectTask,
   Task,
   TasksOutput,
+  XmlTask,
 } from "./abstract";
+import { BaseExecutor } from "./executor";
 
 type SglSamplingParams = FetcherSamplingParams & {
   max_new_tokens?: number;
@@ -58,23 +61,20 @@ type MetaInfoSelection = {
   prompt_logprob: number;
 };
 
-class SglServerExecutor {
-  #state: ClientState;
+class SglServerExecutor extends BaseExecutor {
   readonly #url: string;
-  readonly #sampling_params: FetcherSamplingParams;
   readonly #callbacks: ExecutionCallbacks;
   readonly #reportUsage: ReportUsage;
 
   constructor(
     url: string,
-    sampling_params: FetcherSamplingParams,
-    state: ClientState,
+    data: GenerationThread,
     callbacks: ExecutionCallbacks,
     reportUsage: ReportUsage,
   ) {
-    this.#state = JSON.parse(JSON.stringify(state));
+    super(data);
+
     this.#url = url;
-    this.#sampling_params = sampling_params;
     this.#callbacks = callbacks;
     this.#reportUsage = reportUsage;
   }
@@ -117,6 +117,57 @@ class SglServerExecutor {
     }
     throw new Error(`HTTP request failed: ${lastError}`);
   }
+  override async doSelect(task: Omit<SelectTask, "name">): Promise<string> {
+    // Cache common prefix
+    const res = await this.#generate({
+      text: this.state.text,
+      sampling_params: {
+        ...this.data.sampling_params,
+        max_new_tokens: 0,
+        temperature: 0.0,
+      },
+    });
+
+    const prompt_len = res.meta_info.prompt_tokens;
+
+    const obj = await this.#select({
+      text: task.choices.map((c) => this.state.text + c),
+      sampling_params: {
+        ...this.data.sampling_params,
+        max_new_tokens: 0,
+        temperature: 0.0,
+      },
+      return_logprob: true,
+      logprob_start_len: Math.max(prompt_len - 2, 0),
+    });
+
+    const normalized_prompt_logprob = obj.map((r) => r.meta_info.normalized_prompt_logprob);
+
+    const argMax = normalized_prompt_logprob.reduce(
+      (iMax, x, i, arr) => (x > arr[iMax] ? i : iMax),
+      0,
+    );
+    const decision = task.choices[argMax];
+
+    this.state.text += decision;
+
+    return decision;
+  }
+  override async doGeneration(task: Omit<GenerateTask, "name">): Promise<string> {
+    const out = await this.#generate({
+      text: this.state.text,
+      sampling_params: {
+        ...this.data.sampling_params,
+        max_new_tokens: task.max_tokens,
+        stop: task.stop,
+        regex: task.regex,
+      },
+    });
+    const captured = out.text;
+    this.state.text += captured;
+    return captured;
+  }
+
   async #generate(data: SglGenerateData): Promise<{ text: string; meta_info: MetaInfoGeneration }> {
     const out = await this.#httpRequest<{ text: string; meta_info: MetaInfoGeneration }>(data);
     this.#reportUsage({
@@ -136,28 +187,43 @@ class SglServerExecutor {
     return out;
   }
   getState(): { text: string; captured: Record<string, unknown> } {
-    return this.#state;
+    return this.state;
   }
+
+  async #handleXmlTask(task: XmlTask) {
+    switch (task.schema.type) {
+      case "discriminatedUnion": {
+        await this.handleXmlDiscriminatedUnion([task.name], task.schema);
+        this.#callbacks.onCapture({
+          name: task.name,
+          value: this.state.captured[task.name],
+        });
+        break;
+      }
+      case "object": {
+        await this.handleXmlObject([task.name], task.schema);
+        this.#callbacks.onCapture({
+          name: task.name,
+          value: this.state.captured[task.name],
+        });
+        break;
+      }
+      default: {
+        return assertIsNever(task.schema);
+      }
+    }
+  }
+
   async runTask(task: Task): Promise<void> {
     switch (task.tag) {
       case "AddTextTask": {
-        this.#state.text += task.text;
+        this.state.text += task.text;
         break;
       }
       case "GenerateTask": {
-        const out = await this.#generate({
-          text: this.#state.text,
-          sampling_params: {
-            ...this.#sampling_params,
-            max_new_tokens: task.max_tokens,
-            stop: task.stop,
-            regex: task.regex,
-          },
-        });
-        const captured = out.text;
-        this.#state.text += captured;
+        const captured = await this.doGeneration(task);
         if (task.name != null) {
-          this.#state.captured[task.name] = captured;
+          this.state.captured[task.name] = captured;
           this.#callbacks.onCapture({
             name: task.name,
             value: captured,
@@ -166,40 +232,9 @@ class SglServerExecutor {
         break;
       }
       case "SelectTask": {
-        // Cache common prefix
-        const res = await this.#generate({
-          text: this.#state.text,
-          sampling_params: {
-            ...this.#sampling_params,
-            max_new_tokens: 0,
-            temperature: 0.0,
-          },
-        });
-
-        const prompt_len = res.meta_info.prompt_tokens;
-
-        const obj = await this.#select({
-          text: task.choices.map((c) => this.#state.text + c),
-          sampling_params: {
-            ...this.#sampling_params,
-            max_new_tokens: 0,
-            temperature: 0.0,
-          },
-          return_logprob: true,
-          logprob_start_len: Math.max(prompt_len - 2, 0),
-        });
-
-        const normalized_prompt_logprob = obj.map((r) => r.meta_info.normalized_prompt_logprob);
-
-        const argMax = normalized_prompt_logprob.reduce(
-          (iMax, x, i, arr) => (x > arr[iMax] ? i : iMax),
-          0,
-        );
-        const decision = task.choices[argMax];
-
-        this.#state.text += decision;
+        const decision = await this.doSelect(task);
         if (task.name != null) {
-          this.#state.captured[task.name] = decision;
+          this.state.captured[task.name] = decision;
           this.#callbacks.onCapture({
             name: task.name,
             value: decision,
@@ -209,15 +244,15 @@ class SglServerExecutor {
         break;
       }
       case "RepeatTask": {
-        const value = this.#state.captured[task.variable];
+        const value = this.state.captured[task.variable];
         if (value == null) {
           throw new Error(`Variable ${task.variable} not found`);
         }
-        this.#state.text += value;
+        this.state.text += value;
         break;
       }
       case "MatchTask": {
-        const value = this.#state.captured[task.variable];
+        const value = this.state.captured[task.variable];
         if (value == null) {
           throw new Error(`Variable ${task.variable} not found`);
         }
@@ -236,7 +271,8 @@ The server API exposed by SGLang only supports regex, and we need to run python 
 Use the VLLM backend instead, or the SGLang Runpod adapter.`);
       }
       case "XmlTask": {
-        throw new Error("not implemented");
+        await this.#handleXmlTask(task);
+        break;
       }
       default: {
         return assertIsNever(task);
@@ -262,13 +298,7 @@ export class SGLangBackend implements AbstractBackend {
     this.#reportUsage = options?.reportUsage ?? NOOP;
   }
   async executeJSON(data: GenerationThread, callbacks: ExecutionCallbacks): Promise<TasksOutput> {
-    const executor = new SglServerExecutor(
-      this.#url,
-      data.sampling_params,
-      data.initial_state,
-      callbacks,
-      this.#reportUsage,
-    );
+    const executor = new SglServerExecutor(this.#url, data, callbacks, this.#reportUsage);
     for (const task of data.tasks) {
       await executor.runTask(task);
     }

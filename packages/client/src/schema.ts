@@ -2,32 +2,18 @@ import { assertIsNever } from "./utils";
 
 export type NumberSchemaData = {
   type: "number";
-  example: number;
 };
 
 export type StringSchemaData = {
   type: "string";
-  example: string;
 };
 
 export type NullSchemaData = {
   type: "null";
-  example: null;
 };
 
 export type BooleanSchemaData = {
   type: "boolean";
-  example: boolean;
-};
-
-export type LiteralSchemaData = {
-  type: "literal";
-  children: string | number | boolean;
-};
-
-export type EnumSchemaData = {
-  type: "enum";
-  children: Array<string | number | boolean>;
 };
 
 export type ObjectSchemaData = {
@@ -38,28 +24,28 @@ export type ObjectSchemaData = {
 
 export type ArraySchemaData = {
   type: "array";
-  children: [SchemaClassData];
+  children: SchemaClassData;
 };
 
-export type UnionSchemaData = {
+export type DiscriminatedUnionSchemaData = {
   type: "discriminatedUnion";
-  discriminator: string;
   children: ObjectSchemaData[];
 };
+
+// TODO: string enum, number enum
 
 export type SchemaData =
   | NumberSchemaData
   | StringSchemaData
   | NullSchemaData
   | BooleanSchemaData
-  | LiteralSchemaData
-  | EnumSchemaData
   | ObjectSchemaData
   | ArraySchemaData
-  | UnionSchemaData;
+  | DiscriminatedUnionSchemaData;
 
 type SchemaClassData = SchemaData & {
   description?: string;
+  example?: any;
 };
 
 export class Schema<_T> {
@@ -75,56 +61,39 @@ export class Schema<_T> {
   public description(description: string): this {
     return this.clone({ description });
   }
+
+  public example(example: any): this {
+    return this.clone({ example });
+  }
 }
 
-const number = (example: number): Schema<number> =>
+const number = (): Schema<number> =>
   new Schema({
     type: "number",
-    example,
   });
 
-const string = (example: string): Schema<string> =>
+const string = (): Schema<string> =>
   new Schema({
     type: "string",
-    example,
   });
 
 const null_ = (): Schema<null> =>
   new Schema({
     type: "null",
-    example: null,
   });
 
 const boolean = (): Schema<boolean> =>
   new Schema({
     type: "boolean",
-    example: true,
   });
 
-const literal = <T extends string | number | boolean>(value: T): Schema<T> =>
-  new Schema({
-    type: "literal",
-    children: value,
-  });
-
-const enum_ = <const T extends Array<string | number | boolean>>(
-  schemas: T,
-): Schema<T extends Array<infer U> ? U : never> =>
-  new Schema<any>({
-    type: "enum",
-    children: schemas,
-  });
 const discriminatedUnion = <
-  N extends string,
-  K extends N,
-  T extends [Schema<Record<K, any>>, ...Schema<Record<K, any>>[]],
+  T extends [Schema<Record<string, any>>, ...Schema<Record<string, any>>[]],
 >(
-  discriminator: N,
   schemas: T,
 ): Schema<T[number] extends Schema<infer U> ? U : never> =>
   new Schema({
     type: "discriminatedUnion",
-    discriminator,
     children: schemas.map((it) => it.data) as any,
   });
 
@@ -144,11 +113,11 @@ const intersection = <T extends [Schema<Record<string, any>>, Schema<Record<stri
     title,
   });
 
-const object = <T extends Record<string, Schema<any>>>(
-  title: string,
+const object = <const N extends string, T extends Record<string, Schema<any>>>(
+  title: N,
   schema: T,
 ): Schema<{
-  [K in keyof T]: T[K] extends Schema<infer U> ? U : never;
+  [K in keyof T | "_tag"]: T[K] extends Schema<infer U> ? U : K extends "_tag" ? N : never;
 }> =>
   new Schema({
     type: "object",
@@ -159,7 +128,7 @@ const object = <T extends Record<string, Schema<any>>>(
 const array = <T extends Schema<any>>(schema: T): Schema<T extends Schema<infer U> ? U[] : never> =>
   new Schema({
     type: "array",
-    children: [schema.data],
+    children: schema.data,
   });
 
 export const s = {
@@ -167,12 +136,12 @@ export const s = {
   string,
   null: null_,
   boolean,
-  literal,
+  // literal,
   discriminatedUnion,
   intersection,
   object,
   array,
-  enum: enum_,
+  // enum: enum_,
 };
 
 export type TypeOf<T> = T extends Schema<infer U> ? U : never;
@@ -182,7 +151,7 @@ export const toJsonSchema = (schemaData: SchemaClassData): object => {
     case "array":
       return {
         type: "array",
-        items: toJsonSchema(schemaData.children[0]),
+        items: toJsonSchema(schemaData.children),
       };
     case "object":
       return {
@@ -194,10 +163,6 @@ export const toJsonSchema = (schemaData: SchemaClassData): object => {
       };
     case "discriminatedUnion":
       return { anyOf: schemaData.children.map(toJsonSchema) };
-    case "enum":
-      return { enum: schemaData.children };
-    case "literal":
-      return { const: schemaData.children };
     case "number":
       return { type: "number" };
     case "string":
