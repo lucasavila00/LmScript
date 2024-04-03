@@ -44,7 +44,7 @@ export type GeneratorOptions = {
   regex?: string;
 };
 
-export type JsonSchemaOptions = {
+export type JsonGenerationOptions = {
   maxTokens?: number;
 };
 
@@ -439,7 +439,7 @@ export class LmScript<
   json<const N extends string, T>(
     name: N,
     schema: Schema<T>,
-    opts?: JsonSchemaOptions,
+    opts?: JsonGenerationOptions,
   ): LmScript<
     {
       [K in keyof GEN | N]: K extends N ? T : K extends keyof GEN ? GEN[K] : never;
@@ -453,6 +453,29 @@ export class LmScript<
         name,
         jsonSchema: toJsonSchema(schema),
         max_tokens: opts?.maxTokens ?? 1024,
+      },
+    ]) as any;
+  }
+
+  explainXml<T>(_schema: Schema<T>): LmScript<GEN, SEL> {
+    return this;
+  }
+
+  xml<const N extends string, T extends Record<string, any>>(
+    name: N,
+    schema: Schema<T>,
+  ): LmScript<
+    {
+      [K in keyof GEN | N]: K extends N ? T : K extends keyof GEN ? GEN[K] : never;
+    },
+    SEL
+  > {
+    return this.#clone(this.#state, [
+      ...this.#tasks,
+      {
+        tag: "XmlTask",
+        name,
+        schema: schema.data,
       },
     ]) as any;
   }

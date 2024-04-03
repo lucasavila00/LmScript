@@ -1,142 +1,164 @@
 import { assertIsNever } from "./utils";
 
-type SchemaTypes =
-  | "number"
-  | "string"
-  | "null"
-  | "boolean"
-  | "union"
-  | "intersection"
-  | "literal"
-  | "object"
-  | "array";
-
-export type Schema<T> = {
-  decode: (it: unknown) => T;
-  type: SchemaTypes;
-  children: Schema<any>[] | void | Record<string, Schema<any>> | string | number | boolean;
+type NumberSchemaData = {
+  type: "number";
+  example: number;
 };
 
-const number = (): Schema<number> => ({
-  type: "number",
-  children: void 0,
-  decode: (it: unknown) => {
-    if (typeof it !== "number") {
-      throw new Error("Expected a number");
-    }
-    return it;
-  },
-});
+type StringSchemaData = {
+  type: "string";
+  example: string;
+};
 
-const string = (): Schema<string> => ({
-  type: "string",
-  children: void 0,
-  decode: (it: unknown) => {
-    if (typeof it !== "string") {
-      throw new Error("Expected a string");
-    }
-    return it;
-  },
-});
+type NullSchemaData = {
+  type: "null";
+  example: null;
+};
 
-const null_ = (): Schema<null> => ({
-  type: "null",
-  children: void 0,
-  decode: (it: unknown) => {
-    if (it !== null) {
-      throw new Error("Expected null");
-    }
-    return it;
-  },
-});
+type BooleanSchemaData = {
+  type: "boolean";
+  example: boolean;
+};
 
-const boolean = (): Schema<boolean> => ({
-  type: "boolean",
-  children: void 0,
-  decode: (it: unknown) => {
-    if (typeof it !== "boolean") {
-      throw new Error("Expected a boolean");
-    }
-    return it;
-  },
-});
+type LiteralSchemaData = {
+  type: "literal";
+  children: string | number | boolean;
+};
 
-const literal = <T extends string | number | boolean>(value: T): Schema<T> => ({
-  type: "literal",
-  children: value,
-  decode: (it: unknown) => {
-    if (it !== value) {
-      throw new Error(`Expected ${value}`);
-    }
-    return value;
-  },
-});
+type EnumSchemaData = {
+  type: "enum";
+  children: Array<string | number | boolean>;
+};
 
-const union = <T extends [Schema<any>, ...Schema<any>[]]>(
+type ObjectSchemaData = {
+  type: "object";
+  children: Record<string, Schema<any>>;
+  title: string;
+};
+
+type ArraySchemaData = {
+  type: "array";
+  children: [Schema<any>];
+};
+
+type UnionSchemaData = {
+  type: "union";
+  children: { discriminator: string; schemas: Schema<any>[] };
+};
+
+type IntersectionSchemaData = {
+  type: "intersection";
+  children: Schema<any>[];
+  title: string;
+};
+
+export type SchemaData =
+  | NumberSchemaData
+  | StringSchemaData
+  | NullSchemaData
+  | BooleanSchemaData
+  | LiteralSchemaData
+  | EnumSchemaData
+  | ObjectSchemaData
+  | ArraySchemaData
+  | UnionSchemaData
+  | IntersectionSchemaData;
+
+type SchemaClassData = SchemaData & {
+  description?: string;
+};
+
+export class Schema<_T> {
+  public data: SchemaClassData;
+  constructor(data: SchemaClassData) {
+    this.data = data;
+  }
+
+  private clone(data: Partial<SchemaClassData>): this {
+    return new Schema({ ...this.data, ...data } as any) as any;
+  }
+
+  public description(description: string): this {
+    return this.clone({ description });
+  }
+}
+
+const number = (example: number): Schema<number> =>
+  new Schema({
+    type: "number",
+    example,
+  });
+
+const string = (example: string): Schema<string> =>
+  new Schema({
+    type: "string",
+    example,
+  });
+
+const null_ = (): Schema<null> =>
+  new Schema({
+    type: "null",
+    example: null,
+  });
+
+const boolean = (): Schema<boolean> =>
+  new Schema({
+    type: "boolean",
+    example: true,
+  });
+
+const literal = <T extends string | number | boolean>(value: T): Schema<T> =>
+  new Schema({
+    type: "literal",
+    children: value,
+  });
+
+const enum_ = <const T extends Array<string | number | boolean>>(
   schemas: T,
-): Schema<T[number] extends Schema<infer U> ? U : never> => ({
-  type: "union",
-  children: schemas,
-  decode: (it: unknown) => {
-    for (const schema of schemas) {
-      try {
-        return schema.decode(it);
-      } catch {}
-    }
-    throw new Error("Expected one of the schemas");
-  },
-});
+): Schema<T extends Array<infer U> ? U : never> =>
+  new Schema<any>({
+    type: "enum",
+    children: schemas,
+  });
+const discriminatedUnion = <
+  N extends string,
+  K extends N,
+  T extends [Schema<Record<K, any>>, ...Schema<Record<K, any>>[]],
+>(
+  discriminator: N,
+  schemas: T,
+): Schema<T[number] extends Schema<infer U> ? U : never> =>
+  new Schema({
+    type: "union",
+    children: { discriminator, schemas },
+  });
 
 type UnionToIntersection<U> = (U extends any ? (x: U) => void : never) extends (x: infer I) => void
   ? I
   : never;
 
 const intersection = <T extends [Schema<Record<string, any>>, Schema<Record<string, any>>]>(
+  title: string,
   schemas: T,
-): Schema<UnionToIntersection<T[number] extends Schema<infer U> ? U : never>> => {
-  return {
+): Schema<UnionToIntersection<T[number] extends Schema<infer U> ? U : never>> =>
+  new Schema({
     type: "intersection",
     children: schemas,
-    decode: (it: unknown) => {
-      for (const schema of schemas) {
-        it = schema.decode(it);
-      }
-      return it as any;
-    },
-  };
-};
+    title,
+  });
 
 const object = <T extends Record<string, Schema<any>>>(
+  title: string,
   schema: T,
 ): Schema<{
   [K in keyof T]: T[K] extends Schema<infer U> ? U : never;
-}> => ({
-  type: "object",
-  children: schema,
-  decode: (it: unknown) => {
-    if (typeof it !== "object" || it === null) {
-      throw new Error("Expected an object");
-    }
-    const obj = it as Record<string, unknown>;
-    for (const key in schema) {
-      obj[key] = schema[key].decode(obj[key]);
-    }
-    return obj as any;
-  },
-});
+}> => new Schema({ type: "object", children: schema, title });
 
-const array = <T extends Schema<any>>(
-  schema: T,
-): Schema<T extends Schema<infer U> ? U[] : never> => ({
-  type: "array",
-  children: [schema],
-  decode: (it: unknown) => {
-    if (!Array.isArray(it)) {
-      throw new Error("Expected an array");
-    }
-    return it.map((item) => schema.decode(item)) as any;
-  },
-});
+const array = <T extends Schema<any>>(schema: T): Schema<T extends Schema<infer U> ? U[] : never> =>
+  new Schema({
+    type: "array",
+    children: [schema],
+  });
 
 export const s = {
   number,
@@ -144,38 +166,39 @@ export const s = {
   null: null_,
   boolean,
   literal,
-  union,
+  discriminatedUnion,
   intersection,
   object,
   array,
+  enum: enum_,
 };
 
 export type TypeOf<T> = T extends Schema<infer U> ? U : never;
 
 export const toJsonSchema = (schema: Schema<any>): object => {
-  switch (schema.type) {
+  const schemaData = schema.data;
+  switch (schemaData.type) {
     case "array":
       return {
         type: "array",
-        items: toJsonSchema((schema.children as Schema<any>[])[0]),
+        items: toJsonSchema(schemaData.children[0]),
       };
     case "object":
       return {
         type: "object",
         properties: Object.fromEntries(
-          Object.entries(schema.children as Record<string, Schema<any>>).map(([key, value]) => [
-            key,
-            toJsonSchema(value),
-          ]),
+          Object.entries(schemaData.children).map(([key, value]) => [key, toJsonSchema(value)]),
         ),
-        required: Object.keys(schema.children as Record<string, Schema<any>>),
+        required: Object.keys(schemaData.children),
       };
     case "union":
-      return { anyOf: (schema.children as Schema<any>[]).map(toJsonSchema) };
+      return { anyOf: schemaData.children.schemas.map(toJsonSchema) };
+    case "enum":
+      return { enum: schemaData.children };
     case "intersection":
-      return { allOf: (schema.children as Schema<any>[]).map(toJsonSchema) };
+      return { allOf: schemaData.children.map(toJsonSchema) };
     case "literal":
-      return { const: schema.children };
+      return { const: schemaData.children };
     case "number":
       return { type: "number" };
     case "string":
@@ -185,6 +208,6 @@ export const toJsonSchema = (schema: Schema<any>): object => {
     case "boolean":
       return { type: "boolean" };
     default:
-      return assertIsNever(schema.type);
+      return assertIsNever(schemaData);
   }
 };

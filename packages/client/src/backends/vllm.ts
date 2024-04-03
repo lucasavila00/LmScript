@@ -191,6 +191,9 @@ export class VllmBackend implements AbstractBackend {
           }
           break;
         }
+        case "XmlTask": {
+          throw new Error("not implemented");
+        }
         default: {
           return assertIsNever(task);
         }

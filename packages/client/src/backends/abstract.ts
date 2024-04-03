@@ -3,6 +3,8 @@
  * @module
  */
 
+import { SchemaData } from "../schema";
+
 export type TasksOutput = { text: string; captured: Record<string, string> };
 
 /**
@@ -58,13 +60,20 @@ export type JsonSchemaTask = {
   jsonSchema: any;
   max_tokens: number;
 };
+
+export type XmlTask = {
+  tag: "XmlTask";
+  name: string | undefined;
+  schema: SchemaData;
+};
 export type Task =
   | AddTextTask
   | GenerateTask
   | SelectTask
   | RepeatTask
   | MatchTask
-  | JsonSchemaTask;
+  | JsonSchemaTask
+  | XmlTask;
 export type FetcherSamplingParams = {
   temperature: number;
   top_p?: number;
