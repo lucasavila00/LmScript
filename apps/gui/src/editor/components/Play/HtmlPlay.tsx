@@ -214,7 +214,7 @@ const getDataThrowing = (
 
             throw new LoadingSuspend(authorMsgs);
           } else {
-            const parsedItems = parseGeneration(captured, nodeAttrs.name);
+            const parsedItems = parseGeneration(String(captured), nodeAttrs.name);
             for (const parsed of parsedItems) {
               switch (parsed.tag) {
                 case "hardBreak":

@@ -1,4 +1,4 @@
-import { assertIsNever, delay, NOOP } from "../utils";
+import { delay, NOOP } from "../utils";
 import {
   AbstractBackend,
   ExecutionCallbacks,
@@ -6,7 +6,6 @@ import {
   GenerationThread,
   ReportUsage,
   SelectTask,
-  Task,
   TasksOutput,
 } from "./abstract";
 import { BaseExecutor } from "./executor";
@@ -105,107 +104,6 @@ class VllmBackendExecutor extends BaseExecutor {
     const captured = json.choices[0].text;
     this.state.text += captured;
     return captured;
-  }
-
-  async #handleGenerateTask(task: GenerateTask) {
-    const captured = await this.doGeneration(task);
-    if (task.name != null) {
-      this.state.captured[task.name] = captured;
-      this.callbacks.onCapture({
-        name: task.name,
-        value: captured,
-      });
-    }
-  }
-
-  async #handleSelectTask(task: SelectTask) {
-    const captured = await this.doSelect(task);
-    if (task.name != null) {
-      this.state.captured[task.name] = captured;
-      this.callbacks.onCapture({
-        name: task.name,
-        value: captured,
-      });
-    }
-  }
-  private async handleTask(task: Task) {
-    switch (task.tag) {
-      case "AddTextTask": {
-        this.state.text += task.text;
-        break;
-      }
-      case "GenerateTask": {
-        await this.#handleGenerateTask(task);
-        break;
-      }
-      case "SelectTask": {
-        await this.#handleSelectTask(task);
-        break;
-      }
-      case "RepeatTask": {
-        const captured = this.state.captured[task.variable];
-        if (captured == null) {
-          throw new Error(`No captured value for ${task.variable}`);
-        }
-        this.state.text += captured;
-        break;
-      }
-      case "MatchTask": {
-        const value = this.state.captured[task.variable];
-        if (value == null) {
-          throw new Error(`Variable ${task.variable} not found`);
-        }
-        const tasks = task.choices[value as any];
-        if (tasks == null) {
-          throw new Error(`Variable ${task.variable} not found`);
-        }
-        for (const innerTask of tasks) {
-          await this.handleTask(innerTask);
-        }
-        break;
-      }
-      // case "JsonSchemaTask": {
-      //   // deno-lint-ignore no-explicit-any
-      //   const json = await this.#fetchJSON<any>({
-      //     model: this.#model,
-      //     prompt: this.state.text,
-      //     guided_json: task.jsonSchema,
-      //     temperature: this.data.sampling_params.temperature,
-      //     top_p: this.data.sampling_params.top_p,
-      //     top_k: this.data.sampling_params.top_k,
-      //     frequency_penalty: this.data.sampling_params.frequency_penalty,
-      //     presence_penalty: this.data.sampling_params.presence_penalty,
-      //     max_tokens: task.max_tokens,
-      //   });
-      //   this.#reportUsage({
-      //     promptTokens: json.usage.prompt_tokens,
-      //     completionTokens: json.usage.completion_tokens,
-      //   });
-      //   const captured = json.choices[0].text;
-      //   this.state.text += captured;
-      //   if (task.name != null) {
-      //     this.state.captured[task.name] = JSON.parse(captured);
-      //     this.callbacks.onCapture({
-      //       name: task.name,
-      //       value: JSON.parse(captured),
-      //     });
-      //   }
-      //   break;
-      // }
-      case "XmlTask": {
-        await this.handleXmlTask(task);
-        break;
-      }
-      default: {
-        return assertIsNever(task);
-      }
-    }
-  }
-  async executeJSON(): Promise<TasksOutput> {
-    for (const task of this.data.tasks) {
-      await this.handleTask(task);
-    }
-    return this.state;
   }
 }
 

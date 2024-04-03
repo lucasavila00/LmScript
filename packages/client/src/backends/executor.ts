@@ -11,7 +11,8 @@ import {
   SelectTask,
   GenerateTask,
   ExecutionCallbacks,
-  XmlTask,
+  Task,
+  TasksOutput,
 } from "./abstract";
 
 const INTEGER = "(-)?(0|[1-9][0-9]*)";
@@ -66,16 +67,20 @@ export abstract class BaseExecutor {
     const newFullPath = [...path, key];
     switch (data.type) {
       case "array": {
-        await this.handleXmlArray(path, key, data);
+        await this.#handleXmlArray(path, key, data);
+        break;
+      }
+      case "discriminatedUnion": {
+        await this.#handleXmlDiscriminatedUnion(path, key, data);
+        break;
+      }
+      case "object": {
+        await this.#handleXmlObject(path, key, data);
         break;
       }
       case "null": {
         this.state.text += `<${key} type="null">null</${key}>\n`;
         this.#writeToPath(newFullPath, null);
-        break;
-      }
-      case "object": {
-        await this.#handleXmlObject(path, key, data);
         break;
       }
       case "boolean": {
@@ -113,15 +118,11 @@ export abstract class BaseExecutor {
         this.state.text += `</${key}>\n`;
         break;
       }
-      case "discriminatedUnion": {
-        await this.#handleXmlDiscriminatedUnion(path, key, data);
-        break;
-      }
       default:
         return assertIsNever(data);
     }
   }
-  private async handleXmlArray(path: string[], key: string, schema: ArraySchemaData) {
+  async #handleXmlArray(path: string[], key: string, schema: ArraySchemaData) {
     this.state.text += `<${key} type="array">\n`;
 
     const childType = schema.children;
@@ -193,11 +194,74 @@ export abstract class BaseExecutor {
     this.state.text += `</${key}>\n`;
   }
 
-  protected async handleXmlTask(task: XmlTask) {
-    await this.#handleXmlField([], task.name, task.schema);
-    this.callbacks.onCapture({
-      name: task.name,
-      value: this.state.captured[task.name],
-    });
+  async #runTask(task: Task): Promise<void> {
+    switch (task.tag) {
+      case "AddTextTask": {
+        this.state.text += task.text;
+        break;
+      }
+      case "GenerateTask": {
+        const captured = await this.doGeneration(task);
+        if (task.name != null) {
+          this.state.captured[task.name] = captured;
+          this.callbacks.onCapture({
+            name: task.name,
+            value: captured,
+          });
+        }
+        break;
+      }
+      case "SelectTask": {
+        const decision = await this.doSelect(task);
+        if (task.name != null) {
+          this.state.captured[task.name] = decision;
+          this.callbacks.onCapture({
+            name: task.name,
+            value: decision,
+          });
+        }
+
+        break;
+      }
+      case "RepeatTask": {
+        const value = this.state.captured[task.variable];
+        if (value == null) {
+          throw new Error(`Variable ${task.variable} not found`);
+        }
+        this.state.text += value;
+        break;
+      }
+      case "MatchTask": {
+        const value = this.state.captured[task.variable];
+        if (value == null) {
+          throw new Error(`Variable ${task.variable} not found`);
+        }
+        const tasks = task.choices[value as any];
+        if (tasks == null) {
+          throw new Error(`Variable ${task.variable} not found`);
+        }
+        for (const innerTask of tasks) {
+          await this.#runTask(innerTask);
+        }
+        break;
+      }
+      case "XmlTask": {
+        await this.#handleXmlField([], task.name, task.schema);
+        this.callbacks.onCapture({
+          name: task.name,
+          value: this.state.captured[task.name],
+        });
+        break;
+      }
+      default: {
+        return assertIsNever(task);
+      }
+    }
+  }
+  async executeJSON(): Promise<TasksOutput> {
+    for (const task of this.data.tasks) {
+      await this.#runTask(task);
+    }
+    return this.state;
   }
 }
