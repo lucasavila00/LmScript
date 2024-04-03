@@ -135,7 +135,7 @@ class SglServerExecutor {
     }
     return out;
   }
-  getState(): { text: string; captured: Record<string, string> } {
+  getState(): { text: string; captured: Record<string, unknown> } {
     return this.#state;
   }
   async runTask(task: Task): Promise<void> {
@@ -221,7 +221,7 @@ class SglServerExecutor {
         if (value == null) {
           throw new Error(`Variable ${task.variable} not found`);
         }
-        const tasks = task.choices[value];
+        const tasks = task.choices[value as any];
         if (tasks == null) {
           throw new Error(`Variable ${task.variable} not found`);
         }

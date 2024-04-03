@@ -78,15 +78,14 @@ export const kitchenSink = async (client: InitClient) => {
     temperature: 0.0,
   });
   console.log(conversation10);
-  console.log(captured10.email);
-  console.log(captured10.name);
+  console.log(captured10);
 
   const { rawText: conversation9, captured: captured9 } = await jsonGeneration(client).run({
     temperature: 0.0,
   });
   console.log(conversation9);
+  console.log(captured9);
   console.log(captured9.profile.email);
-  console.log(captured9.profile.name);
 
   const start1 = Date.now();
   const { rawText: conversation7 } = await client

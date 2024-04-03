@@ -19,6 +19,7 @@ import {
 } from "./chat-template";
 import { Schema, toJsonSchema } from "./schema";
 import { ERROR_MESSAGES, NOOP } from "./utils";
+import { explainXmlSchema } from "./xml-schema";
 
 type EmptyRecord = Record<never, string>;
 type AnyRecord = Record<string, string>;
@@ -451,14 +452,20 @@ export class LmScript<
       {
         tag: "JsonSchemaTask",
         name,
-        jsonSchema: toJsonSchema(schema),
+        jsonSchema: toJsonSchema(schema.data),
         max_tokens: opts?.maxTokens ?? 1024,
       },
     ]) as any;
   }
 
-  explainXml<T>(_schema: Schema<T>): LmScript<GEN, SEL> {
-    return this;
+  explainXml<T>(schema: Schema<T>): LmScript<GEN, SEL> {
+    return this.#clone(this.#state, [
+      ...this.#tasks,
+      {
+        tag: "AddTextTask",
+        text: explainXmlSchema(schema.data),
+      },
+    ]) as any;
   }
 
   xml<const N extends string, T extends Record<string, any>>(
@@ -475,7 +482,7 @@ export class LmScript<
       {
         tag: "XmlTask",
         name,
-        schema: schema.data,
+        schema: schema.data as any,
       },
     ]) as any;
   }

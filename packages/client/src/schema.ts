@@ -1,55 +1,50 @@
 import { assertIsNever } from "./utils";
 
-type NumberSchemaData = {
+export type NumberSchemaData = {
   type: "number";
   example: number;
 };
 
-type StringSchemaData = {
+export type StringSchemaData = {
   type: "string";
   example: string;
 };
 
-type NullSchemaData = {
+export type NullSchemaData = {
   type: "null";
   example: null;
 };
 
-type BooleanSchemaData = {
+export type BooleanSchemaData = {
   type: "boolean";
   example: boolean;
 };
 
-type LiteralSchemaData = {
+export type LiteralSchemaData = {
   type: "literal";
   children: string | number | boolean;
 };
 
-type EnumSchemaData = {
+export type EnumSchemaData = {
   type: "enum";
   children: Array<string | number | boolean>;
 };
 
-type ObjectSchemaData = {
+export type ObjectSchemaData = {
   type: "object";
-  children: Record<string, Schema<any>>;
+  children: Record<string, SchemaClassData>;
   title: string;
 };
 
-type ArraySchemaData = {
+export type ArraySchemaData = {
   type: "array";
-  children: [Schema<any>];
+  children: [SchemaClassData];
 };
 
-type UnionSchemaData = {
-  type: "union";
-  children: { discriminator: string; schemas: Schema<any>[] };
-};
-
-type IntersectionSchemaData = {
-  type: "intersection";
-  children: Schema<any>[];
-  title: string;
+export type UnionSchemaData = {
+  type: "discriminatedUnion";
+  discriminator: string;
+  children: ObjectSchemaData[];
 };
 
 export type SchemaData =
@@ -61,8 +56,7 @@ export type SchemaData =
   | EnumSchemaData
   | ObjectSchemaData
   | ArraySchemaData
-  | UnionSchemaData
-  | IntersectionSchemaData;
+  | UnionSchemaData;
 
 type SchemaClassData = SchemaData & {
   description?: string;
@@ -129,8 +123,9 @@ const discriminatedUnion = <
   schemas: T,
 ): Schema<T[number] extends Schema<infer U> ? U : never> =>
   new Schema({
-    type: "union",
-    children: { discriminator, schemas },
+    type: "discriminatedUnion",
+    discriminator,
+    children: schemas.map((it) => it.data) as any,
   });
 
 type UnionToIntersection<U> = (U extends any ? (x: U) => void : never) extends (x: infer I) => void
@@ -142,8 +137,10 @@ const intersection = <T extends [Schema<Record<string, any>>, Schema<Record<stri
   schemas: T,
 ): Schema<UnionToIntersection<T[number] extends Schema<infer U> ? U : never>> =>
   new Schema({
-    type: "intersection",
-    children: schemas,
+    type: "object",
+    children: Object.fromEntries(
+      schemas.map((schema) => Object.entries(schema).map(([k, v]) => [k, v.data])),
+    ),
     title,
   });
 
@@ -152,12 +149,17 @@ const object = <T extends Record<string, Schema<any>>>(
   schema: T,
 ): Schema<{
   [K in keyof T]: T[K] extends Schema<infer U> ? U : never;
-}> => new Schema({ type: "object", children: schema, title });
+}> =>
+  new Schema({
+    type: "object",
+    children: Object.fromEntries(Object.entries(schema).map(([key, value]) => [key, value.data])),
+    title,
+  });
 
 const array = <T extends Schema<any>>(schema: T): Schema<T extends Schema<infer U> ? U[] : never> =>
   new Schema({
     type: "array",
-    children: [schema],
+    children: [schema.data],
   });
 
 export const s = {
@@ -175,8 +177,7 @@ export const s = {
 
 export type TypeOf<T> = T extends Schema<infer U> ? U : never;
 
-export const toJsonSchema = (schema: Schema<any>): object => {
-  const schemaData = schema.data;
+export const toJsonSchema = (schemaData: SchemaClassData): object => {
   switch (schemaData.type) {
     case "array":
       return {
@@ -191,12 +192,10 @@ export const toJsonSchema = (schema: Schema<any>): object => {
         ),
         required: Object.keys(schemaData.children),
       };
-    case "union":
-      return { anyOf: schemaData.children.schemas.map(toJsonSchema) };
+    case "discriminatedUnion":
+      return { anyOf: schemaData.children.map(toJsonSchema) };
     case "enum":
       return { enum: schemaData.children };
-    case "intersection":
-      return { allOf: schemaData.children.map(toJsonSchema) };
     case "literal":
       return { const: schemaData.children };
     case "number":

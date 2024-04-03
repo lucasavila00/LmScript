@@ -3,14 +3,14 @@
  * @module
  */
 
-import { SchemaData } from "../schema";
+import { ObjectSchemaData, UnionSchemaData } from "../schema";
 
-export type TasksOutput = { text: string; captured: Record<string, string> };
+export type TasksOutput = { text: string; captured: Record<string, unknown> };
 
 /**
  * Callback for capturing values from the AI model in real time.
  */
-export type OnCapture = (args: { name: string; value: string }) => void;
+export type OnCapture = (args: { name: string; value: unknown }) => void;
 
 export type ReportUsage = (args: { promptTokens: number; completionTokens: number }) => void;
 
@@ -63,8 +63,8 @@ export type JsonSchemaTask = {
 
 export type XmlTask = {
   tag: "XmlTask";
-  name: string | undefined;
-  schema: SchemaData;
+  name: string;
+  schema: UnionSchemaData | ObjectSchemaData;
 };
 export type Task =
   | AddTextTask
@@ -89,5 +89,5 @@ export type GenerationThread = {
 };
 export type ClientState = {
   text: string;
-  captured: Record<string, string>;
+  captured: Record<string, unknown>;
 };
