@@ -3,7 +3,7 @@
  * @module
  */
 
-import { ObjectSchemaData, DiscriminatedUnionSchemaData } from "../schema";
+import { SchemaData } from "../schema";
 
 export type TasksOutput = { text: string; captured: Record<string, unknown> };
 
@@ -57,7 +57,7 @@ export type MatchTask = {
 export type XmlTask = {
   tag: "XmlTask";
   name: string;
-  schema: DiscriminatedUnionSchemaData | ObjectSchemaData;
+  schema: SchemaData;
 };
 export type Task = AddTextTask | GenerateTask | SelectTask | RepeatTask | MatchTask | XmlTask;
 export type FetcherSamplingParams = {

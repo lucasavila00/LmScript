@@ -5,7 +5,14 @@ import {
   DiscriminatedUnionSchemaData,
 } from "../schema";
 import { assertIsNever } from "../utils";
-import { GenerationThread, ClientState, SelectTask, GenerateTask } from "./abstract";
+import {
+  GenerationThread,
+  ClientState,
+  SelectTask,
+  GenerateTask,
+  ExecutionCallbacks,
+  XmlTask,
+} from "./abstract";
 
 const INTEGER = "(-)?(0|[1-9][0-9]*)";
 const NUMBER = `(${INTEGER})(\\.[0-9]+)?([eE][+-][0-9]+)?`;
@@ -13,9 +20,11 @@ const NUMBER = `(${INTEGER})(\\.[0-9]+)?([eE][+-][0-9]+)?`;
 export abstract class BaseExecutor {
   readonly data: GenerationThread;
   state: ClientState;
-  constructor(data: GenerationThread) {
+  readonly callbacks: ExecutionCallbacks;
+  constructor(data: GenerationThread, callbacks: ExecutionCallbacks) {
     this.data = data;
     this.state = JSON.parse(JSON.stringify(this.data.initial_state));
+    this.callbacks = callbacks;
   }
 
   async #writeToPath(path: string[], captured: unknown) {
@@ -66,7 +75,7 @@ export abstract class BaseExecutor {
         break;
       }
       case "object": {
-        await this.handleXmlObject(newFullPath, data);
+        await this.#handleXmlObject(path, key, data);
         break;
       }
       case "boolean": {
@@ -105,7 +114,7 @@ export abstract class BaseExecutor {
         break;
       }
       case "discriminatedUnion": {
-        await this.handleXmlDiscriminatedUnion(newFullPath, data);
+        await this.#handleXmlDiscriminatedUnion(path, key, data);
         break;
       }
       default:
@@ -144,39 +153,51 @@ export abstract class BaseExecutor {
       idx++;
     }
   }
-  protected async handleXmlDiscriminatedUnion(
+  async #handleXmlDiscriminatedUnion(
     path: string[],
+    key: string,
     schema: DiscriminatedUnionSchemaData,
   ) {
-    const lastPath = path[path.length - 1];
-    this.state.text += `<${lastPath}>\n`;
+    this.state.text += `<${key}>\n`;
     this.state.text += `<`;
-    const discriminatorValues: string[] = schema.children.map((it) => it.title);
+    const discriminatorValues: string[] = Object.keys(schema.children);
     const selection = await this.doSelect({ tag: "SelectTask", choices: discriminatorValues });
-    const schemaSelected = schema.children.find((it) => it.title === selection);
+    const schemaSelected = schema.children[selection];
     if (schemaSelected == null) {
       throw new Error(`Discriminator value ${selection} not found`);
     }
     this.state.text = this.state.text.slice(0, -1 - selection.length);
-    await this.handleXmlObject(path, schemaSelected);
+    await this.#handleXmlObject([...path, key], selection, schemaSelected);
 
-    this.state.text += `</${lastPath}>\n`;
+    this.state.text += `</${key}>\n`;
 
     let current = this.state.captured;
-    for (const key of path) {
-      if (current[key] == null) {
-        current[key] = {};
+    for (const k2 of [...path]) {
+      if (current[k2] == null) {
+        current[k2] = {};
       }
-      current = current[key] as any;
+      current = current[k2] as any;
     }
-    current["tag"] = selection;
+
+    current[key] = {
+      tag: selection,
+      ...(current[key] as any)[selection],
+    };
   }
-  protected async handleXmlObject(path: string[], schema: ObjectSchemaData) {
-    this.state.text += `<${schema.title}>\n`;
-    for (const key of Object.keys(schema.children)) {
-      const field = schema.children[key];
-      await this.#handleXmlField(path, key, field);
+  async #handleXmlObject(path: string[], key: string, schema: ObjectSchemaData) {
+    this.state.text += `<${key}>\n`;
+    for (const k2 of Object.keys(schema.children)) {
+      const field = schema.children[k2];
+      await this.#handleXmlField([...path, key], k2, field);
     }
-    this.state.text += `</${schema.title}>\n`;
+    this.state.text += `</${key}>\n`;
+  }
+
+  protected async handleXmlTask(task: XmlTask) {
+    await this.#handleXmlField([], task.name, task.schema);
+    this.callbacks.onCapture({
+      name: task.name,
+      value: this.state.captured[task.name],
+    });
   }
 }

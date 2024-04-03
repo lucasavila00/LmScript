@@ -15,7 +15,6 @@ import {
   SelectTask,
   Task,
   TasksOutput,
-  XmlTask,
 } from "./abstract";
 import { BaseExecutor } from "./executor";
 
@@ -63,7 +62,6 @@ type MetaInfoSelection = {
 
 class SglServerExecutor extends BaseExecutor {
   readonly #url: string;
-  readonly #callbacks: ExecutionCallbacks;
   readonly #reportUsage: ReportUsage;
 
   constructor(
@@ -72,10 +70,9 @@ class SglServerExecutor extends BaseExecutor {
     callbacks: ExecutionCallbacks,
     reportUsage: ReportUsage,
   ) {
-    super(data);
+    super(data, callbacks);
 
     this.#url = url;
-    this.#callbacks = callbacks;
     this.#reportUsage = reportUsage;
   }
 
@@ -190,30 +187,6 @@ class SglServerExecutor extends BaseExecutor {
     return this.state;
   }
 
-  async #handleXmlTask(task: XmlTask) {
-    switch (task.schema.type) {
-      case "discriminatedUnion": {
-        await this.handleXmlDiscriminatedUnion([task.name], task.schema);
-        this.#callbacks.onCapture({
-          name: task.name,
-          value: this.state.captured[task.name],
-        });
-        break;
-      }
-      case "object": {
-        await this.handleXmlObject([task.name], task.schema);
-        this.#callbacks.onCapture({
-          name: task.name,
-          value: this.state.captured[task.name],
-        });
-        break;
-      }
-      default: {
-        return assertIsNever(task.schema);
-      }
-    }
-  }
-
   async runTask(task: Task): Promise<void> {
     switch (task.tag) {
       case "AddTextTask": {
@@ -224,7 +197,7 @@ class SglServerExecutor extends BaseExecutor {
         const captured = await this.doGeneration(task);
         if (task.name != null) {
           this.state.captured[task.name] = captured;
-          this.#callbacks.onCapture({
+          this.callbacks.onCapture({
             name: task.name,
             value: captured,
           });
@@ -235,7 +208,7 @@ class SglServerExecutor extends BaseExecutor {
         const decision = await this.doSelect(task);
         if (task.name != null) {
           this.state.captured[task.name] = decision;
-          this.#callbacks.onCapture({
+          this.callbacks.onCapture({
             name: task.name,
             value: decision,
           });
@@ -266,7 +239,7 @@ class SglServerExecutor extends BaseExecutor {
         break;
       }
       case "XmlTask": {
-        await this.#handleXmlTask(task);
+        await this.handleXmlTask(task);
         break;
       }
       default: {

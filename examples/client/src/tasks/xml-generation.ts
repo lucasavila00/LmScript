@@ -39,23 +39,23 @@ import { s } from "@lmscript/client/schema";
 //       // .push("\n```\n"),
 //     );
 
-const schema = s.object("profile", {
+const schema = s.object({
   name: s.string(),
   email: s.string(),
-  interactions: s.object("interactions", {
+  interactions: s.object({
     likes: s.number(),
   }),
   age: s.number(),
   online: s.boolean(),
   friends: s.array(s.string()),
-  access: s.discriminatedUnion([
-    s.object("admin", {
+  access: s.discriminatedUnion({
+    admin: s.object({
       level: s.number(),
     }),
-    s.object("user", {
+    user: s.object({
       role: s.string(),
     }),
-  ]),
+  }),
 });
 
 export default (client: InitClient) =>
@@ -65,7 +65,7 @@ export default (client: InitClient) =>
         .push("Write the profile data as XML.")
         .push("\n")
         .push("For example:\n")
-        .pushSchemaExample(schema, {
+        .pushSchemaExample(schema, "profile", {
           name: "John Doe",
           email: "john@doe.com",
           interactions: {

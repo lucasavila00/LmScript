@@ -8,7 +8,6 @@ import {
   SelectTask,
   Task,
   TasksOutput,
-  XmlTask,
 } from "./abstract";
 import { BaseExecutor } from "./executor";
 
@@ -17,7 +16,6 @@ class VllmBackendExecutor extends BaseExecutor {
   readonly #model: string;
   readonly #reportUsage: ReportUsage;
   readonly #auth: string | undefined;
-  readonly callbacks: ExecutionCallbacks;
 
   constructor(options: {
     url: string;
@@ -27,12 +25,11 @@ class VllmBackendExecutor extends BaseExecutor {
     data: GenerationThread;
     callbacks: ExecutionCallbacks;
   }) {
-    super(options.data);
+    super(options.data, options.callbacks);
     this.#url = options.url;
     this.#model = options.model;
     this.#reportUsage = options?.reportUsage ?? NOOP;
     this.#auth = options.auth;
-    this.callbacks = options.callbacks;
   }
   async #fetchJSONNoRet<T>(body: object): Promise<T> {
     const headers: Record<string, string> = {
@@ -108,29 +105,6 @@ class VllmBackendExecutor extends BaseExecutor {
     const captured = json.choices[0].text;
     this.state.text += captured;
     return captured;
-  }
-  async #handleXmlTask(task: XmlTask) {
-    switch (task.schema.type) {
-      case "discriminatedUnion": {
-        await this.handleXmlDiscriminatedUnion([task.name], task.schema);
-        this.callbacks.onCapture({
-          name: task.name,
-          value: this.state.captured[task.name],
-        });
-        break;
-      }
-      case "object": {
-        await this.handleXmlObject([task.name], task.schema);
-        this.callbacks.onCapture({
-          name: task.name,
-          value: this.state.captured[task.name],
-        });
-        break;
-      }
-      default: {
-        return assertIsNever(task.schema);
-      }
-    }
   }
 
   async #handleGenerateTask(task: GenerateTask) {
@@ -219,7 +193,7 @@ class VllmBackendExecutor extends BaseExecutor {
       //   break;
       // }
       case "XmlTask": {
-        await this.#handleXmlTask(task);
+        await this.handleXmlTask(task);
         break;
       }
       default: {
