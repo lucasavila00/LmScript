@@ -246,11 +246,16 @@ export abstract class BaseExecutor {
         break;
       }
       case "XmlTask": {
-        await this.#handleXmlField([], task.name, task.schema);
+        const generationName = task.schemaKey ?? task.name;
+        await this.#handleXmlField([], generationName, task.schema);
         this.callbacks.onCapture({
           name: task.name,
-          value: this.state.captured[task.name],
+          value: this.state.captured[generationName],
         });
+        if (task.name != generationName) {
+          this.state.captured[task.name] = this.state.captured[generationName];
+          delete this.state.captured[generationName];
+        }
         break;
       }
       default: {

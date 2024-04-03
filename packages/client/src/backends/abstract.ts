@@ -57,6 +57,7 @@ export type MatchTask = {
 export type XmlTask = {
   tag: "XmlTask";
   name: string;
+  schemaKey: string | undefined;
   schema: SchemaData;
 };
 export type Task = AddTextTask | GenerateTask | SelectTask | RepeatTask | MatchTask | XmlTask;

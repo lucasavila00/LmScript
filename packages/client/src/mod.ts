@@ -436,7 +436,7 @@ export class LmScript<
     }
   }
 
-  pushSchemaExample<T>(schema: Schema<T>, title: string, example: T): LmScript<GEN, SEL> {
+  pushSchemaExample<T>(title: string, schema: Schema<T>, example: T): LmScript<GEN, SEL> {
     return this.#clone(this.#state, [
       ...this.#tasks,
       {
@@ -447,21 +447,40 @@ export class LmScript<
   }
 
   genSchema<const N extends string, T extends Record<string, any>>(
-    name: N,
+    captureAs: N,
+    title: string,
     schema: Schema<T>,
   ): LmScript<
     {
       [K in keyof GEN | N]: K extends N ? T : K extends keyof GEN ? GEN[K] : never;
     },
     SEL
-  > {
+  >;
+  genSchema<const N extends string, T extends Record<string, any>>(
+    title: N,
+    schema: Schema<T>,
+  ): LmScript<
+    {
+      [K in keyof GEN | N]: K extends N ? T : K extends keyof GEN ? GEN[K] : never;
+    },
+    SEL
+  >;
+
+  genSchema(
+    first: string,
+    second: string | Schema<Record<string, any>>,
+    third?: Schema<Record<string, any>>,
+  ): any {
     return this.#clone(this.#state, [
       ...this.#tasks,
-      {
-        tag: "XmlTask",
-        name,
-        schema: schema.data as any,
-      },
+      third == null
+        ? {
+            tag: "XmlTask",
+            name: first,
+            schema: (second as any).data,
+            schemaKey: undefined,
+          }
+        : { tag: "XmlTask", name: first, schemaKey: second as any, schema: (third as any).data },
     ]) as any;
   }
 

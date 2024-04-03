@@ -65,7 +65,7 @@ export default (client: InitClient) =>
         .push("Write the profile data as XML.")
         .push("\n")
         .push("For example:\n")
-        .pushSchemaExample(schema, "profile", {
+        .pushSchemaExample("profile", schema, {
           name: "John Doe",
           email: "john@doe.com",
           interactions: {
@@ -80,4 +80,6 @@ export default (client: InitClient) =>
           },
         }),
     )
-    .assistant((m) => m.genSchema("profile", schema));
+    .assistant((m) => m.genSchema("profile1", "profile", schema))
+    .user((m) => m.push("Write a second profile in XML."))
+    .assistant((m) => m.genSchema("profile2", "profile", schema));
