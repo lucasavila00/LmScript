@@ -161,14 +161,6 @@ export abstract class BaseExecutor {
     await this.handleXmlObject(path, schemaSelected);
 
     this.state.text += `</${lastPath}>\n`;
-  }
-  protected async handleXmlObject(path: string[], schema: ObjectSchemaData) {
-    this.state.text += `<${schema.title}>\n`;
-    for (const key of Object.keys(schema.children)) {
-      const field = schema.children[key];
-      await this.#handleXmlField(path, key, field);
-    }
-    this.state.text += `</${schema.title}>\n`;
 
     let current = this.state.captured;
     for (const key of path) {
@@ -177,6 +169,14 @@ export abstract class BaseExecutor {
       }
       current = current[key] as any;
     }
-    current["_tag"] = schema.title;
+    current["tag"] = selection;
+  }
+  protected async handleXmlObject(path: string[], schema: ObjectSchemaData) {
+    this.state.text += `<${schema.title}>\n`;
+    for (const key of Object.keys(schema.children)) {
+      const field = schema.children[key];
+      await this.#handleXmlField(path, key, field);
+    }
+    this.state.text += `</${schema.title}>\n`;
   }
 }

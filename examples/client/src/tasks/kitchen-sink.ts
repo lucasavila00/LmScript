@@ -82,6 +82,15 @@ export const kitchenSink = async (client: InitClient) => {
   const end10 = Date.now();
   console.log(`Time taken: ${end10 - start10}ms`);
 
+  const start5 = Date.now();
+  const { rawText: conversation5 } = await characterGen(client, "Harry Potter").run({
+    temperature: 0.1,
+  });
+
+  console.log(conversation5);
+  const end5 = Date.now();
+  console.log(`Time taken: ${end5 - start5}ms`);
+
   const start1 = Date.now();
   const { rawText: conversation7 } = await client
     .user((m) => m.push("Write a markdown list of 5 funny names for a cat."))
@@ -152,10 +161,4 @@ export const kitchenSink = async (client: InitClient) => {
   );
 
   console.log(illustrationPrompt);
-
-  const { rawText: conversation5 } = await characterGen(client, "Harry Potter").run({
-    temperature: 0.1,
-  });
-
-  console.log(conversation5);
 };

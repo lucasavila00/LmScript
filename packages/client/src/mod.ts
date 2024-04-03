@@ -436,19 +436,19 @@ export class LmScript<
     }
   }
 
-  explainXml<T>(schema: Schema<T>): LmScript<GEN, SEL> {
+  pushSchemaExample<T>(schema: Schema<T, any>, example: T): LmScript<GEN, SEL> {
     return this.#clone(this.#state, [
       ...this.#tasks,
       {
         tag: "AddTextTask",
-        text: explainXmlSchema(schema.data),
+        text: explainXmlSchema(schema.data, example),
       },
     ]) as any;
   }
 
-  xml<const N extends string, T extends Record<string, any>>(
+  genSchema<const N extends string, T extends Record<string, any>>(
     name: N,
-    schema: Schema<T>,
+    schema: Schema<T, any>,
   ): LmScript<
     {
       [K in keyof GEN | N]: K extends N ? T : K extends keyof GEN ? GEN[K] : never;

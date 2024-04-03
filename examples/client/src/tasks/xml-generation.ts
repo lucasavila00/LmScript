@@ -60,5 +60,24 @@ const schema = s.object("profile", {
 
 export default (client: InitClient) =>
   client
-    .user((m) => m.push("Write the profile data as XML.").push("\n"))
-    .assistant((m) => m.xml("profile", schema));
+    .user((m) =>
+      m
+        .push("Write the profile data as XML.")
+        .push("\n")
+        .push("For example:\n")
+        .pushSchemaExample(schema, {
+          name: "John Doe",
+          email: "john@doe.com",
+          interactions: {
+            likes: 5,
+          },
+          age: 25,
+          online: true,
+          friends: ["Alice", "Bob"],
+          access: {
+            level: 5,
+            tag: "admin",
+          },
+        }),
+    )
+    .assistant((m) => m.genSchema("profile", schema));

@@ -45,10 +45,9 @@ export type SchemaData =
 
 type SchemaClassData = SchemaData & {
   description?: string;
-  example?: any;
 };
 
-export class Schema<_T> {
+export class Schema<_T, _N> {
   public data: SchemaClassData;
   constructor(data: SchemaClassData) {
     this.data = data;
@@ -61,37 +60,50 @@ export class Schema<_T> {
   public description(description: string): this {
     return this.clone({ description });
   }
-
-  public example(example: any): this {
-    return this.clone({ example });
-  }
 }
 
-const number = (): Schema<number> =>
+const number = (): Schema<number, never> =>
   new Schema({
     type: "number",
   });
 
-const string = (): Schema<string> =>
+const string = (): Schema<string, never> =>
   new Schema({
     type: "string",
   });
 
-const null_ = (): Schema<null> =>
+const null_ = (): Schema<null, never> =>
   new Schema({
     type: "null",
   });
 
-const boolean = (): Schema<boolean> =>
+const boolean = (): Schema<boolean, never> =>
   new Schema({
     type: "boolean",
   });
 
+// const discriminatedUnion = <T extends Record<string, Schema<Record<string, any>>>>(
+//   _schemas: T,
+// ): Schema<{
+//   [K in keyof T]: T[K] extends Schema<infer U> ? U & { tag: K } : never;
+// }> => {
+//   throw new Error("Not implemented");
+// };
+// new Schema({
+//   type: "discriminatedUnion",
+//   children: schemas.map((it) => it.data) as any,
+// });
+
 const discriminatedUnion = <
-  T extends [Schema<Record<string, any>>, ...Schema<Record<string, any>>[]],
+  T extends [Schema<Record<string, any>, never>, ...Schema<Record<string, any>, never>[]],
 >(
   schemas: T,
-): Schema<T[number] extends Schema<infer U> ? U : never> =>
+): Schema<
+  {
+    [K in keyof T]: T[K] extends Schema<infer U, infer N> ? U & { tag: N } : never;
+  }[number],
+  never
+> =>
   new Schema({
     type: "discriminatedUnion",
     children: schemas.map((it) => it.data) as any,
@@ -101,10 +113,13 @@ type UnionToIntersection<U> = (U extends any ? (x: U) => void : never) extends (
   ? I
   : never;
 
-const intersection = <T extends [Schema<Record<string, any>>, Schema<Record<string, any>>]>(
-  title: string,
+const intersection = <
+  const N extends string,
+  T extends [Schema<Record<string, any>, never>, Schema<Record<string, any>, never>],
+>(
+  title: N,
   schemas: T,
-): Schema<UnionToIntersection<T[number] extends Schema<infer U> ? U : never>> =>
+): Schema<UnionToIntersection<T[number] extends Schema<infer U, any> ? U : never>, N> =>
   new Schema({
     type: "object",
     children: Object.fromEntries(
@@ -113,19 +128,24 @@ const intersection = <T extends [Schema<Record<string, any>>, Schema<Record<stri
     title,
   });
 
-const object = <const N extends string, T extends Record<string, Schema<any>>>(
+const object = <const N extends string, T extends Record<string, Schema<any, any>>>(
   title: N,
   schema: T,
-): Schema<{
-  [K in keyof T | "_tag"]: T[K] extends Schema<infer U> ? U : K extends "_tag" ? N : never;
-}> =>
+): Schema<
+  {
+    [K in keyof T]: T[K] extends Schema<infer U, any> ? U : never;
+  },
+  N
+> =>
   new Schema({
     type: "object",
     children: Object.fromEntries(Object.entries(schema).map(([key, value]) => [key, value.data])),
     title,
   });
 
-const array = <T extends Schema<any>>(schema: T): Schema<T extends Schema<infer U> ? U[] : never> =>
+const array = <T extends Schema<any, any>>(
+  schema: T,
+): Schema<T extends Schema<infer U, any> ? U[] : never, never> =>
   new Schema({
     type: "array",
     children: schema.data,
@@ -144,7 +164,7 @@ export const s = {
   // enum: enum_,
 };
 
-export type TypeOf<T> = T extends Schema<infer U> ? U : never;
+export type TypeOf<T> = T extends Schema<infer U, any> ? U : never;
 
 export const toJsonSchema = (schemaData: SchemaClassData): object => {
   switch (schemaData.type) {
