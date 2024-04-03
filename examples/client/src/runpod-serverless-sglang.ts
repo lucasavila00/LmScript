@@ -1,6 +1,6 @@
 import { LmScript } from "@lmscript/client";
 import { RunpodServerlessBackend } from "@lmscript/client/backends/runpod-serverless-sglang";
-import { kitchenSink } from "./kitchen-sink";
+import { kitchenSink } from "./tasks/kitchen-sink";
 import { delay } from "../src/utils";
 
 const getEnvVarOrThrow = (name: string): string => {

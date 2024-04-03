@@ -54,26 +54,12 @@ export type MatchTask = {
   choices: Record<string, Task[]>;
 };
 
-export type JsonSchemaTask = {
-  tag: "JsonSchemaTask";
-  name: string | undefined;
-  jsonSchema: any;
-  max_tokens: number;
-};
-
 export type XmlTask = {
   tag: "XmlTask";
   name: string;
   schema: DiscriminatedUnionSchemaData | ObjectSchemaData;
 };
-export type Task =
-  | AddTextTask
-  | GenerateTask
-  | SelectTask
-  | RepeatTask
-  | MatchTask
-  | JsonSchemaTask
-  | XmlTask;
+export type Task = AddTextTask | GenerateTask | SelectTask | RepeatTask | MatchTask | XmlTask;
 export type FetcherSamplingParams = {
   temperature: number;
   top_p?: number;

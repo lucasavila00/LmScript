@@ -4,7 +4,6 @@ import {
   FetcherSamplingParams,
   MatchTask,
   OnCapture,
-  ReportUsage,
   Task,
 } from "./backends/abstract";
 import { isFirstMessage } from "./chat-template";
@@ -17,7 +16,7 @@ import {
   getRoleStart,
   Role,
 } from "./chat-template";
-import { Schema, toJsonSchema } from "./schema";
+import { Schema } from "./schema";
 import { ERROR_MESSAGES, NOOP } from "./utils";
 import { explainXmlSchema } from "./xml-schema";
 
@@ -437,27 +436,6 @@ export class LmScript<
     }
   }
 
-  json<const N extends string, T>(
-    name: N,
-    schema: Schema<T>,
-    opts?: JsonGenerationOptions,
-  ): LmScript<
-    {
-      [K in keyof GEN | N]: K extends N ? T : K extends keyof GEN ? GEN[K] : never;
-    },
-    SEL
-  > {
-    return this.#clone(this.#state, [
-      ...this.#tasks,
-      {
-        tag: "JsonSchemaTask",
-        name,
-        jsonSchema: toJsonSchema(schema.data),
-        max_tokens: opts?.maxTokens ?? 1024,
-      },
-    ]) as any;
-  }
-
   explainXml<T>(schema: Schema<T>): LmScript<GEN, SEL> {
     return this.#clone(this.#state, [
       ...this.#tasks,
@@ -521,7 +499,6 @@ export class LmScript<
   async run(
     options?: FetcherSamplingParams & {
       onCapture?: OnCapture;
-      reportUsage?: ReportUsage;
     },
   ): Promise<{
     captured: {

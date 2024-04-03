@@ -19,7 +19,6 @@ export abstract class BaseExecutor {
   }
 
   async #writeToPath(path: string[], captured: unknown) {
-    // create empty objects for each path element
     let current = this.state.captured;
 
     for (const key of path.slice(0, -1)) {
@@ -149,6 +148,8 @@ export abstract class BaseExecutor {
     path: string[],
     schema: DiscriminatedUnionSchemaData,
   ) {
+    const lastPath = path[path.length - 1];
+    this.state.text += `<${lastPath}>\n`;
     this.state.text += `<`;
     const discriminatorValues: string[] = schema.children.map((it) => it.title);
     const selection = await this.doSelect({ tag: "SelectTask", choices: discriminatorValues });
@@ -158,6 +159,8 @@ export abstract class BaseExecutor {
     }
     this.state.text = this.state.text.slice(0, -1 - selection.length);
     await this.handleXmlObject(path, schemaSelected);
+
+    this.state.text += `</${lastPath}>\n`;
   }
   protected async handleXmlObject(path: string[], schema: ObjectSchemaData) {
     this.state.text += `<${schema.title}>\n`;

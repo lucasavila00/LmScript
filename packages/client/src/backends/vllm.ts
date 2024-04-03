@@ -190,34 +190,34 @@ class VllmBackendExecutor extends BaseExecutor {
         }
         break;
       }
-      case "JsonSchemaTask": {
-        // deno-lint-ignore no-explicit-any
-        const json = await this.#fetchJSON<any>({
-          model: this.#model,
-          prompt: this.state.text,
-          guided_json: task.jsonSchema,
-          temperature: this.data.sampling_params.temperature,
-          top_p: this.data.sampling_params.top_p,
-          top_k: this.data.sampling_params.top_k,
-          frequency_penalty: this.data.sampling_params.frequency_penalty,
-          presence_penalty: this.data.sampling_params.presence_penalty,
-          max_tokens: task.max_tokens,
-        });
-        this.#reportUsage({
-          promptTokens: json.usage.prompt_tokens,
-          completionTokens: json.usage.completion_tokens,
-        });
-        const captured = json.choices[0].text;
-        this.state.text += captured;
-        if (task.name != null) {
-          this.state.captured[task.name] = JSON.parse(captured);
-          this.callbacks.onCapture({
-            name: task.name,
-            value: JSON.parse(captured),
-          });
-        }
-        break;
-      }
+      // case "JsonSchemaTask": {
+      //   // deno-lint-ignore no-explicit-any
+      //   const json = await this.#fetchJSON<any>({
+      //     model: this.#model,
+      //     prompt: this.state.text,
+      //     guided_json: task.jsonSchema,
+      //     temperature: this.data.sampling_params.temperature,
+      //     top_p: this.data.sampling_params.top_p,
+      //     top_k: this.data.sampling_params.top_k,
+      //     frequency_penalty: this.data.sampling_params.frequency_penalty,
+      //     presence_penalty: this.data.sampling_params.presence_penalty,
+      //     max_tokens: task.max_tokens,
+      //   });
+      //   this.#reportUsage({
+      //     promptTokens: json.usage.prompt_tokens,
+      //     completionTokens: json.usage.completion_tokens,
+      //   });
+      //   const captured = json.choices[0].text;
+      //   this.state.text += captured;
+      //   if (task.name != null) {
+      //     this.state.captured[task.name] = JSON.parse(captured);
+      //     this.callbacks.onCapture({
+      //       name: task.name,
+      //       value: JSON.parse(captured),
+      //     });
+      //   }
+      //   break;
+      // }
       case "XmlTask": {
         await this.#handleXmlTask(task);
         break;

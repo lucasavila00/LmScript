@@ -1,9 +1,8 @@
 import { InitClient } from "@lmscript/client";
-import { assertIsNever } from "./utils";
-import { getIllustrationPrompt } from "./tasks/illustrator-agent";
-import { generateMarkdown } from "./tasks/markdown-generator";
-import createSummary from "./generated/fabric/create_summary";
-import jsonGeneration from "./json-generation";
+import { assertIsNever } from "../utils";
+import { getIllustrationPrompt } from "./illustrator-agent";
+import { generateMarkdown } from "./markdown-generator";
+import createSummary from "../generated/fabric/create_summary";
 import xmlGeneration from "./xml-generation";
 const toolUse = async (model: InitClient, question: string) => {
   const { captured, state: thread } = await model
@@ -74,18 +73,14 @@ const characterGen = (model: InitClient, name: string) =>
     )
     .gen("json_output", { maxTokens: 256, regex: characterRegex });
 export const kitchenSink = async (client: InitClient) => {
+  const start10 = Date.now();
   const { rawText: conversation10, captured: captured10 } = await xmlGeneration(client).run({
     temperature: 0.0,
   });
   console.log(conversation10);
   console.log(JSON.stringify(captured10, null, 2));
-
-  const { rawText: conversation9, captured: captured9 } = await jsonGeneration(client).run({
-    temperature: 0.0,
-  });
-  console.log(conversation9);
-  console.log(captured9);
-  console.log(captured9.profile.email);
+  const end10 = Date.now();
+  console.log(`Time taken: ${end10 - start10}ms`);
 
   const start1 = Date.now();
   const { rawText: conversation7 } = await client
@@ -98,8 +93,8 @@ export const kitchenSink = async (client: InitClient) => {
     });
 
   const end1 = Date.now();
-  console.log(`Time taken: ${end1 - start1}ms`);
   console.log(conversation7);
+  console.log(`Time taken: ${end1 - start1}ms`);
 
   const start2 = Date.now();
   const { rawText: conversation8 } = await client
@@ -111,8 +106,8 @@ export const kitchenSink = async (client: InitClient) => {
 
   const end2 = Date.now();
 
-  console.log(`Time taken: ${end2 - start2}ms`);
   console.log(conversation8);
+  console.log(`Time taken: ${end2 - start2}ms`);
 
   const { rawText: conversation6 } = await createSummary(client, {
     input:

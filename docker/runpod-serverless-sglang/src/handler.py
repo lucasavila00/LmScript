@@ -95,11 +95,11 @@ class SelectTask(BaseModel):
     choices: list[str]
 
 
-class JsonSchemaTask(BaseModel):
-    tag: Literal["JsonSchemaTask"]
-    name: Optional[str]
-    schema: dict
-    max_tokens: int
+# class JsonSchemaTask(BaseModel):
+#     tag: Literal["JsonSchemaTask"]
+#     name: Optional[str]
+#     schema: dict
+#     max_tokens: int
 
 
 class RepeatTask(BaseModel):
@@ -114,7 +114,11 @@ class MatchTask(BaseModel):
 
 
 Task = Union[
-    AddTextTask, GenerateTask, SelectTask, MatchTask, RepeatTask, JsonSchemaTask
+    AddTextTask,
+    GenerateTask,
+    SelectTask,
+    MatchTask,
+    RepeatTask,
 ]
 
 
@@ -221,31 +225,31 @@ async def generate_task(
                 "name": t.name,
                 "value": decision,
             }
-    elif isinstance(t, JsonSchemaTask):
-        regex = build_regex_from_schema(json.dumps(t.schema))
-        params = {
-            **{k: v for k, v in sampling_params.dict().items() if v is not None},
-            "max_new_tokens": t.max_tokens,
-        }
-        params["regex"] = regex
-        res = await generate(
-            {"text": state.text, "sampling_params": params},
-            timeout=BASE_TIMEOUT * 6,
-        )
+    # elif isinstance(t, JsonSchemaTask):
+    #     regex = build_regex_from_schema(json.dumps(t.schema))
+    #     params = {
+    #         **{k: v for k, v in sampling_params.dict().items() if v is not None},
+    #         "max_new_tokens": t.max_tokens,
+    #     }
+    #     params["regex"] = regex
+    #     res = await generate(
+    #         {"text": state.text, "sampling_params": params},
+    #         timeout=BASE_TIMEOUT * 6,
+    #     )
 
-        state.prompt_tokens += res["meta_info"]["prompt_tokens"]
-        state.completion_tokens += res["meta_info"]["completion_tokens"]
+    #     state.prompt_tokens += res["meta_info"]["prompt_tokens"]
+    #     state.completion_tokens += res["meta_info"]["completion_tokens"]
 
-        captured = res["text"]
+    #     captured = res["text"]
 
-        state.text += captured
-        if t.name is not None:
-            state.captured[t.name] = captured
-            yield {
-                "tag": "Capture",
-                "name": t.name,
-                "value": captured,
-            }
+    #     state.text += captured
+    #     if t.name is not None:
+    #         state.captured[t.name] = captured
+    #         yield {
+    #             "tag": "Capture",
+    #             "name": t.name,
+    #             "value": captured,
+    #         }
     elif isinstance(t, RepeatTask):
         state.text += state.captured[t.variable]
     elif isinstance(t, MatchTask):

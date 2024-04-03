@@ -265,11 +265,6 @@ class SglServerExecutor extends BaseExecutor {
         }
         break;
       }
-      case "JsonSchemaTask": {
-        throw new Error(`JsonSchemaTask not implemented for the SGLang backend.
-The server API exposed by SGLang only supports regex, and we need to run python code to transform the JSON Schema into regex.
-Use the VLLM backend instead, or the SGLang Runpod adapter.`);
-      }
       case "XmlTask": {
         await this.#handleXmlTask(task);
         break;
