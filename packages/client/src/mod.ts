@@ -4,7 +4,6 @@ import {
   FetcherSamplingParams,
   MatchTask,
   OnCapture,
-  ReportUsage,
   Task,
 } from "./backends/abstract";
 import { isFirstMessage } from "./chat-template";
@@ -17,7 +16,9 @@ import {
   getRoleStart,
   Role,
 } from "./chat-template";
+import { Schema } from "./schema";
 import { ERROR_MESSAGES, NOOP } from "./utils";
+import { explainXmlSchema } from "./xml-schema";
 
 type EmptyRecord = Record<never, string>;
 type AnyRecord = Record<string, string>;
@@ -41,6 +42,10 @@ export type GeneratorOptions = {
   stop?: string | string[];
   maxTokens?: number;
   regex?: string;
+};
+
+export type JsonGenerationOptions = {
+  maxTokens?: number;
 };
 
 /**
@@ -71,7 +76,7 @@ type ClientStateWithCounter = ClientState & {
  */
 
 export class LmScript<
-  GEN extends Record<string, string> = EmptyRecord,
+  GEN extends Record<string, any> = EmptyRecord,
   SEL extends Record<string, string> = EmptyRecord,
 > {
   #tasks: Task[];
@@ -200,7 +205,7 @@ export class LmScript<
    */
   assistant(cb: string): LmScript<GEN, SEL>;
   assistant<
-    GEN2 extends Record<string, string> = Record<never, never>,
+    GEN2 extends Record<string, any> = Record<never, never>,
     SEL2 extends Record<string, string> = Record<never, never>,
   >(cb: (it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>): LmScript<GEN2, SEL2>;
   assistant<
@@ -218,11 +223,11 @@ export class LmScript<
    */
   system(cb: string): LmScript<GEN, SEL>;
   system<
-    GEN2 extends Record<string, string> = Record<never, never>,
+    GEN2 extends Record<string, any> = Record<never, never>,
     SEL2 extends Record<string, string> = Record<never, never>,
   >(cb: (it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>): LmScript<GEN2, SEL2>;
   system<
-    GEN2 extends Record<string, string> = Record<never, never>,
+    GEN2 extends Record<string, any> = Record<never, never>,
     SEL2 extends Record<string, string> = Record<never, never>,
   >(cb: string | ((it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>)): LmScript<GEN2, SEL2> {
     return this.#wrapRole("system", cb);
@@ -235,12 +240,12 @@ export class LmScript<
    * If a template is not provided, an error will be thrown.
    */ user(cb: string): LmScript<GEN, SEL>;
   user<
-    GEN2 extends Record<string, string> = Record<never, never>,
+    GEN2 extends Record<string, any> = Record<never, never>,
     SEL2 extends Record<string, string> = Record<never, never>,
   >(cb: (it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>): LmScript<GEN2, SEL2>;
 
   user<
-    GEN2 extends Record<string, string> = Record<never, never>,
+    GEN2 extends Record<string, any> = Record<never, never>,
     SEL2 extends Record<string, string> = Record<never, never>,
   >(cb: string | ((it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>)): LmScript<GEN2, SEL2> {
     return this.#wrapRole("user", cb);
@@ -290,7 +295,7 @@ export class LmScript<
    */
   match<K extends keyof SEL>(
     variable: K,
-  ): <GEN2 extends Record<string, string>, SEL2 extends Record<string, string>>(choices: {
+  ): <GEN2 extends Record<string, any>, SEL2 extends Record<string, string>>(choices: {
     [P in SEL[K]]: (client: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>;
   }) => LmScript<GEN2, SEL2> {
     return (choices) => {
@@ -431,6 +436,54 @@ export class LmScript<
     }
   }
 
+  pushSchemaExample<T>(title: string, schema: Schema<T>, example: T): LmScript<GEN, SEL> {
+    return this.#clone(this.#state, [
+      ...this.#tasks,
+      {
+        tag: "AddTextTask",
+        text: explainXmlSchema(schema.data, title, example),
+      },
+    ]) as any;
+  }
+
+  genSchema<const N extends string, T extends Record<string, any>>(
+    captureAs: N,
+    title: string,
+    schema: Schema<T>,
+  ): LmScript<
+    {
+      [K in keyof GEN | N]: K extends N ? T : K extends keyof GEN ? GEN[K] : never;
+    },
+    SEL
+  >;
+  genSchema<const N extends string, T extends Record<string, any>>(
+    title: N,
+    schema: Schema<T>,
+  ): LmScript<
+    {
+      [K in keyof GEN | N]: K extends N ? T : K extends keyof GEN ? GEN[K] : never;
+    },
+    SEL
+  >;
+
+  genSchema(
+    first: string,
+    second: string | Schema<Record<string, any>>,
+    third?: Schema<Record<string, any>>,
+  ): any {
+    return this.#clone(this.#state, [
+      ...this.#tasks,
+      third == null
+        ? {
+            tag: "XmlTask",
+            name: first,
+            schema: (second as any).data,
+            schemaKey: undefined,
+          }
+        : { tag: "XmlTask", name: first, schemaKey: second as any, schema: (third as any).data },
+    ]) as any;
+  }
+
   #executeJSONJustText(): Promise<{
     captured: {
       [K in keyof GEN | keyof SEL]: K extends keyof GEN
@@ -465,7 +518,6 @@ export class LmScript<
   async run(
     options?: FetcherSamplingParams & {
       onCapture?: OnCapture;
-      reportUsage?: ReportUsage;
     },
   ): Promise<{
     captured: {

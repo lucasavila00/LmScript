@@ -47,7 +47,7 @@ export const generateAsyncAtom = atomFamily<
                   return {
                     captures: {
                       ...prev.captures,
-                      [cap.name]: cap.value,
+                      [cap.name]: String(cap.value),
                     },
                     finalText: undefined,
                     state: "loading",
@@ -62,7 +62,9 @@ export const generateAsyncAtom = atomFamily<
           opts.setSelf((prev) => {
             if ("captures" in prev) {
               return {
-                captures: out.captured,
+                captures: Object.fromEntries(
+                  Object.entries(prev.captures).map(([k, v]) => [k, String(v)]),
+                ),
                 finalText: out.text,
                 state: "finished",
               };

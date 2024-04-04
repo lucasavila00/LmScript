@@ -1,5 +1,5 @@
 import { LmScript } from "@lmscript/client";
-import { kitchenSink } from "./kitchen-sink";
+import { kitchenSink } from "./tasks/kitchen-sink";
 import { SGLangBackend } from "@lmscript/client/backends/sglang";
 
 const bench = async () => {

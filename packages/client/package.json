@@ -53,6 +53,12 @@
       "require": "./dist/cjs/chat-template.js",
       "import": "./dist/esm/chat-template.js",
       "default": "./dist/esm/chat-template.js"
+    },
+    "./schema": {
+      "types": "./dist/types/schema.d.ts",
+      "require": "./dist/cjs/schema.js",
+      "import": "./dist/esm/schema.js",
+      "default": "./dist/esm/schema.js"
     }
   }
 }

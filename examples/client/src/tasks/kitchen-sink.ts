@@ -1,8 +1,9 @@
 import { InitClient } from "@lmscript/client";
-import { assertIsNever } from "./utils";
-import { getIllustrationPrompt } from "./tasks/illustrator-agent";
-import { generateMarkdown } from "./tasks/markdown-generator";
-import createSummary from "./generated/fabric/create_summary";
+import { assertIsNever } from "../utils";
+import { getIllustrationPrompt } from "./illustrator-agent";
+import { generateMarkdown } from "./markdown-generator";
+import createSummary from "../generated/fabric/create_summary";
+import xmlGeneration from "./xml-generation";
 const toolUse = async (model: InitClient, question: string) => {
   const { captured, state: thread } = await model
     .push(`To answer this question: ${question}. `)
@@ -72,6 +73,24 @@ const characterGen = (model: InitClient, name: string) =>
     )
     .gen("json_output", { maxTokens: 256, regex: characterRegex });
 export const kitchenSink = async (client: InitClient) => {
+  const start10 = Date.now();
+  const { rawText: conversation10, captured: captured10 } = await xmlGeneration(client).run({
+    temperature: 0.0,
+  });
+  console.log(conversation10);
+  console.log(JSON.stringify(captured10, null, 2));
+  const end10 = Date.now();
+  console.log(`Time taken: ${end10 - start10}ms`);
+
+  const start5 = Date.now();
+  const { rawText: conversation5 } = await characterGen(client, "Harry Potter").run({
+    temperature: 0.1,
+  });
+
+  console.log(conversation5);
+  const end5 = Date.now();
+  console.log(`Time taken: ${end5 - start5}ms`);
+
   const start1 = Date.now();
   const { rawText: conversation7 } = await client
     .user((m) => m.push("Write a markdown list of 5 funny names for a cat."))
@@ -83,8 +102,8 @@ export const kitchenSink = async (client: InitClient) => {
     });
 
   const end1 = Date.now();
-  console.log(`Time taken: ${end1 - start1}ms`);
   console.log(conversation7);
+  console.log(`Time taken: ${end1 - start1}ms`);
 
   const start2 = Date.now();
   const { rawText: conversation8 } = await client
@@ -96,8 +115,8 @@ export const kitchenSink = async (client: InitClient) => {
 
   const end2 = Date.now();
 
-  console.log(`Time taken: ${end2 - start2}ms`);
   console.log(conversation8);
+  console.log(`Time taken: ${end2 - start2}ms`);
 
   const { rawText: conversation6 } = await createSummary(client, {
     input:
@@ -142,10 +161,4 @@ export const kitchenSink = async (client: InitClient) => {
   );
 
   console.log(illustrationPrompt);
-
-  const { rawText: conversation5 } = await characterGen(client, "Harry Potter").run({
-    temperature: 0.1,
-  });
-
-  console.log(conversation5);
 };

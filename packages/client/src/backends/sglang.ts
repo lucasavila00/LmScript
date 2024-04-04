@@ -4,17 +4,17 @@
  */
 
 import { delay, NOOP } from "../utils";
-import { assertIsNever } from "../utils";
 import {
   AbstractBackend,
-  ClientState,
   ExecutionCallbacks,
   FetcherSamplingParams,
+  GenerateTask,
   GenerationThread,
   ReportUsage,
-  Task,
+  SelectTask,
   TasksOutput,
 } from "./abstract";
+import { BaseExecutor } from "./executor";
 
 type SglSamplingParams = FetcherSamplingParams & {
   max_new_tokens?: number;
@@ -58,24 +58,19 @@ type MetaInfoSelection = {
   prompt_logprob: number;
 };
 
-class SglServerExecutor {
-  #state: ClientState;
+class SglServerExecutor extends BaseExecutor {
   readonly #url: string;
-  readonly #sampling_params: FetcherSamplingParams;
-  readonly #callbacks: ExecutionCallbacks;
   readonly #reportUsage: ReportUsage;
 
   constructor(
     url: string,
-    sampling_params: FetcherSamplingParams,
-    state: ClientState,
+    data: GenerationThread,
     callbacks: ExecutionCallbacks,
     reportUsage: ReportUsage,
   ) {
-    this.#state = JSON.parse(JSON.stringify(state));
+    super(data, callbacks);
+
     this.#url = url;
-    this.#sampling_params = sampling_params;
-    this.#callbacks = callbacks;
     this.#reportUsage = reportUsage;
   }
 
@@ -117,7 +112,9 @@ class SglServerExecutor {
     }
     throw new Error(`HTTP request failed: ${lastError}`);
   }
-  async #generate(data: SglGenerateData): Promise<{ text: string; meta_info: MetaInfoGeneration }> {
+  async #generateRequest(
+    data: SglGenerateData,
+  ): Promise<{ text: string; meta_info: MetaInfoGeneration }> {
     const out = await this.#httpRequest<{ text: string; meta_info: MetaInfoGeneration }>(data);
     this.#reportUsage({
       completionTokens: out.meta_info.completion_tokens,
@@ -125,7 +122,9 @@ class SglServerExecutor {
     });
     return out;
   }
-  async #select(data: SglSelectData): Promise<{ text: string; meta_info: MetaInfoSelection }[]> {
+  async #selectRequest(
+    data: SglSelectData,
+  ): Promise<{ text: string; meta_info: MetaInfoSelection }[]> {
     const out = await this.#httpRequest<{ text: string; meta_info: MetaInfoSelection }[]>(data);
     for (const item of out) {
       this.#reportUsage({
@@ -135,105 +134,55 @@ class SglServerExecutor {
     }
     return out;
   }
-  getState(): { text: string; captured: Record<string, string> } {
-    return this.#state;
+  override async doSelect(task: Omit<SelectTask, "name">): Promise<string> {
+    // Cache common prefix
+    const res = await this.#generateRequest({
+      text: this.state.text,
+      sampling_params: {
+        ...this.data.sampling_params,
+        max_new_tokens: 0,
+        temperature: 0.0,
+      },
+    });
+
+    const prompt_len = res.meta_info.prompt_tokens;
+
+    const obj = await this.#selectRequest({
+      text: task.choices.map((c) => this.state.text + c),
+      sampling_params: {
+        ...this.data.sampling_params,
+        max_new_tokens: 0,
+        temperature: 0.0,
+      },
+      return_logprob: true,
+      logprob_start_len: Math.max(prompt_len - 2, 0),
+    });
+
+    const normalized_prompt_logprob = obj.map((r) => r.meta_info.normalized_prompt_logprob);
+
+    const argMax = normalized_prompt_logprob.reduce(
+      (iMax, x, i, arr) => (x > arr[iMax] ? i : iMax),
+      0,
+    );
+    const decision = task.choices[argMax];
+
+    this.state.text += decision;
+
+    return decision;
   }
-  async runTask(task: Task): Promise<void> {
-    switch (task.tag) {
-      case "AddTextTask": {
-        this.#state.text += task.text;
-        break;
-      }
-      case "GenerateTask": {
-        const out = await this.#generate({
-          text: this.#state.text,
-          sampling_params: {
-            ...this.#sampling_params,
-            max_new_tokens: task.max_tokens,
-            stop: task.stop,
-            regex: task.regex,
-          },
-        });
-        const captured = out.text;
-        this.#state.text += captured;
-        if (task.name != null) {
-          this.#state.captured[task.name] = captured;
-          this.#callbacks.onCapture({
-            name: task.name,
-            value: captured,
-          });
-        }
-        break;
-      }
-      case "SelectTask": {
-        // Cache common prefix
-        const res = await this.#generate({
-          text: this.#state.text,
-          sampling_params: {
-            ...this.#sampling_params,
-            max_new_tokens: 0,
-            temperature: 0.0,
-          },
-        });
-
-        const prompt_len = res.meta_info.prompt_tokens;
-
-        const obj = await this.#select({
-          text: task.choices.map((c) => this.#state.text + c),
-          sampling_params: {
-            ...this.#sampling_params,
-            max_new_tokens: 0,
-            temperature: 0.0,
-          },
-          return_logprob: true,
-          logprob_start_len: Math.max(prompt_len - 2, 0),
-        });
-
-        const normalized_prompt_logprob = obj.map((r) => r.meta_info.normalized_prompt_logprob);
-
-        const argMax = normalized_prompt_logprob.reduce(
-          (iMax, x, i, arr) => (x > arr[iMax] ? i : iMax),
-          0,
-        );
-        const decision = task.choices[argMax];
-
-        this.#state.text += decision;
-        if (task.name != null) {
-          this.#state.captured[task.name] = decision;
-          this.#callbacks.onCapture({
-            name: task.name,
-            value: decision,
-          });
-        }
-
-        break;
-      }
-      case "RepeatTask": {
-        const value = this.#state.captured[task.variable];
-        if (value == null) {
-          throw new Error(`Variable ${task.variable} not found`);
-        }
-        this.#state.text += value;
-        break;
-      }
-      case "MatchTask": {
-        const value = this.#state.captured[task.variable];
-        if (value == null) {
-          throw new Error(`Variable ${task.variable} not found`);
-        }
-        const tasks = task.choices[value];
-        if (tasks == null) {
-          throw new Error(`Variable ${task.variable} not found`);
-        }
-        for (const innerTask of tasks) {
-          await this.runTask(innerTask);
-        }
-        break;
-      }
-      default: {
-        return assertIsNever(task);
-      }
-    }
+  override async doGeneration(task: Omit<GenerateTask, "name">): Promise<string> {
+    const out = await this.#generateRequest({
+      text: this.state.text,
+      sampling_params: {
+        ...this.data.sampling_params,
+        max_new_tokens: task.max_tokens,
+        stop: task.stop,
+        regex: task.regex,
+      },
+    });
+    const captured = out.text;
+    this.state.text += captured;
+    return captured;
   }
 }
 
@@ -254,16 +203,7 @@ export class SGLangBackend implements AbstractBackend {
     this.#reportUsage = options?.reportUsage ?? NOOP;
   }
   async executeJSON(data: GenerationThread, callbacks: ExecutionCallbacks): Promise<TasksOutput> {
-    const executor = new SglServerExecutor(
-      this.#url,
-      data.sampling_params,
-      data.initial_state,
-      callbacks,
-      this.#reportUsage,
-    );
-    for (const task of data.tasks) {
-      await executor.runTask(task);
-    }
-    return executor.getState();
+    const executor = new SglServerExecutor(this.#url, data, callbacks, this.#reportUsage);
+    return executor.executeJSON();
   }
 }

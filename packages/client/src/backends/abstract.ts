@@ -3,12 +3,14 @@
  * @module
  */
 
-export type TasksOutput = { text: string; captured: Record<string, string> };
+import { SchemaData } from "../schema";
+
+export type TasksOutput = { text: string; captured: Record<string, unknown> };
 
 /**
  * Callback for capturing values from the AI model in real time.
  */
-export type OnCapture = (args: { name: string; value: string }) => void;
+export type OnCapture = (args: { name: string; value: unknown }) => void;
 
 export type ReportUsage = (args: { promptTokens: number; completionTokens: number }) => void;
 
@@ -52,8 +54,13 @@ export type MatchTask = {
   choices: Record<string, Task[]>;
 };
 
-export type Task = AddTextTask | GenerateTask | SelectTask | RepeatTask | MatchTask;
-
+export type XmlTask = {
+  tag: "XmlTask";
+  name: string;
+  schemaKey: string | undefined;
+  schema: SchemaData;
+};
+export type Task = AddTextTask | GenerateTask | SelectTask | RepeatTask | MatchTask | XmlTask;
 export type FetcherSamplingParams = {
   temperature: number;
   top_p?: number;
@@ -69,5 +76,5 @@ export type GenerationThread = {
 };
 export type ClientState = {
   text: string;
-  captured: Record<string, string>;
+  captured: Record<string, unknown>;
 };
