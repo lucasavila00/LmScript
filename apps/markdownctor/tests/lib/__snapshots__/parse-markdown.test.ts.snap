@@ -1,0 +1,84 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`parses ordered list 2`] = `
+[
+  {
+    "content": "Adding text to context",
+    "level": 3,
+    "tag": "heading",
+  },
+  {
+    "content": "Use \`.push\` to add text to the context.",
+    "tag": "paragraph",
+  },
+  {
+    "content": "Use \`.system\`, \`.user\` and \`.assistant\` to create the messages with the required
+formatting for them to be assigned to their roles.",
+    "tag": "paragraph",
+  },
+  {
+    "content": "The role functions can receive a single string that will be applied to \`.push\`,
+or it receives a callback that passes the client object where you can call any
+of the supported functions.",
+    "tag": "paragraph",
+  },
+  {
+    "error": [Error: Unknown type: code],
+    "original": "\`\`\`ts
+const { captured } = await client
+  .system("You are a helpful assistant.")
+  .user(question1)
+  .assistant((m) => m.gen("answer1", { maxTokens: 256 }))
+  .run();
+\`\`\`",
+    "tag": "error",
+  },
+  {
+    "content": "Generation",
+    "level": 3,
+    "tag": "heading",
+  },
+  {
+    "content": "Generates the text and captures it with a name.",
+    "tag": "paragraph",
+  },
+  {
+    "error": [Error: Unknown type: code],
+    "original": "\`\`\`ts
+const {
+  captured: { language },
+} = await client.push("The best programming language is ").gen("language").run();",
+    "tag": "error",
+  },
+  {
+    "content": "console.log(language);
+\`\`\`",
+    "tag": "paragraph",
+  },
+  {
+    "content": "Selection",
+    "level": 3,
+    "tag": "heading",
+  },
+  {
+    "content": "Selects one of the choices.",
+    "tag": "paragraph",
+  },
+  {
+    "error": [Error: Unknown type: code],
+    "original": "\`\`\`ts
+const {
+  captured: { language },
+} = await client
+  .push("The best programming language is ")
+  .select("language", { choices: ["javascript", "typescript"] })
+  .run();",
+    "tag": "error",
+  },
+  {
+    "content": "console.log(language);
+\`\`\`",
+    "tag": "paragraph",
+  },
+]
+`;

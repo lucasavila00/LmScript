@@ -1,14 +1,21 @@
-import { LmEditorState, UiGenerationData } from "@lmscript/editor-tools/types";
-import { compileEditorState } from "@lmscript/editor-tools";
 import { atomFamily } from "recoil";
-import { Backend } from "@lmscript/editor-tools/backend-config";
-import type { GetBackendInstance } from "@lmscript/editor-tools/get-lmscript-backend";
+import { GenerationInput } from "./types";
+export type UiGenerationData = {
+  state: "loading" | "initialized" | "finished" | "error";
+  captures: Record<string, unknown>;
+  finalText: string | undefined;
+  error?: unknown;
+};
+import { AbstractBackend, Task } from "@lmscript/client/backends/abstract";
+
+const getInstance = (): AbstractBackend => {
+  throw new Error("not implemented");
+};
 
 export const generateAsyncAtom = atomFamily<
   UiGenerationData,
   {
-    backend: Backend;
-    editorState: LmEditorState;
+    input: GenerationInput;
     cacheBuster: number;
   }
 >({
@@ -23,18 +30,29 @@ export const generateAsyncAtom = atomFamily<
   effects: (param) => [
     (opts) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const getter = (window as any).getBackendInstance as GetBackendInstance;
-      const instance = getter(param.backend);
-      const tasks = compileEditorState(param.editorState, {
-        template: param.backend.template,
-        useGenerationUuids: true,
-      });
+      //   const getter = (window as any).getBackendInstance as GetBackendInstance;
+      //   const instance = getter(param.backend);
+      //   const tasks = compileEditorState(param.editorState, {
+      //     template: param.backend.template,
+      //     useGenerationUuids: true,
+      //   });
+
+      const tasks: Task[] = [
+        {
+          tag: "AddTextTask",
+          text: param.input.md,
+        },
+      ];
+
+      const instance = getInstance();
 
       instance
         .executeJSON(
           {
             tasks,
-            sampling_params: param.editorState.samplingParams,
+            sampling_params: {
+              temperature: 0.5,
+            },
             initial_state: {
               text: "",
               captured: {},

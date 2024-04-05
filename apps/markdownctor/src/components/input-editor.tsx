@@ -10,6 +10,8 @@ export const InputMdEditor: FC<{
     placeholder={"Type your markdown here."}
     value={value}
     onChange={setValue}
+    height="100vh"
+    maxHeight="100vh"
     extensions={[markdown({ base: markdownLanguage })]}
   />
 );

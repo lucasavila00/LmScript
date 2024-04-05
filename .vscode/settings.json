@@ -15,9 +15,12 @@
     "lmscript",
     "logprob",
     "lucide",
+    "markdownctor",
     "openai",
     "runpod",
     "sglang",
+    "tailwindcss",
+    "testw",
     "Textmenu",
     "Tiptap",
     "Vllm"

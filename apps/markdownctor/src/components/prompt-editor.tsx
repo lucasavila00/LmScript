@@ -31,6 +31,7 @@ export const PromptEditor: FC<{
         </Select>
       </div>
       <Textarea
+        rows={10}
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
         placeholder="Type your prompt here."
