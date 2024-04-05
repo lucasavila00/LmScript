@@ -12,6 +12,13 @@ import {
   ALL_GENERATION_NODE_TYPES,
 } from "@lmscript/editor-tools/types";
 import { assertIsNever, cn } from "../../../lib/utils";
+import {
+  BULLET_LIST_REGEX,
+  DATE_REGEX,
+  DECIMAL_REGEX,
+  INTEGER_REGEX,
+  NUMBERED_LIST_REGEX,
+} from "@lmscript/client/regex";
 
 type ChoicesOption = {
   label: string;
@@ -157,23 +164,23 @@ const StopEditor: FC<{
 const REGEX_OPTIONS: ReactSelectOption[] = [
   {
     label: "Bullet List",
-    value: "(- [^\n]*\n)+(- [^\n]*)(\n\n)?",
+    value: BULLET_LIST_REGEX,
   },
   {
     label: "Numbered List",
-    value: "([0-9]+\\. [^\n]*\n)+([0-9]+\\. [^\n]*)(\n\n)?",
+    value: NUMBERED_LIST_REGEX,
   },
   {
     label: "Integer",
-    value: "[0-9]+",
+    value: INTEGER_REGEX,
   },
   {
     label: "Decimal",
-    value: "[0-9]+\\.[0-9]+",
+    value: DECIMAL_REGEX,
   },
   {
     label: "Date",
-    value: "\\d{4}-\\d{2}-\\d{2}",
+    value: DATE_REGEX,
   },
 ];
 const RegexEditor: FC<{

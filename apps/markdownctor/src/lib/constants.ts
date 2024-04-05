@@ -17,6 +17,7 @@ You are a writing expert. You refine the input text to enhance clarity, coherenc
 - Analyze the input text for grammatical errors, stylistic inconsistencies, clarity issues, and coherence.
 - Apply corrections and improvements directly to the text.
 - Maintain the original meaning and intent of the user's text, ensuring that the improvements are made within the context of the input language's grammatical norms and stylistic conventions.
+- Maintain the original formatting of the user's markdown. Do not change the structure of the text, such as headings, lists, links or paragraphs.
 
 # OUTPUT INSTRUCTIONS
 
@@ -24,7 +25,6 @@ You are a writing expert. You refine the input text to enhance clarity, coherenc
 - Return in the same language as the input.
 - Include NO additional commentary or explanation in the response.
 
-<start_of_input>
-`,
+<start_of_input>`,
 };
 export const PROMPT_EXAMPLES: PromptExample[] = [DEFAULT_PROMPT_EXAMPLE];

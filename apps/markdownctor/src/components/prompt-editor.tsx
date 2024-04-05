@@ -25,7 +25,9 @@ export const PromptEditor: FC<{
           </SelectTrigger>
           <SelectContent>
             {PROMPT_EXAMPLES.map((example) => (
-              <SelectItem value={example.id}>{example.title}</SelectItem>
+              <SelectItem value={example.id} key={example.id}>
+                {example.title}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>

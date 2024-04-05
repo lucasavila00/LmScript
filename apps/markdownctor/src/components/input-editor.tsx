@@ -1,4 +1,4 @@
-import CodeMirror from "@uiw/react-codemirror";
+import CodeMirror, { EditorView } from "@uiw/react-codemirror";
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { FC } from "react";
 
@@ -12,6 +12,6 @@ export const InputMdEditor: FC<{
     onChange={setValue}
     height="100vh"
     maxHeight="100vh"
-    extensions={[markdown({ base: markdownLanguage })]}
+    extensions={[markdown({ base: markdownLanguage }), EditorView.lineWrapping]}
   />
 );

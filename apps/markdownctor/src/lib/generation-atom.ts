@@ -7,11 +7,14 @@ export type UiGenerationData = {
   error?: unknown;
 };
 import { AbstractBackend, Task } from "@lmscript/client/backends/abstract";
-import { parseMarkdown } from "./parse-markdown";
+import { SGLangBackend } from "@lmscript/client/backends/sglang";
 import { assertIsNever } from "./utils";
-
+import { BULLET_LIST_REGEX, NUMBERED_LIST_REGEX } from "@lmscript/client/regex";
 const getInstance = (): AbstractBackend => {
-  throw new Error("not implemented");
+  return new SGLangBackend({
+    url: "http://localhost:8080/http://localhost:30000",
+    template: "mistral",
+  });
 };
 const getTasks = (input: GenerationInput) => {
   const tasks: Task[] = [
@@ -21,13 +24,17 @@ const getTasks = (input: GenerationInput) => {
     },
     {
       tag: "AddTextTask",
+      text: input.prompt,
+    },
+    {
+      tag: "AddTextTask",
       text: input.md,
     },
     {
       tag: "StartRoleTask",
       role: "assistant",
     },
-    ...parseMarkdown(input.md).flatMap((block): Task[] => {
+    ...input.parsedMd.flatMap((block): Task[] => {
       switch (block.tag) {
         case "error": {
           return [
@@ -38,13 +45,46 @@ const getTasks = (input: GenerationInput) => {
           ];
         }
         case "heading": {
-          throw new Error("not implemented");
+          return [
+            {
+              tag: "AddTextTask",
+              text: "#".repeat(block.level),
+            },
+            {
+              tag: "GenerateTask",
+              max_tokens: 1024,
+              name: block.uuid,
+              stop: ["\n"],
+              regex: undefined,
+            },
+            {
+              tag: "AddTextTask",
+              text: "\n\n",
+            },
+          ];
         }
         case "paragraph": {
-          throw new Error("not implemented");
+          return [
+            {
+              tag: "GenerateTask",
+              max_tokens: 1024,
+              name: block.uuid,
+              stop: ["\n\n"],
+              regex: undefined,
+            },
+          ];
         }
         case "list": {
-          throw new Error("not implemented");
+          const regex = block.ordered ? NUMBERED_LIST_REGEX : BULLET_LIST_REGEX;
+          return [
+            {
+              tag: "GenerateTask",
+              max_tokens: 1024,
+              name: block.uuid,
+              stop: ["\n\n"],
+              regex,
+            },
+          ];
         }
         default: {
           return assertIsNever(block);
@@ -80,7 +120,7 @@ export const generateAsyncAtom = atomFamily<
           {
             tasks,
             sampling_params: {
-              temperature: 0.5,
+              temperature: 0.1,
             },
             initial_state: {
               text: "",

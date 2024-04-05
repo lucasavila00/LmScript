@@ -59,6 +59,12 @@
       "require": "./dist/cjs/schema.js",
       "import": "./dist/esm/schema.js",
       "default": "./dist/esm/schema.js"
+    },
+    "./regex": {
+      "types": "./dist/types/regex.d.ts",
+      "require": "./dist/cjs/regex.js",
+      "import": "./dist/esm/regex.js",
+      "default": "./dist/esm/regex.js"
     }
   }
 }
