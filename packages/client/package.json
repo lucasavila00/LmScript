@@ -1,6 +1,6 @@
 {
   "name": "@lmscript/client",
-  "version": "0.0.34",
+  "version": "0.0.35",
   "description": "Dependency-Free Typescript client for LmScript.",
   "main": "index.js",
   "scripts": {
