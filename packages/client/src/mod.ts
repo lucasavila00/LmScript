@@ -6,16 +6,7 @@ import {
   OnCapture,
   Task,
 } from "./backends/abstract";
-import { isFirstMessage } from "./chat-template";
-import {
-  ChatTemplate,
-  ChatTemplateDefinition,
-  Eos,
-  getEos,
-  getRoleEnd,
-  getRoleStart,
-  Role,
-} from "./chat-template";
+import { Role } from "./chat-template";
 import { Schema } from "./schema";
 import { ERROR_MESSAGES, NOOP } from "./utils";
 import { explainXmlSchema } from "./xml-schema";
@@ -52,9 +43,7 @@ export type JsonGenerationOptions = {
  * Options for creating a new client.
  * Template is required to support roles.
  */
-export type CreateClientOptions = FetcherSamplingParams & {
-  template?: ChatTemplate | ChatTemplateDefinition;
-};
+export type CreateClientOptions = FetcherSamplingParams & {};
 const validateRegex = (regex: string) => {
   if (regex == "") {
     return false;
@@ -68,7 +57,6 @@ const validateRegex = (regex: string) => {
 };
 
 type ClientStateWithCounter = ClientState & {
-  roleCounter: Record<Role, number>;
   currentRole: Role | undefined;
 };
 /**
@@ -92,11 +80,6 @@ export class LmScript<
     this.#state = {
       text: "",
       captured: {},
-      roleCounter: {
-        assistant: 0,
-        system: 0,
-        user: 0,
-      },
       currentRole: undefined,
     };
     this.#tasks = [];
@@ -107,12 +90,18 @@ export class LmScript<
     role: Role,
     cb: string | ((it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>),
   ): LmScript<GEN2, SEL2> {
+    if (this.#state.currentRole !== undefined) {
+      throw new Error(ERROR_MESSAGES.cannotNestRoles);
+    }
+    this.#state.currentRole = role;
     if (typeof cb === "string") {
       // deno-lint-ignore no-explicit-any
-      return this.startRole(role).push(cb).endRole(role) as any;
+      return this.#startRole(role).push(cb) as any;
     }
 
-    return cb(this.startRole(role)).endRole(role);
+    const out = cb(this.#startRole(role));
+    this.#state.currentRole = undefined;
+    return out;
   }
 
   /**
@@ -120,80 +109,14 @@ export class LmScript<
    *
    * Most of the time this should not be used directly, use `client.assistant`, `client.system`, or `client.user` instead.
    */
-  startRole(role: Role): LmScript<GEN, SEL> {
-    if (this.#state.currentRole != null) {
-      throw new Error(ERROR_MESSAGES.cannotNestRoles);
-    }
-    const clone = this.#clone({ ...this.#state, currentRole: role }, this.#tasks);
-    const template = clone.#options.template;
-    if (template == null) {
-      throw new Error(ERROR_MESSAGES.missingTemplate);
-    }
-    if (typeof template === "string") {
-      return clone.push(getRoleStart(template, role, clone.#state.roleCounter));
-    }
-    const [start] = template[role];
-    if (start == null) {
-      throw new Error(ERROR_MESSAGES.missingRoleStartInTemplateConfig("custom", role));
-    }
-
-    const bos = template.bos;
-    if (bos != null && isFirstMessage(clone.#state.roleCounter)) {
-      return clone.push(bos).push(start);
-    }
-
-    return clone.push(start);
-  }
-
-  #endRoleState(role: Role): LmScript<GEN, SEL> {
-    return this.#clone(
+  #startRole(role: Role): LmScript<GEN, SEL> {
+    return this.#clone(this.#state, [
+      ...this.#tasks,
       {
-        ...this.#state,
-        currentRole: undefined,
-        roleCounter: {
-          ...this.#state.roleCounter,
-          [role]: this.#state.roleCounter[role] + 1,
-        },
+        tag: "StartRoleTask",
+        role,
       },
-      this.#tasks,
-    );
-  }
-  /**
-   * Ends a role message in the conversation.
-   *
-   * Most of the time this should not be used directly, use `client.assistant`, `client.system`, or `client.user` instead.
-   */
-  endRole(role: Role): LmScript<GEN, SEL> {
-    const template = this.#options.template;
-    if (template == null) {
-      throw new Error(ERROR_MESSAGES.missingTemplate);
-    }
-    if (typeof template === "string") {
-      return this.push(getRoleEnd(template, role, this.#state.roleCounter)).#endRoleState(role);
-    }
-    const [, end] = template[role];
-    if (end == null) {
-      throw new Error(ERROR_MESSAGES.missingRoleStartInTemplateConfig("custom", role));
-    }
-
-    return this.push(end).#endRoleState(role);
-  }
-  /**
-   * Returns the token that represents the end of a message.
-   */
-  eos(): Eos {
-    const template = this.#options.template;
-    if (template == null) {
-      throw new Error(ERROR_MESSAGES.missingTemplate);
-    }
-    if (typeof template === "string") {
-      return getEos(template);
-    }
-    const eos = template.eos;
-    if (eos === null) {
-      throw new Error(ERROR_MESSAGES.missingEosInTemplateConfig("custom"));
-    }
-    return eos as Eos;
+    ]);
   }
 
   /**
@@ -535,7 +458,7 @@ export class LmScript<
       return this.#executeJSONJustText();
     }
 
-    const { template: _, ...restCreatorOptions } = this.#options;
+    const { ...restCreatorOptions } = this.#options;
     const { onCapture, ...restOptions } = options ?? {};
     const out = await this.#fetcher.executeJSON(
       {
