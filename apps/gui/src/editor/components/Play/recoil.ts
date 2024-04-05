@@ -26,7 +26,6 @@ export const generateAsyncAtom = atomFamily<
       const getter = (window as any).getBackendInstance as GetBackendInstance;
       const instance = getter(param.backend);
       const tasks = compileEditorState(param.editorState, {
-        template: param.backend.template,
         useGenerationUuids: true,
       });
 
@@ -62,9 +61,12 @@ export const generateAsyncAtom = atomFamily<
           opts.setSelf((prev) => {
             if ("captures" in prev) {
               return {
-                captures: Object.fromEntries(
-                  Object.entries(prev.captures).map(([k, v]) => [k, String(v)]),
-                ),
+                captures: {
+                  ...prev.captures,
+                  ...Object.fromEntries(
+                    Object.entries(out.captured).map(([k, v]) => [k, String(v)]),
+                  ),
+                },
                 finalText: out.text,
                 state: "finished",
               };

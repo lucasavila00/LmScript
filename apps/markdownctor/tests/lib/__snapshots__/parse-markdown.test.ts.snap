@@ -1,0 +1,147 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`parses ordered list 2`] = `
+[
+  {
+    "content": "Adding text to context",
+    "level": 3,
+    "tag": "heading",
+    "uuid": "uuid",
+  },
+  {
+    "content": "Use \`.push\` to add text to the context.",
+    "tag": "paragraph",
+    "uuid": "uuid",
+  },
+  {
+    "error": "Type not supported: space",
+    "original": "
+
+",
+    "tag": "error",
+    "uuid": "uuid",
+  },
+  {
+    "content": "Use \`.system\`, \`.user\` and \`.assistant\` to create the messages with the required
+formatting for them to be assigned to their roles.",
+    "tag": "paragraph",
+    "uuid": "uuid",
+  },
+  {
+    "error": "Type not supported: space",
+    "original": "
+
+",
+    "tag": "error",
+    "uuid": "uuid",
+  },
+  {
+    "content": "The role functions can receive a single string that will be applied to \`.push\`,
+or it receives a callback that passes the client object where you can call any
+of the supported functions.",
+    "tag": "paragraph",
+    "uuid": "uuid",
+  },
+  {
+    "error": "Type not supported: space",
+    "original": "
+
+",
+    "tag": "error",
+    "uuid": "uuid",
+  },
+  {
+    "error": "Type not supported: code",
+    "original": "\`\`\`ts
+const { captured } = await client
+  .system("You are a helpful assistant.")
+  .user(question1)
+  .assistant((m) => m.gen("answer1", { maxTokens: 256 }))
+  .run();
+\`\`\`",
+    "tag": "error",
+    "uuid": "uuid",
+  },
+  {
+    "error": "Type not supported: space",
+    "original": "
+
+",
+    "tag": "error",
+    "uuid": "uuid",
+  },
+  {
+    "content": "Generation",
+    "level": 3,
+    "tag": "heading",
+    "uuid": "uuid",
+  },
+  {
+    "content": "Generates the text and captures it with a name.",
+    "tag": "paragraph",
+    "uuid": "uuid",
+  },
+  {
+    "error": "Type not supported: space",
+    "original": "
+
+",
+    "tag": "error",
+    "uuid": "uuid",
+  },
+  {
+    "error": "Type not supported: code",
+    "original": "\`\`\`ts
+const {
+  captured: { language },
+} = await client.push("The best programming language is ").gen("language").run();
+
+console.log(language);
+\`\`\`",
+    "tag": "error",
+    "uuid": "uuid",
+  },
+  {
+    "error": "Type not supported: space",
+    "original": "
+
+",
+    "tag": "error",
+    "uuid": "uuid",
+  },
+  {
+    "content": "Selection",
+    "level": 3,
+    "tag": "heading",
+    "uuid": "uuid",
+  },
+  {
+    "content": "Selects one of the choices.",
+    "tag": "paragraph",
+    "uuid": "uuid",
+  },
+  {
+    "error": "Type not supported: space",
+    "original": "
+
+",
+    "tag": "error",
+    "uuid": "uuid",
+  },
+  {
+    "error": "Type not supported: code",
+    "original": "\`\`\`ts
+const {
+  captured: { language },
+} = await client
+  .push("The best programming language is ")
+  .select("language", { choices: ["javascript", "typescript"] })
+  .run();
+
+console.log(language);
+\`\`\`",
+    "tag": "error",
+    "uuid": "uuid",
+  },
+]
+`;

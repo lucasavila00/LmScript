@@ -10,17 +10,22 @@ export type GetBackendInstance = (backend: Backend) => AbstractBackend;
 export const getBackendInstance = (backend: Backend): AbstractBackend => {
   switch (backend.tag) {
     case "runpod-serverless-sglang": {
-      return new RunpodServerlessBackend(backend.url, backend.token);
+      return new RunpodServerlessBackend({
+        url: backend.url,
+        apiToken: backend.token,
+        template: backend.template,
+      });
     }
     case "vllm-openai": {
       return new VllmBackend({
         url: backend.url,
         auth: backend.token,
         model: backend.model,
+        template: backend.template,
       });
     }
     case "sglang": {
-      return new SGLangBackend(backend.url);
+      return new SGLangBackend(backend);
     }
     default: {
       return assertIsNever(backend);

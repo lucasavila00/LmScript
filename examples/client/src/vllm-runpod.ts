@@ -21,9 +21,9 @@ const bench = async () => {
       promptTokens += pt;
       completionTokens += ct;
     },
+    template: "mistral",
   });
   const model = new LmScript(backend, {
-    template: "mistral",
     temperature: 0.1,
   });
   const batch = Array.from({ length: 1 }, (_, _i) =>

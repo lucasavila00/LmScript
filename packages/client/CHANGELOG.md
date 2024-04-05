@@ -1,5 +1,11 @@
 # @lmscript/client
 
+## 0.0.35
+
+### Patch Changes
+
+- Handle template in abstract backend
+
 ## 0.0.34
 
 ### Patch Changes

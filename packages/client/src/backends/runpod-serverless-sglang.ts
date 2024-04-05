@@ -3,8 +3,9 @@
  * @module
  */
 
+import { ChatTemplate, Role, getRoleEnd, getRoleStart } from "../chat-template";
 import { delay, NOOP } from "../utils";
-import { ExecutionCallbacks, ReportUsage } from "./abstract";
+import { ExecutionCallbacks, ReportUsage, Task } from "./abstract";
 import { AbstractBackend, GenerationThread, TasksOutput } from "./abstract";
 
 type RunpodStreamResponse =
@@ -67,16 +68,19 @@ class RunpodServerlessSingleExecutor {
   #reportUsage: ReportUsage;
   #callbacks: ExecutionCallbacks;
   #stream: OutputItems[] = [];
+  #template: ChatTemplate;
 
   constructor(
     url: string,
     apiToken: string,
     callbacks: { reportUsage: ReportUsage } & ExecutionCallbacks,
+    template: ChatTemplate,
   ) {
     this.#url = url;
     this.#apiToken = apiToken;
     this.#reportUsage = callbacks.reportUsage;
     this.#callbacks = callbacks;
+    this.#template = template;
   }
 
   async #fetch<T>(url: string, body?: string): Promise<T> {
@@ -142,13 +146,49 @@ class RunpodServerlessSingleExecutor {
     }
   }
 
+  #applyChatTemplate(data: GenerationThread): GenerationThread {
+    const countOfRoles: Record<Role, number> = {
+      system: 0,
+      user: 0,
+      assistant: 0,
+    };
+
+    let currentRole: Role | null = null;
+
+    return {
+      ...data,
+      tasks: data.tasks.flatMap((task) => {
+        if (task.tag === "StartRoleTask") {
+          let acc: Task[] = [];
+          if (currentRole != null) {
+            acc.push({
+              tag: "AddTextTask",
+              text: getRoleEnd(this.#template, currentRole, countOfRoles),
+            });
+
+            countOfRoles[currentRole] += 1;
+          }
+          currentRole = task.role;
+          acc.push({
+            tag: "AddTextTask",
+            text: getRoleStart(this.#template, currentRole, countOfRoles),
+          });
+
+          return acc;
+        }
+        return task;
+      }),
+    };
+  }
+
   async executeJSON(data: GenerationThread): Promise<TasksOutput> {
     const out = await this.#fetch<RunSyncResponse>(
       this.#url + "/run",
       JSON.stringify({
         input: {
           endpoint: "generate_thread",
-          parameters: data,
+          parameters: this.#applyChatTemplate(data),
+          template: this.#template,
         },
       }),
     );
@@ -178,17 +218,29 @@ export class RunpodServerlessBackend implements AbstractBackend {
   #url: string;
   #apiToken: string;
   #reportUsage: ReportUsage;
-  constructor(url: string, apiToken: string, callbacks?: { reportUsage: ReportUsage }) {
-    this.#url = url;
-    this.#apiToken = apiToken;
-    this.#reportUsage = callbacks?.reportUsage ?? NOOP;
+  #template: ChatTemplate;
+  constructor(options: {
+    url: string;
+    apiToken: string;
+    template: ChatTemplate;
+    reportUsage?: ReportUsage;
+  }) {
+    this.#url = options.url;
+    this.#apiToken = options.apiToken;
+    this.#reportUsage = options?.reportUsage ?? NOOP;
+    this.#template = options.template;
   }
 
   async executeJSON(data: GenerationThread, callbacks: ExecutionCallbacks): Promise<TasksOutput> {
-    const executor = new RunpodServerlessSingleExecutor(this.#url, this.#apiToken, {
-      ...callbacks,
-      reportUsage: this.#reportUsage,
-    });
+    const executor = new RunpodServerlessSingleExecutor(
+      this.#url,
+      this.#apiToken,
+      {
+        ...callbacks,
+        reportUsage: this.#reportUsage,
+      },
+      this.#template,
+    );
 
     let lastError: unknown = null;
     for (let i = 1; i < 5; i++) {

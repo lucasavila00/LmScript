@@ -1,5 +1,14 @@
 # egui
 
+## 0.0.35
+
+### Patch Changes
+
+- Updated dependencies
+  - @lmscript/editor-tools@0.0.35
+  - @lmscript/client@0.0.35
+  - @lmscript/gui@0.0.35
+
 ## 0.0.34
 
 ### Patch Changes

@@ -2,12 +2,10 @@ import { type Task } from "@lmscript/client/backends/abstract";
 import { LmEditorState } from "./types";
 import { MessageOfAuthorGetter, printCustomError } from "./messages-of-author";
 import { applyChatTemplate } from "./apply-chat-template";
-import { ChatTemplate } from "@lmscript/client/chat-template";
 
 export const compileEditorState = (
   editorState: LmEditorState,
   options: {
-    template: ChatTemplate;
     variableOverrides?: Record<string, string>;
     useGenerationUuids?: boolean;
   },
@@ -37,5 +35,5 @@ export const compileEditorState = (
   }
   const messages = state.getAcc();
 
-  return applyChatTemplate(messages, editorState.variables, options.template);
+  return applyChatTemplate(messages, editorState.variables);
 };

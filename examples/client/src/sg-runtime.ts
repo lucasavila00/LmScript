@@ -5,14 +5,15 @@ import { SGLangBackend } from "@lmscript/client/backends/sglang";
 const bench = async () => {
   let promptTokens = 0;
   let completionTokens = 0;
-  const backend = new SGLangBackend(`http://localhost:30000`, {
+  const backend = new SGLangBackend({
+    url: `http://localhost:30000`,
     reportUsage: ({ promptTokens: pt, completionTokens: ct }) => {
       promptTokens += pt;
       completionTokens += ct;
     },
+    template: "mistral",
   });
   const model = new LmScript(backend, {
-    template: "mistral",
     temperature: 0.1,
   });
   const batch = Array.from({ length: 1 }, (_, _i) =>
