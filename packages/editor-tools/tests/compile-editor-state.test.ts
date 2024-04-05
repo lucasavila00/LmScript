@@ -32,16 +32,12 @@ test("handles paragraph", async () => {
   expect(msgs).toMatchInlineSnapshot(`
     [
       {
-        "tag": "AddTextTask",
-        "text": "<s>[INST] ",
+        "role": "user",
+        "tag": "StartRoleTask",
       },
       {
         "tag": "AddTextTask",
         "text": "What is the best subject for the illustration to accompany the following?",
-      },
-      {
-        "tag": "AddTextTask",
-        "text": " [/INST]",
       },
     ]
   `);
@@ -82,8 +78,8 @@ test("handles variable override", async () => {
   expect(msgs).toMatchInlineSnapshot(`
     [
       {
-        "tag": "AddTextTask",
-        "text": "<s>[INST] ",
+        "role": "user",
+        "tag": "StartRoleTask",
       },
       {
         "tag": "AddTextTask",
@@ -96,10 +92,6 @@ test("handles variable override", async () => {
       {
         "tag": "AddTextTask",
         "text": """,
-      },
-      {
-        "tag": "AddTextTask",
-        "text": " [/INST]",
       },
     ]
   `);
@@ -143,8 +135,8 @@ test("handles variable override", async () => {
   expect(msgs).toMatchInlineSnapshot(`
     [
       {
-        "tag": "AddTextTask",
-        "text": "<s>[INST] ",
+        "role": "user",
+        "tag": "StartRoleTask",
       },
       {
         "tag": "AddTextTask",
@@ -157,10 +149,6 @@ test("handles variable override", async () => {
       {
         "tag": "AddTextTask",
         "text": """,
-      },
-      {
-        "tag": "AddTextTask",
-        "text": " [/INST]",
       },
     ]
   `);
@@ -201,8 +189,8 @@ test("handles lmGenerator, use names", async () => {
   expect(msgs).toMatchInlineSnapshot(`
     [
       {
-        "tag": "AddTextTask",
-        "text": "<s>[INST] ",
+        "role": "user",
+        "tag": "StartRoleTask",
       },
       {
         "tag": "AddTextTask",
@@ -221,10 +209,6 @@ test("handles lmGenerator, use names", async () => {
       {
         "tag": "AddTextTask",
         "text": "",
-      },
-      {
-        "tag": "AddTextTask",
-        "text": " [/INST]",
       },
     ]
   `);
@@ -266,8 +250,8 @@ test("handles lmGenerator, use uuids", async () => {
   expect(msgs).toMatchInlineSnapshot(`
     [
       {
-        "tag": "AddTextTask",
-        "text": "<s>[INST] ",
+        "role": "user",
+        "tag": "StartRoleTask",
       },
       {
         "tag": "AddTextTask",
@@ -286,10 +270,6 @@ test("handles lmGenerator, use uuids", async () => {
       {
         "tag": "AddTextTask",
         "text": "",
-      },
-      {
-        "tag": "AddTextTask",
-        "text": " [/INST]",
       },
     ]
   `);

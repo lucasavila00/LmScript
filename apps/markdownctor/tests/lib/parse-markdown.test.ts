@@ -1,6 +1,11 @@
 import { expect, test } from "vitest";
-import { parseMarkdown } from "../../src/lib/parse-markdown";
+import { parseMarkdownUnbound } from "../../src/lib/parse-markdown";
 import dedent from "dedent";
+
+const parseMarkdown = (text: string) =>
+  parseMarkdownUnbound(text, {
+    randomUUID: () => "uuid",
+  });
 test("parses heading", () => {
   const out = parseMarkdown(dedent`
     # Hello
@@ -21,31 +26,37 @@ test("parses heading", () => {
         "content": "Hello",
         "level": 1,
         "tag": "heading",
+        "uuid": "uuid",
       },
       {
         "content": "World",
         "level": 2,
         "tag": "heading",
+        "uuid": "uuid",
       },
       {
         "content": "third",
         "level": 3,
         "tag": "heading",
+        "uuid": "uuid",
       },
       {
         "content": "fourth",
         "level": 4,
         "tag": "heading",
+        "uuid": "uuid",
       },
       {
         "content": "fifth",
         "level": 5,
         "tag": "heading",
+        "uuid": "uuid",
       },
       {
         "content": "sixth",
         "level": 6,
         "tag": "heading",
+        "uuid": "uuid",
       },
     ]
   `);
@@ -62,10 +73,12 @@ test("parses heading and paragraph with a single line break", () => {
         "content": "Hello",
         "level": 1,
         "tag": "heading",
+        "uuid": "uuid",
       },
       {
         "content": "world",
         "tag": "paragraph",
+        "uuid": "uuid",
       },
     ]
   `);
@@ -85,6 +98,7 @@ test("parses unordered list", () => {
         ],
         "ordered": false,
         "tag": "list",
+        "uuid": "uuid",
       },
     ]
   `);
@@ -104,6 +118,7 @@ test("parses ordered list", () => {
         ],
         "ordered": true,
         "tag": "list",
+        "uuid": "uuid",
       },
     ]
   `);
