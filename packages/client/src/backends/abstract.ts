@@ -3,6 +3,7 @@
  * @module
  */
 
+import { Role } from "../chat-template";
 import { SchemaData } from "../schema";
 
 export type TasksOutput = { text: string; captured: Record<string, unknown> };
@@ -60,7 +61,20 @@ export type XmlTask = {
   schemaKey: string | undefined;
   schema: SchemaData;
 };
-export type Task = AddTextTask | GenerateTask | SelectTask | RepeatTask | MatchTask | XmlTask;
+
+export type StartRoleTask = {
+  tag: "StartRoleTask";
+  role: Role;
+};
+
+export type Task =
+  | StartRoleTask
+  | AddTextTask
+  | GenerateTask
+  | SelectTask
+  | RepeatTask
+  | MatchTask
+  | XmlTask;
 export type FetcherSamplingParams = {
   temperature: number;
   top_p?: number;

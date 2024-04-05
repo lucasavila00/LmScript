@@ -26,7 +26,6 @@ export const generateAsyncAtom = atomFamily<
       const getter = (window as any).getBackendInstance as GetBackendInstance;
       const instance = getter(param.backend);
       const tasks = compileEditorState(param.editorState, {
-        template: param.backend.template,
         useGenerationUuids: true,
       });
 

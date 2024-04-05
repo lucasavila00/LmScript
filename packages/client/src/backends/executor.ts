@@ -1,3 +1,4 @@
+import { ChatTemplate, Role, getRoleEnd, getRoleStart } from "../chat-template";
 import {
   SchemaData,
   ObjectSchemaData,
@@ -22,8 +23,19 @@ export abstract class BaseExecutor {
   readonly data: GenerationThread;
   state: ClientState;
   readonly callbacks: ExecutionCallbacks;
-  constructor(data: GenerationThread, callbacks: ExecutionCallbacks) {
+  readonly template: ChatTemplate;
+
+  #countOfRoles: Record<Role, number> = {
+    system: 0,
+    user: 0,
+    assistant: 0,
+  };
+
+  #currentRole: Role | null = null;
+
+  constructor(data: GenerationThread, callbacks: ExecutionCallbacks, template: ChatTemplate) {
     this.data = data;
+    this.template = template;
     this.state = JSON.parse(JSON.stringify(this.data.initial_state));
     this.callbacks = callbacks;
   }
@@ -196,6 +208,15 @@ export abstract class BaseExecutor {
 
   async #runTask(task: Task): Promise<void> {
     switch (task.tag) {
+      case "StartRoleTask": {
+        if (this.#currentRole != null) {
+          this.state.text += getRoleEnd(this.template, this.#currentRole, this.#countOfRoles);
+          this.#countOfRoles[task.role] = this.#countOfRoles[task.role] + 1;
+        }
+        this.#currentRole = task.role;
+        this.state.text += getRoleStart(this.template, this.#currentRole, this.#countOfRoles);
+        break;
+      }
       case "AddTextTask": {
         this.state.text += task.text;
         break;

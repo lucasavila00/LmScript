@@ -14,14 +14,16 @@ const bench = async () => {
   let promptTokens = 0;
   let completionTokens = 0;
   const model = new LmScript(
-    new RunpodServerlessBackend(getEnvVarOrThrow("RUNPOD_URL"), getEnvVarOrThrow("RUNPOD_TOKEN"), {
+    new RunpodServerlessBackend({
+      url: getEnvVarOrThrow("RUNPOD_URL"),
+      apiToken: getEnvVarOrThrow("RUNPOD_TOKEN"),
       reportUsage: ({ promptTokens: pt, completionTokens: ct }) => {
         promptTokens += pt;
         completionTokens += ct;
       },
+      template: "mistral",
     }),
     {
-      template: "mistral",
       temperature: 0.1,
     },
   );

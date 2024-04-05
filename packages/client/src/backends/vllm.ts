@@ -1,3 +1,4 @@
+import { ChatTemplate } from "../chat-template";
 import { delay, NOOP } from "../utils";
 import {
   AbstractBackend,
@@ -23,8 +24,9 @@ class VllmBackendExecutor extends BaseExecutor {
     reportUsage?: ReportUsage;
     data: GenerationThread;
     callbacks: ExecutionCallbacks;
+    template: ChatTemplate;
   }) {
-    super(options.data, options.callbacks);
+    super(options.data, options.callbacks, options.template);
     this.#url = options.url;
     this.#model = options.model;
     this.#reportUsage = options?.reportUsage ?? NOOP;
@@ -115,11 +117,19 @@ export class VllmBackend implements AbstractBackend {
   readonly #model: string;
   readonly #reportUsage: ReportUsage;
   readonly #auth: string | undefined;
-  constructor(options: { url: string; auth?: string; model: string; reportUsage?: ReportUsage }) {
+  readonly #template: ChatTemplate;
+  constructor(options: {
+    url: string;
+    template: ChatTemplate;
+    auth?: string;
+    model: string;
+    reportUsage?: ReportUsage;
+  }) {
     this.#url = options.url;
     this.#model = options.model;
     this.#reportUsage = options?.reportUsage ?? NOOP;
     this.#auth = options.auth;
+    this.#template = options.template;
   }
   async executeJSON(data: GenerationThread, callbacks: ExecutionCallbacks): Promise<TasksOutput> {
     const executor = new VllmBackendExecutor({
@@ -129,6 +139,7 @@ export class VllmBackend implements AbstractBackend {
       auth: this.#auth,
       data,
       callbacks,
+      template: this.#template,
     });
     return executor.executeJSON();
   }

@@ -73,9 +73,11 @@ class InfiniteChat {
 }
 
 const main = async () => {
-  const backend = new SGLangBackend(`http://localhost:30004`);
-  const client = new LmScript(backend, {
+  const backend = new SGLangBackend({
+    url: `http://localhost:30004`,
     template: "mistral",
+  });
+  const client = new LmScript(backend, {
     temperature: 0.1,
   });
   const chat = new InfiniteChat(client);

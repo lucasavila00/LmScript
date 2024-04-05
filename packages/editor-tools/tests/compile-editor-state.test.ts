@@ -27,7 +27,7 @@ test("handles paragraph", async () => {
         ],
       },
     },
-    { template: "mistral" },
+    {},
   );
   expect(msgs).toMatchInlineSnapshot(`
     [
@@ -77,7 +77,7 @@ test("handles variable override", async () => {
         ],
       },
     },
-    { template: "mistral" },
+    {},
   );
   expect(msgs).toMatchInlineSnapshot(`
     [
@@ -135,7 +135,6 @@ test("handles variable override", async () => {
       },
     },
     {
-      template: "mistral",
       variableOverrides: {
         content: "The new content",
       },
@@ -197,9 +196,7 @@ test("handles lmGenerator, use names", async () => {
         ],
       },
     },
-    {
-      template: "mistral",
-    },
+    {},
   );
   expect(msgs).toMatchInlineSnapshot(`
     [
@@ -263,7 +260,6 @@ test("handles lmGenerator, use uuids", async () => {
       },
     },
     {
-      template: "mistral",
       useGenerationUuids: true,
     },
   );

@@ -3,6 +3,7 @@
  * @module
  */
 
+import { ChatTemplate } from "../chat-template";
 import { delay, NOOP } from "../utils";
 import {
   AbstractBackend,
@@ -67,8 +68,9 @@ class SglServerExecutor extends BaseExecutor {
     data: GenerationThread,
     callbacks: ExecutionCallbacks,
     reportUsage: ReportUsage,
+    template: ChatTemplate,
   ) {
-    super(data, callbacks);
+    super(data, callbacks, template);
 
     this.#url = url;
     this.#reportUsage = reportUsage;
@@ -193,17 +195,20 @@ class SglServerExecutor extends BaseExecutor {
 export class SGLangBackend implements AbstractBackend {
   readonly #url: string;
   readonly #reportUsage: ReportUsage;
-  constructor(
-    url: string,
-    options?: {
-      reportUsage?: ReportUsage;
-    },
-  ) {
-    this.#url = url;
+  readonly #template: ChatTemplate;
+  constructor(options: { url: string; reportUsage?: ReportUsage; template: ChatTemplate }) {
+    this.#url = options.url;
     this.#reportUsage = options?.reportUsage ?? NOOP;
+    this.#template = options.template;
   }
   async executeJSON(data: GenerationThread, callbacks: ExecutionCallbacks): Promise<TasksOutput> {
-    const executor = new SglServerExecutor(this.#url, data, callbacks, this.#reportUsage);
+    const executor = new SglServerExecutor(
+      this.#url,
+      data,
+      callbacks,
+      this.#reportUsage,
+      this.#template,
+    );
     return executor.executeJSON();
   }
 }

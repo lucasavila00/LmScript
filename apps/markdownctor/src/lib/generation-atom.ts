@@ -7,11 +7,54 @@ export type UiGenerationData = {
   error?: unknown;
 };
 import { AbstractBackend, Task } from "@lmscript/client/backends/abstract";
+import { parseMarkdown } from "./parse-markdown";
+import { assertIsNever } from "./utils";
 
 const getInstance = (): AbstractBackend => {
   throw new Error("not implemented");
 };
+const getTasks = (input: GenerationInput) => {
+  const tasks: Task[] = [
+    {
+      tag: "StartRoleTask",
+      role: "user",
+    },
+    {
+      tag: "AddTextTask",
+      text: input.md,
+    },
+    {
+      tag: "StartRoleTask",
+      role: "assistant",
+    },
+    ...parseMarkdown(input.md).flatMap((block): Task[] => {
+      switch (block.tag) {
+        case "error": {
+          return [
+            {
+              tag: "AddTextTask",
+              text: block.original,
+            },
+          ];
+        }
+        case "heading": {
+          throw new Error("not implemented");
+        }
+        case "paragraph": {
+          throw new Error("not implemented");
+        }
+        case "list": {
+          throw new Error("not implemented");
+        }
+        default: {
+          return assertIsNever(block);
+        }
+      }
+    }),
+  ];
 
+  return tasks;
+};
 export const generateAsyncAtom = atomFamily<
   UiGenerationData,
   {
@@ -29,22 +72,8 @@ export const generateAsyncAtom = atomFamily<
   },
   effects: (param) => [
     (opts) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      //   const getter = (window as any).getBackendInstance as GetBackendInstance;
-      //   const instance = getter(param.backend);
-      //   const tasks = compileEditorState(param.editorState, {
-      //     template: param.backend.template,
-      //     useGenerationUuids: true,
-      //   });
-
-      const tasks: Task[] = [
-        {
-          tag: "AddTextTask",
-          text: param.input.md,
-        },
-      ];
-
       const instance = getInstance();
+      const tasks = getTasks(param.input);
 
       instance
         .executeJSON(
