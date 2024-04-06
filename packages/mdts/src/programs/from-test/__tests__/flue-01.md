@@ -21,7 +21,7 @@ Returns a promise that resolves with the Flue value or rejects.
 ```ts
 const emptyDependency = undefined;
 
-await Flue.resolve(1).execute(emptyDependency);
+console.log(await Flue.resolve(1).execute(emptyDependency));
 ```
 
 ```json
@@ -33,7 +33,7 @@ await Flue.resolve(1).execute(emptyDependency);
 Returns an object that represents either a success (Right) or a failure (Left).
 
 ```ts
-await Flue.resolve(2).toEither(emptyDependency);
+console.log(await Flue.resolve(2).toEither(emptyDependency));
 ```
 
 ```js
@@ -44,7 +44,7 @@ await Flue.resolve(2).toEither(emptyDependency);
 ```
 
 ```ts
-await Flue.reject(new Error("It failed")).toEither(emptyDependency);
+console.log(await Flue.reject(new Error("It failed")).toEither(emptyDependency));
 ```
 
 ```js
