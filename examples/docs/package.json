@@ -6,7 +6,7 @@
   "scripts": {
     "mdts": "mdts tests docs-out/",
     "mdts-run": "mdts tests docs-out/ --run && prettier docs-out --print-width 60 --write",
-    "test": "vitest",
+    "test-all": "vitest",
     "ts": "tsc --noEmit",
     "static": "npm run ts && npm run mdts-run"
   },
