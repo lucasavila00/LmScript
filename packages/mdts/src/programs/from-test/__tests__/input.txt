@@ -1,0 +1,50 @@
+import { test, expect } from "vitest";
+const md = (_content: TemplateStringsArray, ..._values: never[]) => {};
+
+import { Flue } from "../src";
+test("flue-01.md", async () => {
+  md`
+    # Flue
+
+    A Flue represents a lazy async computation that depends on a value.
+
+    To create and execute Flues, start by importing Flue.
+
+    ~~~ts
+    import { Flue } from "flue-ts";
+    ~~~
+
+    ## Table of contents
+
+    ## Execution
+
+    Call \`execute\` or \`toEither\` with the dependency as argument to execute a Flue.
+
+    ### Execute
+
+    Returns a promise that resolves with the Flue value or rejects.
+  `;
+  const emptyDependency = undefined;
+  expect(await Flue.resolve(1).execute(emptyDependency)).toMatchInlineSnapshot(
+    "1"
+  );
+  md`
+    ### ToEither
+
+    Returns an object that represents either a success (Right) or a failure (Left).
+  `;
+  expect(await Flue.resolve(2).toEither(emptyDependency))
+    .toMatchInlineSnapshot(`
+    {
+      "_tag": "Right",
+      "right": 2,
+    }
+  `);
+  expect(await Flue.reject(new Error("It failed")).toEither(emptyDependency))
+    .toMatchInlineSnapshot(`
+    {
+      "_tag": "Left",
+      "left": [Error: It failed],
+    }
+  `);
+});

@@ -7,9 +7,10 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: degroote22/lmscript-runpod-serverless:0.0.9
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
     environment:
       - REPO_ID=TheBloke/Mistral-7B-Instruct-v0.2-AWQ
     command: python3.11 -u /handler.py --rp_serve_api --rp_api_host='0.0.0.0'

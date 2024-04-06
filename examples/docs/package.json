@@ -1,0 +1,22 @@
+{
+  "name": "docs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "mdts": "mdts tests docs-out/",
+    "mdts-run": "mdts tests docs-out/ --run && prettier docs-out --print-width 60 --write",
+    "test": "vitest",
+    "ts": "tsc --noEmit",
+    "static": "npm run ts && npm run mdts-run"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@lmscript/client": "workspace:^",
+    "mdts": "workspace:*",
+    "prettier": "^3.2.5",
+    "vitest": "^1.4.0"
+  }
+}
