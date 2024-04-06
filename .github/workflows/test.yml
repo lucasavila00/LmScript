@@ -21,6 +21,7 @@ jobs:
       - run: npm config set "//registry.tiptap.dev/:_authToken" ${{ secrets.TIPTAP_TOKEN }}
       - run: pnpm i
       - run: pnpm run build-packages
+      - run: pnpm i
       - run: pnpm run static
       - run: pnpm run test
       # assert no file were changed

@@ -96,7 +96,9 @@ export class LmScript<
     this.#state.currentRole = role;
     if (typeof cb === "string") {
       // deno-lint-ignore no-explicit-any
-      return this.#startRole(role).push(cb) as any;
+      const out = this.#startRole(role).push(cb) as any;
+      this.#state.currentRole = undefined;
+      return out;
     }
 
     const out = cb(this.#startRole(role));
@@ -161,12 +163,13 @@ export class LmScript<
    * The client should be configured with a template to support roles.
    *
    * If a template is not provided, an error will be thrown.
-   */ user(cb: string): LmScript<GEN, SEL>;
+   */
+
+  user(cb: string): LmScript<GEN, SEL>;
   user<
     GEN2 extends Record<string, any> = Record<never, never>,
     SEL2 extends Record<string, string> = Record<never, never>,
   >(cb: (it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>): LmScript<GEN2, SEL2>;
-
   user<
     GEN2 extends Record<string, any> = Record<never, never>,
     SEL2 extends Record<string, string> = Record<never, never>,
