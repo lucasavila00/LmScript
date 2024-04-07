@@ -4,7 +4,7 @@
   "entryPointStrategy": "packages",
   "includeVersion": false,
   "sidebarLinks": {
-    "docs": "https://lucasavila00.github.io/LmScript/docs"
+    "Docs": "https://lucasavila00.github.io/LmScript/docs/intro"
   }
 
   // Potentially useful for debugging
