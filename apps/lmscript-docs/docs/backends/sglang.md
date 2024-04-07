@@ -1,15 +1,17 @@
-# Runpod Serverless SGLang Backend
+# SGLang Backend
 
-Connects to SGLang backend running on Runpod Serverless.
+Connects to a local SGLang backend.
 
-This backend minimizes the number of requests to the server.
-A list of Tasks is sent to the server and the server processes them in a batch.
-This guarantees a higher chance of hitting the SGLang's cache.
+Can be used with the provided [SGLang Docker image](https://github.com/lucasavila00/LmScript/tree/main/docker/sglang-docker).
+
+## Import
 
 ```ts
 import { LmScript } from "@lmscript/client";
-import { RunpodServerlessBackend } from "@lmscript/client/backends/runpod-serverless-sglang";
+import { SGLangBackend } from "@lmscript/client/backends/sglang";
 ```
+
+## Optionally setup usage tracking
 
 ```ts
 let promptTokens = 0;
@@ -20,21 +22,32 @@ const reportUsage: ReportUsage = (usage) => {
   promptTokens += usage.promptTokens;
   completionTokens += usage.completionTokens;
 };
+```
 
-const backend = new RunpodServerlessBackend({
-  url: `http://localhost:8000`,
+## Instantiate
+
+```ts
+const backend = new SGLangBackend({
+  url: `http://localhost:30000`,
   template: "mistral",
   reportUsage, // Optional
-  apiToken: "YOUR_API_TOKEN", // Can be undefined if running the backend locally
 });
+```
 
+## Use
+
+```ts
 const model = new LmScript(backend, { temperature: 0 });
 
 const { captured, rawText } = await model
   .user("Tell me a joke.")
   .assistant((m) => m.gen("joke", { maxTokens: 128 }))
   .run();
+```
 
+The captured text is available in the `captured` object.
+
+```ts
 console.log(captured.joke);
 ```
 
@@ -43,6 +56,8 @@ console.log(captured.joke);
 
 Because they make up everything!"
 ```
+
+The raw text is available in the `rawText` variable.
 
 ```ts
 console.log(rawText);
@@ -53,6 +68,8 @@ console.log(rawText);
 
 Because they make up everything!"
 ```
+
+The promptTokens and completionTokens have been updated by the `reportUsage` function.
 
 ```ts
 console.log(promptTokens);
