@@ -3,7 +3,7 @@ import createSummary from "../generated/fabric/create_summary";
 
 const longTask = async (client: InitClient) => {
   const start = Date.now();
-  const { rawText: conversation6 } = await createSummary(client, {
+  const { rawText: _conversation6 } = await createSummary(client, {
     input: `
           Edward Jones (7 April 1824 – c. 1893 or 1896), also known as "the boy Jones", was an English stalker who became notorious for breaking into Buckingham Palace several times between 1838 and 1841.
 
