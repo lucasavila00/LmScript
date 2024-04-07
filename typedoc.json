@@ -2,7 +2,10 @@
   "entryPoints": ["packages/*"],
   "name": "LmScript",
   "entryPointStrategy": "packages",
-  "includeVersion": false
+  "includeVersion": false,
+  "sidebarLinks": {
+    "docs": "https://lucasavila00.github.io/LmScript/docs"
+  }
 
   // Potentially useful for debugging
   // "logLevel": "Verbose"
