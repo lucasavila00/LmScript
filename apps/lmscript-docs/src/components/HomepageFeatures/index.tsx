@@ -11,27 +11,37 @@ type FeatureItem = {
 const FeatureList: FeatureItem[] = [
   {
     title: "Easy to Use",
-    Svg: require("@site/static/img/undraw_docusaurus_mountain.svg").default,
+    Svg: require("@site/static/img/undraw_docusaurus_mountain.svg")
+      .default,
     description: (
       <>
-        LmScript is designed to be easy to use. You can get started in minutes with our quickstart.
+        LmScript is designed to be easy to use. You can get
+        started in minutes with our quickstart.
       </>
     ),
   },
   {
     title: "Precision and Control",
-    Svg: require("@site/static/img/undraw_docusaurus_tree.svg").default,
+    Svg: require("@site/static/img/undraw_docusaurus_tree.svg")
+      .default,
     description: (
       <>
-        No need to parse or validate the output. LmScript provides structured output with the
-        ability to control the generation process.
+        No need to parse or validate the output. LmScript
+        provides structured output with the ability to
+        control the generation process.
       </>
     ),
   },
   {
     title: "Open Source",
-    Svg: require("@site/static/img/undraw_docusaurus_react.svg").default,
-    description: <>Open Source and Open Models. LmScript is free to use and modify.</>,
+    Svg: require("@site/static/img/undraw_docusaurus_react.svg")
+      .default,
+    description: (
+      <>
+        Open Source and Open Models. LmScript is free to use
+        and modify.
+      </>
+    ),
   },
 ];
 

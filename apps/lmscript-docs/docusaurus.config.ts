@@ -4,7 +4,8 @@ import type * as Preset from "@docusaurus/preset-classic";
 
 const config: Config = {
   title: "LmScript",
-  tagline: "Controllable Language Model Interactions - Open Source, Open Models",
+  tagline:
+    "Controllable Language Model Interactions - Open Source, Open Models",
   favicon: "img/favicon.ico",
 
   // Set the production url of your site here
@@ -37,13 +38,15 @@ const config: Config = {
           sidebarPath: "./sidebars.ts",
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
-          editUrl: "https://github.com/lucasavila00/LmScript/tree/main/apps/lmscript-docs/docs/",
+          editUrl:
+            "https://github.com/lucasavila00/LmScript/tree/main/apps/lmscript-docs/docs/",
         },
         blog: {
           showReadingTime: true,
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
-          editUrl: "https://github.com/lucasavila00/LmScript/tree/main/apps/lmscript-docs/docs/",
+          editUrl:
+            "https://github.com/lucasavila00/LmScript/tree/main/apps/lmscript-docs/docs/",
         },
         theme: {
           customCss: "./src/css/custom.css",
