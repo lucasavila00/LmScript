@@ -486,7 +486,7 @@ importers:
         version: link:../../packages/client
       mdts:
         specifier: workspace:*
-        version: link:../../packages/mdts
+        version: link:../../internal-packages/mdts
       prettier:
         specifier: ^3.2.5
         version: 3.2.5
@@ -494,35 +494,7 @@ importers:
         specifier: ^1.4.0
         version: 1.4.0
 
-  packages/client:
-    devDependencies:
-      prettier:
-        specifier: ^3.2.5
-        version: 3.2.5
-      typescript:
-        specifier: ^5.4.3
-        version: 5.4.3
-
-  packages/editor-tools:
-    dependencies:
-      '@lmscript/client':
-        specifier: workspace:^
-        version: link:../client
-      vitest:
-        specifier: ^1.4.0
-        version: 1.4.0
-      zod:
-        specifier: ^3.22.4
-        version: 3.22.4
-    devDependencies:
-      prettier:
-        specifier: ^3.2.5
-        version: 3.2.5
-      typescript:
-        specifier: ^5.4.3
-        version: 5.4.3
-
-  packages/mdts:
+  internal-packages/mdts:
     dependencies:
       '@practical-fp/union-types':
         specifier: ^1.5.1
@@ -558,6 +530,34 @@ importers:
       vitest:
         specifier: ^0.31.4
         version: 0.31.4
+
+  packages/client:
+    devDependencies:
+      prettier:
+        specifier: ^3.2.5
+        version: 3.2.5
+      typescript:
+        specifier: ^5.4.3
+        version: 5.4.3
+
+  packages/editor-tools:
+    dependencies:
+      '@lmscript/client':
+        specifier: workspace:^
+        version: link:../client
+      vitest:
+        specifier: ^1.4.0
+        version: 1.4.0
+      zod:
+        specifier: ^3.22.4
+        version: 3.22.4
+    devDependencies:
+      prettier:
+        specifier: ^3.2.5
+        version: 3.2.5
+      typescript:
+        specifier: ^5.4.3
+        version: 5.4.3
 
 packages:
 
