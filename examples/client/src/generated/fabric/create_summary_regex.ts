@@ -20,13 +20,13 @@ export default (
         .gen("summary", { maxTokens: 256, stop: ["\n"] })
         .push("\n\n## MAIN POINTS:\n\n")
         .gen("main_points", {
-          maxTokens: 512,
+          maxTokens: 1024,
           stop: ["\n\n"],
           regex: "([0-9]+\\. [^\n]*\n)+([0-9]+\\. [^\n]*)(\n\n)?",
         })
         .push("\n\n## TAKEAWAYS:\n\n")
         .gen("takeaways", {
-          maxTokens: 512,
+          maxTokens: 1024,
           stop: ["\n\n"],
           regex: "([0-9]+\\. [^\n]*\n)+([0-9]+\\. [^\n]*)(\n\n)?",
         })
