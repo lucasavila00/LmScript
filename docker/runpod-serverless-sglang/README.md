@@ -10,7 +10,7 @@ https://hub.docker.com/r/degroote22/lmscript-runpod-serverless
 
 ## Usage
 
-Documentation is available in the [LmScript Docs](/docs/category/lmscriptclient).
+Documentation is available in the [LmScript Docs](/docs/docker/runpod-serverless-sglang).
 
 ## License
 

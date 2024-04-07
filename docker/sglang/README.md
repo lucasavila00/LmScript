@@ -1,4 +1,4 @@
-# Runpod Serverless SGLang Docker Image
+# SGLang Docker Image
 
 Pre-built Docker image that runs [TheBloke/Mistral-7B-Instruct-v0.2-AWQ](https://huggingface.co/TheBloke/Mistral-7B-Instruct-v0.2-AWQ) on SGLang
 
@@ -9,8 +9,7 @@ https://hub.docker.com/r/degroote22/lmscript-sglang
 
 ## Usage
 
-Use the `docker-compose.yml` file in this folder to run it locally with
-`docker-compose up`.
+Documentation is available in the [LmScript Docs](/docs/docker/sglang).
 
 ## License
 
