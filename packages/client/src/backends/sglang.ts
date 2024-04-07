@@ -4,16 +4,16 @@
  */
 
 import { ChatTemplate } from "../chat-template";
-import { delay, NOOP } from "../utils";
+import { NOOP } from "../utils";
 import {
   AbstractBackend,
+  ClientState,
   ExecutionCallbacks,
   FetcherSamplingParams,
   GenerateTask,
   GenerationThread,
   ReportUsage,
   SelectTask,
-  TasksOutput,
 } from "./abstract";
 import { BaseExecutor } from "./executor";
 
@@ -76,7 +76,7 @@ class SglServerExecutor extends BaseExecutor {
     this.#reportUsage = reportUsage;
   }
 
-  async #httpRequestNoRetry<T>(data: object): Promise<T> {
+  async #httpRequest<T>(data: object): Promise<T> {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 60_000);
     try {
@@ -99,20 +99,6 @@ class SglServerExecutor extends BaseExecutor {
     } finally {
       clearTimeout(timeout);
     }
-  }
-  async #httpRequest<T>(data: object): Promise<T> {
-    let lastError: unknown = null;
-    for (let i = 1; i < 5; i++) {
-      try {
-        if (lastError != null) {
-          await delay(1000 * i * i);
-        }
-        return await this.#httpRequestNoRetry(data);
-      } catch (e) {
-        lastError = e;
-      }
-    }
-    throw new Error(`HTTP request failed: ${lastError}`);
   }
   async #generateRequest(
     data: SglGenerateData,
@@ -191,7 +177,6 @@ class SglServerExecutor extends BaseExecutor {
 /**
  * Backend for the regular SGLang server.
  */
-
 export class SGLangBackend implements AbstractBackend {
   readonly #url: string;
   readonly #reportUsage: ReportUsage;
@@ -201,14 +186,13 @@ export class SGLangBackend implements AbstractBackend {
     this.#reportUsage = options?.reportUsage ?? NOOP;
     this.#template = options.template;
   }
-  async executeJSON(data: GenerationThread, callbacks: ExecutionCallbacks): Promise<TasksOutput> {
-    const executor = new SglServerExecutor(
+  async executeJSON(data: GenerationThread, callbacks: ExecutionCallbacks): Promise<ClientState> {
+    return new SglServerExecutor(
       this.#url,
       data,
       callbacks,
       this.#reportUsage,
       this.#template,
-    );
-    return executor.executeJSON();
+    ).executeJSON();
   }
 }

@@ -106,11 +106,6 @@ export class LmScript<
     return out;
   }
 
-  /**
-   * Starts a role message in the conversation.
-   *
-   * Most of the time this should not be used directly, use `client.assistant`, `client.system`, or `client.user` instead.
-   */
   #startRole(role: Role): LmScript<GEN, SEL> {
     return this.#clone(this.#state, [
       ...this.#tasks,
@@ -157,6 +152,7 @@ export class LmScript<
   >(cb: string | ((it: LmScript<GEN, SEL>) => LmScript<GEN2, SEL2>)): LmScript<GEN2, SEL2> {
     return this.#wrapRole("system", cb);
   }
+
   /**
    * Wraps the calls made to the client in the callback with the user role.
    *
@@ -164,7 +160,6 @@ export class LmScript<
    *
    * If a template is not provided, an error will be thrown.
    */
-
   user(cb: string): LmScript<GEN, SEL>;
   user<
     GEN2 extends Record<string, any> = Record<never, never>,
@@ -362,6 +357,9 @@ export class LmScript<
     }
   }
 
+  /**
+   * Adds text with an example of the schema to the state.
+   */
   pushSchemaExample<T>(title: string, schema: Schema<T>, example: T): LmScript<GEN, SEL> {
     return this.#clone(this.#state, [
       ...this.#tasks,
@@ -372,6 +370,9 @@ export class LmScript<
     ]) as any;
   }
 
+  /**
+   * Generates and captures structured data with a schema.
+   */
   genSchema<const N extends string, T extends Record<string, any>>(
     captureAs: N,
     title: string,
@@ -382,6 +383,9 @@ export class LmScript<
     },
     SEL
   >;
+  /**
+   * Generates and captures structured data with a schema.
+   */
   genSchema<const N extends string, T extends Record<string, any>>(
     title: N,
     schema: Schema<T>,
@@ -391,7 +395,6 @@ export class LmScript<
     },
     SEL
   >;
-
   genSchema(
     first: string,
     second: string | Schema<Record<string, any>>,

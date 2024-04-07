@@ -1,15 +1,14 @@
+/**
+ * This module contains chat templates.
+ * @module
+ */
+
 import { ERROR_MESSAGES } from "./utils";
 
 /**
  * One of possible roles in a conversation.
  */
 export type Role = "assistant" | "system" | "user";
-
-/**
- * A special type that represents the end of a message.
- * Do not use this directly, use `client.eos()` instead.
- */
-export type Eos = "%%%%%%%%%HACK_TYPE_FOR_EOS_DO_NOT_USE_THIS_STRING_DIRECTLY%%%%%%%%%%";
 
 /**
  * List of all supported chat templates.
@@ -93,9 +92,13 @@ const chatTemplates: AllChatTemplates = {
   },
 };
 
-export const isFirstMessage = (countOfRoles: Record<Role, number>): boolean => {
+const isFirstMessage = (countOfRoles: Record<Role, number>): boolean => {
   return countOfRoles.assistant + countOfRoles.system + countOfRoles.user === 0;
 };
+
+/**
+ * Get the text for the start of a role.
+ */
 export const getRoleStart = (
   template: ChatTemplate,
   role: Role,
@@ -117,6 +120,10 @@ export const getRoleStart = (
   }
   return prefix + str;
 };
+
+/**
+ * Get the text for the end of a role.
+ */
 export const getRoleEnd = (
   template: ChatTemplate,
   role: Role,
@@ -127,12 +134,4 @@ export const getRoleEnd = (
     throw new Error(ERROR_MESSAGES.missingRoleStartInTemplateConfig(template, role));
   }
   return str;
-};
-
-export const getEos = (template: ChatTemplate): Eos => {
-  const eos = chatTemplates[template].eos;
-  if (eos === null) {
-    throw new Error(ERROR_MESSAGES.missingEosInTemplateConfig(template));
-  }
-  return eos as Eos;
 };

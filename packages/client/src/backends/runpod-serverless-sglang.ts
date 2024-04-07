@@ -5,8 +5,8 @@
 
 import { ChatTemplate, Role, getRoleEnd, getRoleStart } from "../chat-template";
 import { delay, NOOP } from "../utils";
-import { ExecutionCallbacks, ReportUsage, Task } from "./abstract";
-import { AbstractBackend, GenerationThread, TasksOutput } from "./abstract";
+import { ClientState, ExecutionCallbacks, ReportUsage, Task } from "./abstract";
+import { AbstractBackend, GenerationThread } from "./abstract";
 
 type RunpodStreamResponse =
   | RunpodCompletedResponse
@@ -39,7 +39,7 @@ type OutputStream = Array<
 >;
 type RunpodCompletedResponse = {
   status: "COMPLETED";
-  output: TasksOutput;
+  output: ClientState;
   stream: OutputStream;
 };
 
@@ -101,7 +101,7 @@ class RunpodServerlessSingleExecutor {
     return out;
   }
 
-  async #monitorProgress(id: string, retries: number): Promise<TasksOutput> {
+  async #monitorProgress(id: string, retries: number): Promise<ClientState> {
     await delay(1000 * retries * retries);
     const out = await this.#fetch<RunpodStreamResponse>(this.#url + "/stream/" + id);
     return this.#handleRunpodStreamResponse(id, out, retries + 1);
@@ -118,7 +118,7 @@ class RunpodServerlessSingleExecutor {
     id: string,
     out: RunpodStreamResponse,
     retries: number,
-  ): Promise<TasksOutput> {
+  ): Promise<ClientState> {
     this.#handleStream((out.stream ?? []).map((it) => it.output));
     switch (out.status) {
       case "COMPLETED": {
@@ -181,7 +181,7 @@ class RunpodServerlessSingleExecutor {
     };
   }
 
-  async executeJSON(data: GenerationThread): Promise<TasksOutput> {
+  async executeJSON(data: GenerationThread): Promise<ClientState> {
     const out = await this.#fetch<RunSyncResponse>(
       this.#url + "/run",
       JSON.stringify({
@@ -231,8 +231,8 @@ export class RunpodServerlessBackend implements AbstractBackend {
     this.#template = options.template;
   }
 
-  async executeJSON(data: GenerationThread, callbacks: ExecutionCallbacks): Promise<TasksOutput> {
-    const executor = new RunpodServerlessSingleExecutor(
+  async executeJSON(data: GenerationThread, callbacks: ExecutionCallbacks): Promise<ClientState> {
+    return new RunpodServerlessSingleExecutor(
       this.#url,
       this.#apiToken,
       {
@@ -240,19 +240,6 @@ export class RunpodServerlessBackend implements AbstractBackend {
         reportUsage: this.#reportUsage,
       },
       this.#template,
-    );
-
-    let lastError: unknown = null;
-    for (let i = 1; i < 5; i++) {
-      try {
-        if (lastError != null) {
-          await delay(1000 * i * i);
-        }
-        return await executor.executeJSON(data);
-      } catch (e) {
-        lastError = e;
-      }
-    }
-    throw new Error(`HTTP request failed: ${lastError}`);
+    ).executeJSON(data);
   }
 }

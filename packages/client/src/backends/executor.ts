@@ -13,7 +13,6 @@ import {
   GenerateTask,
   ExecutionCallbacks,
   Task,
-  TasksOutput,
 } from "./abstract";
 
 const INTEGER = "(-)?(0|[1-9][0-9]*)";
@@ -284,7 +283,7 @@ export abstract class BaseExecutor {
       }
     }
   }
-  async executeJSON(): Promise<TasksOutput> {
+  async executeJSON(): Promise<ClientState> {
     for (const task of this.data.tasks) {
       await this.#runTask(task);
     }
