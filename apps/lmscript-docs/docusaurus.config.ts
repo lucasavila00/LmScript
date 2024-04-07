@@ -3,8 +3,9 @@ import type { Config } from "@docusaurus/types";
 import type * as Preset from "@docusaurus/preset-classic";
 
 const config: Config = {
-  title: "My Site",
-  tagline: "Dinosaurs are cool",
+  title: "LmScript",
+  tagline:
+    "Controllable Language Model Interactions - Open Source, Open Models",
   favicon: "img/favicon.ico",
 
   // Set the production url of your site here
@@ -38,14 +39,14 @@ const config: Config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/",
+            "https://github.com/lucasavila00/LmScript/tree/main/apps/lmscript-docs/docs/",
         },
         blog: {
           showReadingTime: true,
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/",
+            "https://github.com/lucasavila00/LmScript/tree/main/apps/lmscript-docs/docs/",
         },
         theme: {
           customCss: "./src/css/custom.css",
@@ -58,9 +59,9 @@ const config: Config = {
     // Replace with your project's social card
     image: "img/docusaurus-social-card.jpg",
     navbar: {
-      title: "My Site",
+      title: "LmScript",
       logo: {
-        alt: "My Site Logo",
+        alt: "LmScript Logo",
         src: "img/logo.svg",
       },
       items: [
@@ -71,7 +72,7 @@ const config: Config = {
           label: "Docs",
         },
         {
-          to: "https://lucasavila00.github.io/LmScript/typedoc",
+          href: "https://lucasavila00.github.io/LmScript/typedoc",
           label: "API Reference",
           position: "left",
         },
@@ -121,7 +122,7 @@ const config: Config = {
             // },
             {
               label: "API Reference",
-              to: "https://lucasavila00.github.io/LmScript/typedoc",
+              href: "https://lucasavila00.github.io/LmScript/typedoc",
             },
             {
               label: "GitHub",
@@ -130,7 +131,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
+      copyright: `MIT License`,
     },
     prism: {
       theme: prismThemes.github,
