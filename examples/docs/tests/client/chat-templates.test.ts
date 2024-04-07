@@ -1,5 +1,6 @@
-import { test } from "vitest";
+import { expect, test } from "vitest";
 import { md } from "mdts";
+import { ALL_CHAT_TEMPLATES } from "@lmscript/client/chat-template";
 
 test("client/chat-templates", async () => {
   md`
@@ -9,6 +10,20 @@ test("client/chat-templates", async () => {
 
     # Chat Templates
 
-    TODO
+    Use predefined chat templates to generate responses.
+
+    Import the \`ALL_CHAT_TEMPLATES\` array to get a list of available templates.
+
+    Please create an issue if you want to add a new template.
+
+    ~~~ts
+    import { ALL_CHAT_TEMPLATES } from "@lmscript/client/chat-template";
+    ~~~
   `;
+
+  expect(ALL_CHAT_TEMPLATES).toMatchInlineSnapshot(`
+    [
+      "mistral",
+    ]
+  `);
 });

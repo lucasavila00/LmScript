@@ -4,7 +4,9 @@ sidebar_position: 1
 
 # Generation
 
-Generate text with LmScript. Optionally constrain the output with a regex expression.
+Let the language model generate text.
+
+Optionally, constrain the output with a regex expression.
 
 ## Generating and Capturing
 
