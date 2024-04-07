@@ -2,7 +2,7 @@
 
 Connects to a local SGLang backend.
 
-Can be used with the provided [SGLang Docker image](https://github.com/lucasavila00/LmScript/tree/main/docker/sglang-docker).
+Can be used with the provided [SGLang Docker image](/docs/docker/sglang).
 
 ## Import
 
@@ -51,10 +51,10 @@ The captured text is available in the `captured` object.
 console.log(captured.joke);
 ```
 
-```js
-" Why don't scientists trust atoms?
+```
+` Why don't scientists trust atoms?
 
-Because they make up everything!"
+Because they make up everything!`
 ```
 
 The raw text is available in the `rawText` variable.
@@ -63,10 +63,10 @@ The raw text is available in the `rawText` variable.
 console.log(rawText);
 ```
 
-```js
-"<s>[INST] Tell me a joke. [/INST] Why don't scientists trust atoms?
+```
+`<s>[INST] Tell me a joke. [/INST] Why don't scientists trust atoms?
 
-Because they make up everything!"
+Because they make up everything!`
 ```
 
 The promptTokens and completionTokens have been updated by the `reportUsage` function.

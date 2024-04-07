@@ -25,6 +25,11 @@ import { SGLangBackend } from "@lmscript/client/backends/sglang";
 
 ### Instantiate Client
 
+The client requires a backend.
+
+This example uses the [SGLang backend](/docs/backends/sglang)
+and the [SGLang Docker image](/docs/docker/sglang).
+
 ```ts
 const backend = new SGLangBackend({
   url: `http://localhost:30000`,
@@ -56,20 +61,20 @@ const {
 console.log(joke);
 ```
 
-```js
-" Why don't scientists trust atoms?
+```
+` Why don't scientists trust atoms?
 
-Because they make up everything!"
+Because they make up everything!`
 ```
 
 ```ts
 console.log(joke2);
 ```
 
-```js
-" Why did the scarecrow win an award?
+```
+` Why did the scarecrow win an award?
 
-Because he was outstanding in his field!"
+Because he was outstanding in his field!`
 ```
 
 #### Debugging
@@ -80,10 +85,10 @@ The raw text is available in the `rawText` variable.
 console.log(out.rawText);
 ```
 
-```js
-"<s>[INST] Tell me a joke. [/INST] Why don't scientists trust atoms?
+```
+`<s>[INST] Tell me a joke. [/INST] Why don't scientists trust atoms?
 
 Because they make up everything!</s>[INST] Tell me another joke. [/INST] Why did the scarecrow win an award?
 
-Because he was outstanding in his field!"
+Because he was outstanding in his field!`
 ```

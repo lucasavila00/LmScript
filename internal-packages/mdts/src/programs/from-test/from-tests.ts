@@ -174,6 +174,11 @@ const printStatement = (
       return `\`\`\`ts\n${printed}\n\`\`\``;
     },
     SnapshotSt: (it) => {
+      const trimmed = dedent(it.result).trim();
+      if (trimmed.startsWith('"') && trimmed.endsWith('"')) {
+        const withoutQuotes = trimmed.slice(1, -1);
+        return `\`\`\`\n\`${withoutQuotes}\`\n\`\`\``;
+      }
       let tag = "js";
 
       try {

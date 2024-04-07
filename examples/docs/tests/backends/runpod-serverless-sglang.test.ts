@@ -8,7 +8,7 @@ test("backends/runpod-serverless-sglang", async () => {
   md`
     # Runpod Serverless SGLang Backend
 
-    Connects to [LmScript adapter of SGLang backend running on Runpod Serverless](https://github.com/lucasavila00/LmScript/tree/main/docker/runpod-serverless-sglang).
+    Connects to [LmScript adapter of SGLang backend running on Runpod Serverless](/docs/docker/runpod-serverless-sglang).
 
     This backend minimizes the number of requests to the server.
 

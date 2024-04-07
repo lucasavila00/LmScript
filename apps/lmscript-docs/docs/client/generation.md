@@ -23,10 +23,10 @@ The captured text is available in the `captured` object.
 console.log(joke);
 ```
 
-```js
-" Why don't scientists trust atoms?
+```
+` Why don't scientists trust atoms?
 
-Because they make up everything!"
+Because they make up everything!`
 ```
 
 ## Stop sequence
@@ -46,8 +46,8 @@ const {
 console.log(oneLine);
 ```
 
-```json
-" Why did the tomato turn red? Because it saw the salad dressing!"
+```
+` Why did the tomato turn red? Because it saw the salad dressing!`
 ```
 
 ## Regex Constraint
@@ -75,12 +75,12 @@ const {
 console.log(mdList);
 ```
 
-```js
-"- Why did the tomato turn red? Because it saw the salad dressing!
+```
+`- Why did the tomato turn red? Because it saw the salad dressing!
 - Why did the scarecrow win an award? Because he was outstanding in his field!
 - Why don't scientists trust atoms? Because they make up everything!
 - Why did the bicycle fall over? Because it was two-tired!
-- Why did the chicken cross the playground? To get to the other slide!"
+- Why did the chicken cross the playground? To get to the other slide!`
 ```
 
 ## Generate without a name
@@ -123,14 +123,14 @@ The captured text is available in the `captured` object.
 console.log(sureJoke);
 ```
 
-```js
-" Here's a classic one for you:
+```
+` Here's a classic one for you:
 
 Why did the tomato turn red?
 
 Because it saw the salad dressing!
 
-I hope that brought a smile to your face! Do you have any other requests or questions? I'm here to help."
+I hope that brought a smile to your face! Do you have any other requests or questions? I'm here to help.`
 ```
 
 ## Generating without chat template
@@ -154,12 +154,12 @@ The captured text is available in the `captured` object.
 console.log(continuation);
 ```
 
-```js
-"
+```
+`
 
 Why did the tomato turn red?
 
 Because it saw the salad dressing!
 
-This is a classic example of a pun, which is"
+This is a classic example of a pun, which is`
 ```
