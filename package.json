@@ -12,7 +12,7 @@
     "static": "pnpm run -r static",
     "test": "pnpm run -r test",
     "build-packages": "cd packages/client && npm run build && cd ../editor-tools && npm run build && cd ../mdts && npm run build",
-    "docs": "typedoc"
+    "typedoc": "typedoc --out apps/lmscript-docs/build/typedoc"
   },
   "author": "",
   "license": "ISC"

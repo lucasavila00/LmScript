@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "mdts": "mdts tests docs-out/",
-    "mdts-run": "mdts tests docs-out/ --run && prettier docs-out --print-width 60 --write",
+    "mdts": "mdts tests ../../apps/lmscript-docs/docs/",
+    "mdts-run": "mdts tests ../../apps/lmscript-docs/docs/ --run && prettier ../../apps/lmscript-docs/docs/ --print-width 60 --write",
     "test-all": "vitest",
     "ts": "tsc --noEmit",
     "static": "npm run ts && npm run mdts-run"

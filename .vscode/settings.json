@@ -25,6 +25,7 @@
     "testw",
     "Textmenu",
     "Tiptap",
+    "typedoc",
     "Vllm"
   ],
   "python.analysis.typeCheckingMode": "basic"
