@@ -1,33 +1,16 @@
 # LmScript
 
-LmScript: Fast and Controllable Language Model Interactions
+Controllable Language Model Interactions in TypeScript
 
-- LMScript: a suite of tools for easy, fast, and controllable interactions with
-  language models.
+- A suite of tools for easy, fast, and controllable interactions with language models.
 - Open models and open source.
 - Supports [SGLang](https://github.com/sgl-project/sglang/) and
   [vLLM](https://github.com/vllm-project/vllm)
   ([Outlines](https://github.com/outlines-dev/outlines)).
 
-## What the code looks like?
+## Documentation, Tutorial, Examples
 
-```ts
-const {
-  captured: { language },
-} = await client
-  .push("The best programming language is ")
-  .select("language", { choices: ["javascript", "typescript"] })
-  .run();
-
-console.log(language);
-```
-
-There are more complete examples in the
-[client's examples folder](https://github.com/lucasavila00/LmScript/tree/main/examples/client).
-
-## Do you prefer a graphical interface?
-
-[![screenshot of lmscript ui](./assets/app.png)](https://github.com/lucasavila00/LmScript/tree/main/apps/egui)
+Check out the [LmScript Docs](https://lucasavila00.github.io/LmScript/)
 
 ## Projects
 

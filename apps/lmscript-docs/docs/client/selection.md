@@ -4,7 +4,7 @@ sidebar_position: 2
 
 # Selection
 
-Let me language model choose an option from a list of choices.
+Let the language model choose an option from a list of choices.
 
 :::note
 

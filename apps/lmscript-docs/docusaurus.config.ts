@@ -5,7 +5,7 @@ import type * as Preset from "@docusaurus/preset-classic";
 const config: Config = {
   title: "LmScript",
   tagline:
-    "Controllable Language Model Interactions - Open Source, Open Models",
+    "Controllable Language Model Interactions in TypeScript",
   favicon: "img/favicon.ico",
 
   // Set the production url of your site here
