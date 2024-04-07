@@ -1,5 +1,5 @@
 import { test } from "vitest";
-import { md } from "../../../../internal-packages/mdts/src";
+import { md } from "mdts";
 
 test("client/generation", async () => {
   md`

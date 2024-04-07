@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { md } from "../../../../internal-packages/mdts/src";
+import { md } from "mdts";
 import { RunpodServerlessBackend } from "@lmscript/client/backends/runpod-serverless-sglang";
 import { LmScript } from "@lmscript/client";
 import { ReportUsage } from "@lmscript/client/backends/abstract";
