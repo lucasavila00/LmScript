@@ -70,7 +70,11 @@ const config: Config = {
           position: "left",
           label: "Docs",
         },
-        { to: "/typedoc", label: "API Reference", position: "left" },
+        {
+          to: "https://lucasavila00.github.io/LmScript/typedoc",
+          label: "API Reference",
+          position: "left",
+        },
         // { to: "/blog", label: "Blog", position: "left" },
         {
           href: "https://github.com/lucasavila00/LmScript",
@@ -117,7 +121,7 @@ const config: Config = {
             // },
             {
               label: "API Reference",
-              to: "/typedoc",
+              to: "https://lucasavila00.github.io/LmScript/typedoc",
             },
             {
               label: "GitHub",
