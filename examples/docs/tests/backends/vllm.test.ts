@@ -12,8 +12,8 @@ test("backends/vllm", async () => {
 
     It supports both Docker images:
 
-    - [vLLM](https://github.com/lucasavila00/LmScript/tree/main/docker/vllm)
-    - [Runpod Serverless vLLM](https://github.com/lucasavila00/LmScript/tree/main/docker/runpod-serverless-vllm)
+    - [vLLM](/docs/docker/vllm)
+    - [Runpod Serverless vLLM](/docs/docker/runpod-serverless-vllm)
 
     Uses the OpenAI compatible API.
 

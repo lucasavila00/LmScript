@@ -21,9 +21,9 @@ The raw text is available in the `rawText` variable.
 console.log(rawText);
 ```
 
-```js
-"Some text...
-And more text"
+```
+`Some text...
+And more text`
 ```
 
 ## With chat role
@@ -42,7 +42,7 @@ The raw text is available in the `rawText` variable.
 console.log(rawTextChat);
 ```
 
-```js
-"<s>[INST] Some text...
- [/INST]And more text"
+```
+`<s>[INST] Some text...
+ [/INST]And more text`
 ```

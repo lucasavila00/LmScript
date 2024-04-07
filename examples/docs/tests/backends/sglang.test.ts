@@ -10,7 +10,7 @@ test("backends/sglang", async () => {
 
     Connects to a local SGLang backend.
 
-    Can be used with the provided [SGLang Docker image](https://github.com/lucasavila00/LmScript/tree/main/docker/sglang-docker).
+    Can be used with the provided [SGLang Docker image](/docs/docker/sglang).
 
     ## Import
 

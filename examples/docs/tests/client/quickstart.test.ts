@@ -33,6 +33,11 @@ test("client/quickstart", async () => {
 
   md`
     ### Instantiate Client
+
+    The client requires a backend.
+
+    This example uses the [SGLang backend](/docs/backends/sglang)
+    and the [SGLang Docker image](/docs/docker/sglang).
   `;
   const backend = new SGLangBackend({
     url: `http://localhost:30000`,

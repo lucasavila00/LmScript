@@ -10,8 +10,7 @@ https://hub.docker.com/r/degroote22/lmscript-runpod-serverless-vllm
 
 ## Usage
 
-The DockerHub image can be deployed to a machine with a 24gb RAM GPU without any
-configuration changes.
+Documentation is available in the [LmScript Docs](/docs/docker/runpod-serverless-vllm).
 
 ## Source Code
 

@@ -12,7 +12,7 @@ npm i @lmscript/client
 
 ## Usage
 
-Documentation is available in the [LmScript Docs](http://localhost:3000/LmScript/docs/category/lmscriptclient).
+Documentation is available in the [LmScript Docs](/docs/category/lmscriptclient).
 
 ## License
 
