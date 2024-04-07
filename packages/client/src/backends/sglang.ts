@@ -77,28 +77,13 @@ class SglServerExecutor extends BaseExecutor {
   }
 
   async #httpRequest<T>(data: object): Promise<T> {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 60_000);
-    try {
-      const response = await fetch(this.#url + "/generate", {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        method: "POST",
-        body: JSON.stringify(data),
-        signal: controller.signal,
-      });
-      if (!response.ok) {
-        console.error((await response.text()).slice(0, 500));
-        throw new Error("HTTP error " + response.status);
-      }
-
-      return await response.json();
-    } catch (e) {
-      throw e;
-    } finally {
-      clearTimeout(timeout);
-    }
+    return this.fetchJSONWithTimeout(this.#url + "/generate", {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+      body: JSON.stringify(data),
+    });
   }
   async #generateRequest(
     data: SglGenerateData,

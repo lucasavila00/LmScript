@@ -39,6 +39,24 @@ export abstract class BaseExecutor {
     this.callbacks = callbacks;
   }
 
+  protected async fetchJSONWithTimeout<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 60_000);
+    try {
+      const response = await fetch(input, {
+        ...init,
+        signal: controller.signal,
+      });
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(`HTTP error: ${response.status} - ${text.slice(0, 1000)}`);
+      }
+      return await response.json();
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
   async #writeToPath(path: string[], captured: unknown) {
     let current = this.state.captured;
 

@@ -72,6 +72,10 @@ const characterGen = (model: InitClient, name: string) =>
     )
     .gen("json_output", { maxTokens: 256, regex: characterRegex });
 export const kitchenSink = async (client: InitClient) => {
+  // const out = await client
+  //   .user("Tell me a joke")
+  //   .assistant((m) => m.gen("joke"))
+  //   .run();
   const start10 = Date.now();
   const { rawText: conversation10, captured: captured10 } = await xmlGeneration(client).run({
     temperature: 0.0,

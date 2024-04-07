@@ -44,16 +44,11 @@ class VllmBackendExecutor extends BaseExecutor {
     if (this.#auth != null) {
       headers["Authorization"] = `Bearer ${this.#auth}`;
     }
-    const response = await fetch(`${this.#url}/v1/completions`, {
+    return this.fetchJSONWithTimeout(`${this.#url}/v1/completions`, {
       method: "POST",
       headers,
       body: JSON.stringify(body),
     });
-    if (!response.ok) {
-      throw new Error(`HTTP error: ${response.status}`);
-    }
-    const json = await response.json();
-    return json;
   }
 
   override async doGeneration(task: GenerateTask): Promise<string> {
