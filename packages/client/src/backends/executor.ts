@@ -13,7 +13,6 @@ import {
   GenerateTask,
   ExecutionCallbacks,
   Task,
-  TasksOutput,
 } from "./abstract";
 
 const INTEGER = "(-)?(0|[1-9][0-9]*)";
@@ -38,6 +37,24 @@ export abstract class BaseExecutor {
     this.template = template;
     this.state = JSON.parse(JSON.stringify(this.data.initial_state));
     this.callbacks = callbacks;
+  }
+
+  protected async fetchJSONWithTimeout<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 60_000);
+    try {
+      const response = await fetch(input, {
+        ...init,
+        signal: controller.signal,
+      });
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(`HTTP error: ${response.status} - ${text.slice(0, 1000)}`);
+      }
+      return await response.json();
+    } finally {
+      clearTimeout(timeout);
+    }
   }
 
   async #writeToPath(path: string[], captured: unknown) {
@@ -284,7 +301,7 @@ export abstract class BaseExecutor {
       }
     }
   }
-  async executeJSON(): Promise<TasksOutput> {
+  async executeJSON(): Promise<ClientState> {
     for (const task of this.data.tasks) {
       await this.#runTask(task);
     }

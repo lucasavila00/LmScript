@@ -6,6 +6,8 @@
     "src/backends/sglang.ts",
     "src/backends/vllm.ts",
     "src/backends/runpod-serverless-sglang.ts",
-    "src/chat-template.ts"
+    "src/chat-template.ts",
+    "src/schema.ts",
+    "src/regex.ts"
   ]
 }

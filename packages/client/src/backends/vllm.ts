@@ -1,13 +1,18 @@
+/**
+ * This module contains the backend for the vLLM using OpenAI compatible API.
+ * @module
+ */
+
 import { ChatTemplate } from "../chat-template";
-import { delay, NOOP } from "../utils";
+import { NOOP } from "../utils";
 import {
   AbstractBackend,
+  ClientState,
   ExecutionCallbacks,
   GenerateTask,
   GenerationThread,
   ReportUsage,
   SelectTask,
-  TasksOutput,
 } from "./abstract";
 import { BaseExecutor } from "./executor";
 
@@ -32,39 +37,18 @@ class VllmBackendExecutor extends BaseExecutor {
     this.#reportUsage = options?.reportUsage ?? NOOP;
     this.#auth = options.auth;
   }
-  async #fetchJSONNoRet<T>(body: object): Promise<T> {
+  async #fetchJSON<T>(body: object): Promise<T> {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
     };
     if (this.#auth != null) {
       headers["Authorization"] = `Bearer ${this.#auth}`;
     }
-    const response = await fetch(`${this.#url}/v1/completions`, {
+    return this.fetchJSONWithTimeout(`${this.#url}/v1/completions`, {
       method: "POST",
       headers,
       body: JSON.stringify(body),
     });
-    if (!response.ok) {
-      throw new Error(`HTTP error: ${response.status}`);
-    }
-    const json = await response.json();
-    return json;
-  }
-  async #fetchJSON<T>(body: object): Promise<T> {
-    let lastError: unknown = null;
-    for (let i = 1; i < 5; i++) {
-      try {
-        if (lastError != null) {
-          await delay(1000 * i * i);
-        }
-        return await this.#fetchJSONNoRet<T>(body);
-      } catch (e) {
-        console.error(e);
-        console.log("Retrying...");
-        lastError = e;
-      }
-    }
-    throw new Error(`HTTP request failed: ${lastError}`);
   }
 
   override async doGeneration(task: GenerateTask): Promise<string> {
@@ -131,8 +115,8 @@ export class VllmBackend implements AbstractBackend {
     this.#auth = options.auth;
     this.#template = options.template;
   }
-  async executeJSON(data: GenerationThread, callbacks: ExecutionCallbacks): Promise<TasksOutput> {
-    const executor = new VllmBackendExecutor({
+  async executeJSON(data: GenerationThread, callbacks: ExecutionCallbacks): Promise<ClientState> {
+    return new VllmBackendExecutor({
       url: this.#url,
       model: this.#model,
       reportUsage: this.#reportUsage,
@@ -140,7 +124,6 @@ export class VllmBackend implements AbstractBackend {
       data,
       callbacks,
       template: this.#template,
-    });
-    return executor.executeJSON();
+    }).executeJSON();
   }
 }

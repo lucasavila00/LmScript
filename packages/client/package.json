@@ -42,6 +42,12 @@
       "import": "./dist/esm/backends/vllm.js",
       "default": "./dist/esm/backends/vllm.js"
     },
+    "./backends/tgi": {
+      "types": "./dist/types/backends/tgi.d.ts",
+      "require": "./dist/cjs/backends/tgi.js",
+      "import": "./dist/esm/backends/tgi.js",
+      "default": "./dist/esm/backends/tgi.js"
+    },
     "./backends/runpod-serverless-sglang": {
       "types": "./dist/types/backends/runpod-serverless-sglang.d.ts",
       "require": "./dist/cjs/backends/runpod-serverless-sglang.js",

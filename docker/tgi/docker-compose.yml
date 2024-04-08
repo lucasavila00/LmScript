@@ -1,0 +1,21 @@
+services:
+  sv:
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    image: ghcr.io/huggingface/text-generation-inference:1.4.5
+    command: "--model-id TheBloke/Mistral-7B-Instruct-v0.2-AWQ --quantize awq"
+    ports:
+      - 8080:8080
+    network_mode: host
+    ipc: "host"
+    volumes:
+      - tgi_cache:/data
+
+volumes:
+  tgi_cache:
+    driver: local

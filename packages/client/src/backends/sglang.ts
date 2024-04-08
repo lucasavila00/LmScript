@@ -4,16 +4,16 @@
  */
 
 import { ChatTemplate } from "../chat-template";
-import { delay, NOOP } from "../utils";
+import { NOOP } from "../utils";
 import {
   AbstractBackend,
+  ClientState,
   ExecutionCallbacks,
   FetcherSamplingParams,
   GenerateTask,
   GenerationThread,
   ReportUsage,
   SelectTask,
-  TasksOutput,
 } from "./abstract";
 import { BaseExecutor } from "./executor";
 
@@ -76,43 +76,14 @@ class SglServerExecutor extends BaseExecutor {
     this.#reportUsage = reportUsage;
   }
 
-  async #httpRequestNoRetry<T>(data: object): Promise<T> {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 60_000);
-    try {
-      const response = await fetch(this.#url + "/generate", {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        method: "POST",
-        body: JSON.stringify(data),
-        signal: controller.signal,
-      });
-      if (!response.ok) {
-        console.error((await response.text()).slice(0, 500));
-        throw new Error("HTTP error " + response.status);
-      }
-
-      return await response.json();
-    } catch (e) {
-      throw e;
-    } finally {
-      clearTimeout(timeout);
-    }
-  }
   async #httpRequest<T>(data: object): Promise<T> {
-    let lastError: unknown = null;
-    for (let i = 1; i < 5; i++) {
-      try {
-        if (lastError != null) {
-          await delay(1000 * i * i);
-        }
-        return await this.#httpRequestNoRetry(data);
-      } catch (e) {
-        lastError = e;
-      }
-    }
-    throw new Error(`HTTP request failed: ${lastError}`);
+    return this.fetchJSONWithTimeout(this.#url + "/generate", {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+      body: JSON.stringify(data),
+    });
   }
   async #generateRequest(
     data: SglGenerateData,
@@ -191,7 +162,6 @@ class SglServerExecutor extends BaseExecutor {
 /**
  * Backend for the regular SGLang server.
  */
-
 export class SGLangBackend implements AbstractBackend {
   readonly #url: string;
   readonly #reportUsage: ReportUsage;
@@ -201,14 +171,13 @@ export class SGLangBackend implements AbstractBackend {
     this.#reportUsage = options?.reportUsage ?? NOOP;
     this.#template = options.template;
   }
-  async executeJSON(data: GenerationThread, callbacks: ExecutionCallbacks): Promise<TasksOutput> {
-    const executor = new SglServerExecutor(
+  async executeJSON(data: GenerationThread, callbacks: ExecutionCallbacks): Promise<ClientState> {
+    return new SglServerExecutor(
       this.#url,
       data,
       callbacks,
       this.#reportUsage,
       this.#template,
-    );
-    return executor.executeJSON();
+    ).executeJSON();
   }
 }

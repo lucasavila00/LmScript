@@ -7,7 +7,7 @@
     "mdts": "./out/cli/main.js"
   },
   "scripts": {
-    "test": "vitest",
+    "test": "vitest --run",
     "coverage": "vitest run --coverage",
     "ts": "tsc --noEmit",
     "static": "npm run ts",

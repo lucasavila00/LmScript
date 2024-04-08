@@ -19,6 +19,7 @@
     "mdts",
     "openai",
     "positionals",
+    "regexes",
     "runpod",
     "sglang",
     "tailwindcss",
