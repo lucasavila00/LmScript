@@ -1,0 +1,22 @@
+[package]
+name = "lmlogits"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "logits"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = "0.20.0"
+regex-automata = "0.4.6"
+rustc-hash = "1.1.0"
+vob = "3.0.3"
+cfgrammar = "0.13.3"
+lrtable = "0.13.3"
+anyhow = "1.0.82"
+tracing = "0.1.40"
+serde = "1.0.198"
+serde_json = "1.0.116"
+tokenizers = "0.19.1"
