@@ -42,6 +42,12 @@
       "import": "./dist/esm/backends/vllm.js",
       "default": "./dist/esm/backends/vllm.js"
     },
+    "./backends/rt": {
+      "types": "./dist/types/backends/rt.d.ts",
+      "require": "./dist/cjs/backends/rt.js",
+      "import": "./dist/esm/backends/rt.js",
+      "default": "./dist/esm/backends/rt.js"
+    },
     "./backends/tgi": {
       "types": "./dist/types/backends/tgi.d.ts",
       "require": "./dist/cjs/backends/tgi.js",
